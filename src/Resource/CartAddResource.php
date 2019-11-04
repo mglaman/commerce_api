@@ -194,6 +194,7 @@ final class CartAddResource extends CartResourceBase {
         $cart = $this->getCartForOrderItem($order_item, $store);
         $order_item = $this->cartManager->addOrderItem($cart, $order_item, $meta['combine'] ?? TRUE);
         // Reload the order item as the cart has refreshed.
+        // @todo remove after https://www.drupal.org/node/3038342
         $order_item = $order_item_storage->load($order_item->id());
         $order_items[] = ResourceObject::createFromEntity($this->resourceTypeRepository->get($order_item->getEntityTypeId(), $order_item->bundle()), $order_item);
       }

@@ -111,11 +111,13 @@ final class CartUpdateItemResource extends CartResourceBase {
 
     static::validate($commerce_order_item, $field_names);
 
+    // @todo use CartManager::updateOrderItem
     $commerce_order_item->save();
     $commerce_order->save();
 
     $order_item_storage = $this->entityTypeManager->getStorage('commerce_order_item');
     assert($order_item_storage instanceof OrderItemStorageInterface);
+    // @todo CartManager::updateOrderItem should refresh for us.
     // Reload the order item as the cart has refreshed.
     $commerce_order_item = $order_item_storage->load($commerce_order_item->id());
 
