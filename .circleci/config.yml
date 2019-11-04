@@ -1,0 +1,26 @@
+version: 2.1
+defaults: &defaults
+  docker:
+    - image: circleci/php:7.2-cli
+  working_directory: ~/repo
+aliases:
+  - &composer-cache
+      v4-composer-cache
+commands:
+  create-drupal-project:
+    steps:
+      - run: composer create-project drupal/recommended-project:^8.8@alpha /tmp/drupal --no-interaction --prefer-dist --ignore-platform-reqs
+jobs:
+  lint:
+    docker:
+      - image: circleci/php:7.2-cli
+    steps:
+      - setup-job
+      - run:
+          name: Composer Validate
+          command: |
+            composer validate
+      - run:
+          name: PHPCS
+          command: |
+            ./vendor/bin/phpcs src
