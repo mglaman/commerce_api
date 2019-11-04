@@ -5,6 +5,7 @@ core: 8.x
 package: 'Commerce (web services)'
 dependencies:
   - commerce:commerce
-  - drupal:serialization
+  - commerce:commerce_cart
   - drupal:jsonapi
+  - drupal:serialization
   - jsonapi_resources:jsonapi_resources

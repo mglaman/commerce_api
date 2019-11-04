@@ -1,0 +1,55 @@
+version: 2.1
+commands:
+  setup-job:
+    steps:
+      - checkout
+      - run: composer global require "hirak/prestissimo:^0.3"
+      - run:
+          name: Add Composer global path
+          command: |
+            echo 'export PATH="$HOME/.composer/vendor/bin:$PATH"' >> $BASH_ENV
+            echo 'export SIMPLETEST_BASE_URL="http://127.0.0.1:8080"' >> $BASH_ENV
+            echo 'export SIMPLETEST_DB="sqlite://localhost/sites/default/files/.ht.sqlite"' >> $BASH_ENV
+jobs:
+  lint:
+    docker:
+      - image: circleci/php:7.2-cli
+    steps:
+      - setup-job
+      - run: composer global require "drupal/coder:8.3.*"
+      - run: phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer
+      - run: phpcs --standard=phpcs.xml . -s
+  test:
+    docker:
+      - image: circleci/php:7.2-browsers
+    steps:
+      - setup-job
+      - run: sudo apt update && sudo apt-get install -y sqlite3
+      - run: sudo apt-get update && sudo apt-get install -y libpng-dev libjpeg62-turbo-dev
+      - run: sudo docker-php-ext-install gd bcmath
+      - run: |
+          composer --no-interaction create-project drupal/recommended-project:^8.8@alpha $HOME/drupal
+      - run: |
+          cd $HOME/drupal
+          composer config repositories.0 path ${CIRCLE_WORKING_DIRECTORY}
+          composer config repositories.1 composer https://packages.drupal.org/8
+      - run: |
+          cd $HOME/drupal
+          composer require drupal/commerce_api *@dev
+      - run:
+          name: Start ChromeDriver
+          command: chromedriver
+          background: true
+      - run:
+          name: Start builtin
+          command: php -S 127.0.0.1:8080 -t $HOME/drupal/web
+          background: true
+      - run: |
+          cd $HOME/drupal/web
+          ../vendor/bin/phpunit -c core modules/contrib/commerce_api
+workflows:
+  version: 2
+  lint_and_test:
+    jobs:
+      - lint
+      - test

@@ -1,0 +1,50 @@
+language: php
+addons:
+  chrome: stable
+php:
+  - 7.3
+  - 7.2
+  - 7.1
+matrix:
+  fast_finish: true
+mysql:
+  database: drupal_travis_db
+  username: root
+  encoding: utf8
+env:
+  global:
+    - SIMPLETEST_BASE_URL="http://127.0.0.1:8080"
+    - SIMPLETEST_DB="sqlite://localhost/sites/default/files/.ht.sqlite"
+    - MINK_DRIVER_ARGS_WEBDRIVER='["chrome", {"browserName":"chrome","chromeOptions":{"args":["--disable-gpu", "--no-sandbox"]}}, "http://127.0.0.1:9515"]'
+before_install:
+  - phpenv config-rm xdebug.ini || true
+  - composer global require "hirak/prestissimo:^0.3"
+install:
+  - composer global require "drupal/coder:8.3.*"
+  - phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer
+
+  # Install Chromedriver.
+  - mkdir travis-chromedriver
+  - CHROMEDRIVER_VERSION=$(wget http://chromedriver.storage.googleapis.com/LATEST_RELEASE -qO-)
+  - wget http://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip -d travis-chromedriver && rm -f chromedriver_linux64.zip
+  - chmod a+x travis-chromedriver/chromedriver
+  - export PATH=$PWD/travis-chromedriver:$PATH
+  - chromedriver --version
+before_script:
+  - composer --no-interaction create-project drupal/recommended-project:^8.8@alpha $TRAVIS_BUILD_DIR/../drupal
+  - cd $TRAVIS_BUILD_DIR/../drupal
+  - |
+    composer config repositories.0 path $TRAVIS_BUILD_DIR
+    composer config repositories.1 composer https://packages.drupal.org/8
+  - composer require drupal/commerce_api *@dev
+script:
+  - cd $TRAVIS_BUILD_DIR
+  - phpcs --standard=phpcs.xml src -s
+  - phpcs --standard=phpcs.xml tests -s
+  - phpcs --standard=phpcs.xml commerce_api.module
+
+  - cd $TRAVIS_BUILD_DIR/../drupal
+  - ../vendor/bin/phpunit -c core modules/contrib/commerce_api
+notifications:
+  email: false

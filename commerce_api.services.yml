@@ -2,3 +2,28 @@ services:
   commerce_api.jsonapi_controller_shim:
     parent: jsonapi.entity_resource
     class: Drupal\commerce_api\EntityResourceShim
+  access_check.cart_api:
+    class: Drupal\commerce_api\Access\CartApiAccessCheck
+    arguments: ['@commerce_cart.cart_provider']
+    tags:
+      - { name: access_check, applies_to: _cart_api }
+
+  commerce_api.field_access:
+    class: Drupal\commerce_api\FieldAccess
+    arguments: ['@current_route_match']
+
+  commerce_api.cart_token_session:
+    class: Drupal\commerce_api\CartTokenSession
+    decorates: commerce_cart.cart_session
+    public: false
+    arguments: ['@commerce_api.cart_token_session.inner', '@request_stack', '@tempstore.shared']
+  commerce_api.cart_token_session_configuration:
+    class: Drupal\commerce_api\Session\CartTokenSessionConfiguration
+    decorates: session_configuration
+    public: false
+    arguments: ['@commerce_api.cart_token_session_configuration.inner']
+  commerce_api.token_cart_convert_subscriber:
+    class: Drupal\commerce_api\EventSubscriber\CartTokenSubscriber
+    arguments: ['@commerce_cart.cart_session', '@tempstore.shared']
+    tags:
+      - { name: event_subscriber }
