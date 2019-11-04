@@ -3,9 +3,11 @@ services:
   - docker
 
 install:
+  - echo $(pwd)
   - |
-    git clone --branch production https://git.drupalcode.org/project/drupalci_testbot.git
-    cd drupalci_testbot
+    git clone --branch production https://git.drupalcode.org/project/drupalci_testbot.git ../drupalci_testbot
+    cd ../drupalci_testbot
     composer install
 script:
-  - ./drupalci
+  - ./drupalci run .travisci/drupalci.yml
+

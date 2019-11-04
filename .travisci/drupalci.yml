@@ -21,6 +21,8 @@ build:
         phpversion: 7.1.14
         options: 'install --prefer-dist --no-suggest --no-interaction --no-progress'
         halt-on-fail: true
+      composer:
+        options: "config repositories.local path ../mglaman/commerce_api"
       composer_contrib:
         project: commerce_api
         branch: "*"
