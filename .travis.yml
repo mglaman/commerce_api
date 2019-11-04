@@ -3,12 +3,10 @@ services:
   - docker
 
 install:
-  - echo $(pwd)
   - |
     git clone --branch production https://git.drupalcode.org/project/drupalci_testbot.git ../drupalci_testbot
     cd ../drupalci_testbot
     composer install --prefer-dist --no-suggest --no-interaction --no-dev
 script:
-  - echo $(pwd)
   - DCI_Composer_Branch=$TRAVIS_BRANCH ./drupalci run ../commerce_api/.travisci/drupalci.yml
 

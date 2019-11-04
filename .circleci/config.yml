@@ -1,15 +1,34 @@
 version: 2.1
-defaults: &defaults
-  docker:
-    - image: circleci/php:7.2-cli
-  working_directory: ~/repo
-aliases:
-  - &composer-cache
-      v4-composer-cache
 commands:
+  setup-job:
+    steps:
+      - run: sudo apt-get update && sudo apt-get install -y libpng-dev libjpeg62-turbo-dev
+      - run:
+          name: Install PHP Extensions
+          command: sudo docker-php-ext-install gd
+      - checkout
+      - restore_cache:
+          keys:
+            - v-composer-cache
+      - run: composer global require "hirak/prestissimo:^0.3
+  save-cache:
+    steps:
+      - save_cache:
+          key: v-composer-cache
+          paths:
+            - ~/.composer/cache
   create-drupal-project:
     steps:
       - run: composer create-project drupal/recommended-project:^8.8@alpha /tmp/drupal --no-interaction --prefer-dist --ignore-platform-reqs
+  local-require:
+    steps:
+      - run:
+          name: Add as local
+          command: |
+            cd /tmp/drupal
+            composer config repositories.1 path ${CIRCLE_WORKING_DIRECTORY}
+            composer require drupal/commerce_api "*"
+            cat composer.json
 jobs:
   lint:
     docker:
@@ -24,3 +43,29 @@ jobs:
           name: PHPCS
           command: |
             ./vendor/bin/phpcs src
+  test:
+    docker:
+      - image: circleci/php:7.2-browsers
+    steps:
+      - setup-job
+      - run: sudo apt update && sudo apt-get install -y sqlite3
+      - create-drupal-project
+      - local-require
+      - run:
+          name: Start ChromeDriver
+          command: chromedriver
+          background: true
+      - run:
+          name: Start builtin
+          command: php -S 127.0.0.1:8080 -t web
+          background: true
+      - run: |
+          SIMPLETEST_DB=sqlite://localhost/sites/default/files/.ht.sqlite && \
+          SIMPLETEST_BASE_URL=http://127.0.0.1:8080 && \
+          ./vendor/bin/phpunit modules/contrib/commerce_api
+
+workflows:
+  version: 2
+  lint_and_test:
+    jobs:
+      - lint

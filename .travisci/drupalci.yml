@@ -23,9 +23,7 @@ build:
         halt-on-fail: true
       container_command:
         commands:
-          - "cd ${SOURCE_DIR} && echo $(pwd)"
-          - "cd ${SOURCE_DIR} && ls ../commerce_api"
-          - "cd ${SOURCE_DIR} && sudo -u www-data composer config repositories.local path ../commerce_api"
+          - "cd ${SOURCE_DIR} && sudo -u www-data composer config repositories.local vcs https://github.com/mglaman/commerce_api.git"
       composer_contrib:
         project: commerce_api
       update_build: {  }
