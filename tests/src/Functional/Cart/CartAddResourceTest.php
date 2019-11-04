@@ -27,7 +27,7 @@ final class CartAddResourceTest extends CartResourceTestBase {
           'id' => $this->variation->uuid(),
           'meta' => [
             'quantity' => 1,
-          ]
+          ],
         ],
       ],
     ]);
@@ -59,12 +59,12 @@ final class CartAddResourceTest extends CartResourceTestBase {
             'unit_price' => [
               'number' => '1000.0',
               'currency_code' => 'USD',
-              'formatted' => '$1,000.00'
+              'formatted' => '$1,000.00',
             ],
             'total_price' => [
               'number' => '1000.0',
               'currency_code' => 'USD',
-              'formatted' => '$1,000.00'
+              'formatted' => '$1,000.00',
             ],
           ],
           'relationships' => [

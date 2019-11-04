@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace Drupal\Tests\commerce_api\Kernel\Cart;
 
@@ -23,7 +23,7 @@ final class CartResourceRoutesTest extends KernelTestBase {
 
   public function testCouponAddRoute() {
     $this->installModule('commerce_promotion');
-    $route = $this->router->getRouteCollection()->get('commerce_api.jsonapi.cart_coupon_add');
+    $this->router->getRouteCollection()->get('commerce_api.jsonapi.cart_coupon_add');
   }
 
 }

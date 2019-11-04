@@ -13,6 +13,7 @@ mysql:
   encoding: utf8
 env:
   global:
+    - PATH=$PATH:/home/travis/.config/composer/vendor/bin
     - SIMPLETEST_BASE_URL="http://127.0.0.1:8080"
     - SIMPLETEST_DB="sqlite://localhost/sites/default/files/.ht.sqlite"
     - MINK_DRIVER_ARGS_WEBDRIVER='["chrome", {"browserName":"chrome","chromeOptions":{"args":["--disable-gpu", "--no-sandbox"]}}, "http://127.0.0.1:9515"]'

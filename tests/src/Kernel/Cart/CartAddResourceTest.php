@@ -7,12 +7,10 @@ use Drupal\commerce_price\Price;
 use Drupal\commerce_product\Entity\Product;
 use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\Component\Serialization\Json;
-use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
-use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
 use Drupal\Tests\commerce_api\Kernel\KernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -231,7 +229,7 @@ final class CartAddResourceTest extends KernelTestBase {
   }
 
   /**
-   * Creates data array for the JSON:API document
+   * Creates data array for the JSON:API document.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity.
