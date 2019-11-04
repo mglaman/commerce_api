@@ -10,7 +10,7 @@ commands:
       - restore_cache:
           keys:
             - v-composer-cache
-      - run: composer global require "hirak/prestissimo:^0.3
+      - run: composer global require hirak/prestissimo:^0.3
   save-cache:
     steps:
       - save_cache:
