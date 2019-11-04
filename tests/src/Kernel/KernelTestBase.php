@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Drupal\Tests\commerce_api\Kernel\Cart;
+namespace Drupal\Tests\commerce_api\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
 
-abstract class CartResourceKernelTestBase extends CommerceKernelTestBase {
+abstract class KernelTestBase extends CommerceKernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -21,7 +21,6 @@ abstract class CartResourceKernelTestBase extends CommerceKernelTestBase {
     'path',
     'commerce_product',
     'commerce_cart',
-    'commerce_api',
     'commerce_api',
   ];
 

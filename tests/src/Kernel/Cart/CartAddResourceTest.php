@@ -13,6 +13,7 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
+use Drupal\Tests\commerce_api\Kernel\KernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -20,7 +21,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 /**
  * @group commerce_api
  */
-final class CartAddResourceTest extends CartResourceKernelTestBase {
+final class CartAddResourceTest extends KernelTestBase {
 
   /**
    * Tests exception when a non-purchasable entity provided.

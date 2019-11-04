@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace Drupal\Tests\commerce_api\Functional\Cart;
 
@@ -128,7 +128,7 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
             'total_price' => [
               'number' => '5000.0',
               'currency_code' => 'USD',
-              'formatted' => '$5,000.00'
+              'formatted' => '$5,000.00',
             ],
           ],
           'relationships' => [

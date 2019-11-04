@@ -15,12 +15,13 @@ use Drupal\commerce_promotion\Entity\Promotion;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
+use Drupal\Tests\commerce_api\Kernel\KernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @group commerce_api
  */
-final class CartCouponAddResourceTest extends CartResourceKernelTestBase {
+final class CartCouponAddResourceTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}

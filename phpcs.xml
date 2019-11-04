@@ -18,6 +18,7 @@
     <exclude name="Drupal.Semantics.FunctionTriggerError"/>
 
     <!-- The following rules are intentionally disabled. -->
+    <exclude name="Drupal.WhiteSpace.OpenTagNewline.BlankLine"/>
     <exclude name="Drupal.Commenting.ClassComment.Missing"/>
     <exclude name="Drupal.Files.LineLength.TooLong"/>
     <exclude name="Drupal.Arrays.Array.LongLineDeclaration"/>

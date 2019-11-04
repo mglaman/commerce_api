@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Drupal\Tests\commerce_api\Functional\Cart;
 
@@ -35,7 +35,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
         'attributes' => [
           'quantity' => 5,
         ],
-      ]
+      ],
     ]);
 
     $response = $this->request('PATCH', $url, $request_options);
@@ -65,7 +65,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
         'attributes' => [
           'quantity' => 5,
         ],
-      ]
+      ],
     ]);
 
     $response = $this->request('PATCH', $url, $request_options);
@@ -100,7 +100,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
             'info' => ['href' => HttpExceptionNormalizer::getInfoUrl(403)],
             'via' => ['href' => $url->setAbsolute()->toString()],
           ],
-        ]
+        ],
       ],
     ], Json::decode((string) $response->getBody()));
   }
@@ -132,7 +132,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
         'attributes' => [
           'quantity' => 5,
         ],
-      ]
+      ],
     ]);
     $response = $this->request('PATCH', $url, $request_options);
     $this->assertSame(403, $response->getStatusCode(), (string) $response->getBody());
@@ -165,7 +165,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
           'quantity' => 5,
           'title' => 'Test title',
         ],
-      ]
+      ],
     ]);
     $response = $this->request('PATCH', $url, $request_options);
     $this->assertResponseCode(403, $response);
@@ -190,7 +190,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
           'source' => [
             'pointer' => '/data/attributes/title',
           ],
-        ]
+        ],
       ],
     ], Json::decode((string) $response->getBody()));
 
@@ -222,7 +222,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
           'source' => [
             'pointer' => '/data/attributes/quantity/value'
           ],
-        ]
+        ],
       ],
     ], Json::decode((string) $response->getBody()));
   }
@@ -295,14 +295,14 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
           ],
         ],
         'attributes' => [
-          'drupal_internal__order_item_id' => $order_item_2->id(),
+          'drupal_internal__order_item_id' => (string) $order_item_2->id(),
           'title' => $order_item_2->label(),
           'unit_price' => [
             'number' => '500.0',
             'currency_code' => 'USD',
             'formatted' => '$500.00',
           ],
-          'quantity' => '1',
+          'quantity' => 1,
           'total_price' => [
             'number' => '500.0',
             'currency_code' => 'USD',

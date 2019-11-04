@@ -13,13 +13,14 @@ use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\jsonapi\Exception\EntityAccessDeniedHttpException;
 use Drupal\jsonapi\Exception\UnprocessableHttpEntityException;
 use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
+use Drupal\Tests\commerce_api\Kernel\KernelTestBase;
 use Symfony\Cmf\Component\Routing\RouteObjectInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @group commerce_api
  */
-final class CartUpdateItemResourceTest extends CartResourceKernelTestBase {
+final class CartUpdateItemResourceTest extends KernelTestBase {
 
   /**
    * @dataProvider dataUpdateItemAttributes

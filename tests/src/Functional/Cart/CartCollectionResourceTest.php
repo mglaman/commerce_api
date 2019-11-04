@@ -11,6 +11,7 @@ use Drupal\user\Entity\User;
  * @group commerce_api
  */
 final class CartCollectionResourceTest extends CartResourceTestBase {
+
   /**
    * Test cart collection.
    */
@@ -117,7 +118,7 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
             'unit_price' => [
               'number' => '1000.0',
               'currency_code' => 'USD',
-              'formatted' => '$1,000.00'
+              'formatted' => '$1,000.00',
             ],
             'total_price' => [
               'number' => '5000.0',
@@ -187,4 +188,5 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
       ],
     ], Json::decode((string) $response->getBody()));
   }
+
 }

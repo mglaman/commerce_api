@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\commerce_api\Kernel;
+namespace Drupal\Tests\commerce_api\Kernel\Constraint;
 
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderItem;
@@ -8,31 +8,17 @@ use Drupal\commerce_order\Entity\OrderItemType;
 use Drupal\commerce_price\Price;
 use Drupal\commerce_promotion\Entity\Coupon;
 use Drupal\commerce_promotion\Entity\Promotion;
-use Drupal\Core\Entity\Entity\EntityFormMode;
-use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
+use Drupal\Tests\commerce_api\Kernel\KernelTestBase;
 
 /**
  * Tests the coupon available constraint on coupons fields.
  *
  * @group commerce
  */
-class CouponAvailableConstraintValidatorTest extends CommerceKernelTestBase {
+class CouponAvailableConstraintValidatorTest extends KernelTestBase {
 
-  /**
-   * Modules to enable.
-   *
-   * @var array
-   */
   public static $modules = [
-    'serialization',
-    'jsonapi',
-    'entity_reference_revisions',
-    'profile',
-    'state_machine',
-    'commerce_order',
     'commerce_promotion',
-    'commerce_cart',
-    'commerce_api',
   ];
 
   /**
@@ -40,16 +26,10 @@ class CouponAvailableConstraintValidatorTest extends CommerceKernelTestBase {
    */
   protected function setUp() {
     parent::setUp();
-
-    $this->installEntitySchema('profile');
-    $this->installEntitySchema('commerce_order');
-    $this->installEntitySchema('commerce_order_item');
     $this->installEntitySchema('commerce_promotion');
     $this->installEntitySchema('commerce_promotion_coupon');
     $this->installSchema('commerce_promotion', ['commerce_promotion_usage']);
     $this->installConfig([
-      'profile',
-      'commerce_order',
       'commerce_promotion',
     ]);
 

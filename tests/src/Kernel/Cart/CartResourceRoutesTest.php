@@ -2,10 +2,12 @@
 
 namespace Drupal\Tests\commerce_api\Kernel\Cart;
 
+use Drupal\Tests\commerce_api\Kernel\KernelTestBase;
+
 /**
  * @group commerce_api
  */
-final class CartResourceRoutesTest extends CartResourceKernelTestBase {
+final class CartResourceRoutesTest extends KernelTestBase {
 
   /**
    * The router.
