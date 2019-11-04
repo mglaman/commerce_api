@@ -2,11 +2,15 @@ language: php
 services:
   - docker
 
+before_install:
+  - |
+    cd ..
+    git clone --branch production https://git.drupalcode.org/project/drupalci_testbot.git
+    mv commerce_api drupalci_testbot/commerce_api
 install:
   - |
-    git clone --branch production https://git.drupalcode.org/project/drupalci_testbot.git ../drupalci_testbot
-    cd ../drupalci_testbot
+    cd drupalci_testbot
     composer install --prefer-dist --no-suggest --no-interaction --no-dev
 script:
-  - DCI_Composer_Branch=$TRAVIS_BRANCH ./drupalci run ../commerce_api/.travisci/drupalci.yml
+  - DCI_Composer_Branch=$TRAVIS_BRANCH ./drupalci run commerce_api/.travisci/drupalci.yml
 
