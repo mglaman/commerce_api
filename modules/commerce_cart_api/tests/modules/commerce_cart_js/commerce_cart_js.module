@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Provides hooks.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function commerce_cart_js_theme($existing, $type, $theme, $path) {
+  return [
+    'commerce_cart_js_block' => [
+      'variables' => [],
+    ],
+  ];
+}

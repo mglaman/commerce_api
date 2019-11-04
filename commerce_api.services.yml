@@ -1,0 +1,4 @@
+services:
+  commerce_api.jsonapi_controller_shim:
+    parent: jsonapi.entity_resource
+    class: Drupal\commerce_api\EntityResourceShim

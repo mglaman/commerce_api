@@ -1,0 +1,13 @@
+parameters:
+  commerce_cart_api:
+    use_cart_token_session: true
+services:
+  access_check.cart_api:
+    class: Drupal\commerce_cart_api\Access\CartApiAccessCheck
+    arguments: ['@commerce_cart.cart_provider']
+    tags:
+      - { name: access_check, applies_to: _cart_api }
+
+  commerce_cart_api.field_access:
+    class: Drupal\commerce_cart_api\FieldAccess
+    arguments: ['@current_route_match']
