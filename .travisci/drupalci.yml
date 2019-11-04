@@ -22,7 +22,7 @@ build:
         options: 'install --prefer-dist --no-suggest --no-interaction --no-progress'
         halt-on-fail: true
       composer:
-        options: "config repositories.local path ../mglaman/commerce_api"
+        options: "config repositories.local path ../commerce_api"
       composer_contrib:
         project: commerce_api
         branch: "*"

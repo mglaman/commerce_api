@@ -7,7 +7,8 @@ install:
   - |
     git clone --branch production https://git.drupalcode.org/project/drupalci_testbot.git ../drupalci_testbot
     cd ../drupalci_testbot
-    composer install
+    composer install --prefer-dist --no-suggest --no-interaction --no-dev
 script:
-  - ./drupalci run .travisci/drupalci.yml
+  - echo $(pwd)
+  - ./drupalci run ../commerce_api/.travisci/drupalci.yml
 
