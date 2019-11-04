@@ -21,11 +21,13 @@ build:
         phpversion: 7.1.14
         options: 'install --prefer-dist --no-suggest --no-interaction --no-progress'
         halt-on-fail: true
-      composer:
-        options: "config repositories.local path ../commerce_api"
+      container_command:
+        commands:
+          - "cd ${SOURCE_DIR} && echo $(pwd)"
+          - "cd ${SOURCE_DIR} && ls ../commerce_api"
+          - "cd ${SOURCE_DIR} && sudo -u www-data composer config repositories.local path ../commerce_api"
       composer_contrib:
         project: commerce_api
-        branch: "*"
       update_build: {  }
       update_dependencies: {  }
     project-name: commerce_api

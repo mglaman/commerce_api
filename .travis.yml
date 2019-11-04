@@ -10,5 +10,5 @@ install:
     composer install --prefer-dist --no-suggest --no-interaction --no-dev
 script:
   - echo $(pwd)
-  - ./drupalci run ../commerce_api/.travisci/drupalci.yml
+  - DCI_Composer_Branch=$TRAVIS_BRANCH ./drupalci run ../commerce_api/.travisci/drupalci.yml
 
