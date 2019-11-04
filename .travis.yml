@@ -1,0 +1,11 @@
+language: php
+services:
+  - docker
+
+install:
+  - |
+    git clone --branch production https://git.drupalcode.org/project/drupalci_testbot.git
+    cd drupalci_testbot
+    composer install
+script:
+  - ./drupalci
