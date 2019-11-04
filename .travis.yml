@@ -3,10 +3,10 @@ services:
   - docker
 
 before_install:
-  - |
-    cd ..
-    git clone --branch production https://git.drupalcode.org/project/drupalci_testbot.git
-    mv commerce_api drupalci_testbot/commerce_api
+    - |
+      cd ..
+      git clone --branch production https://git.drupalcode.org/project/drupalci_testbot.git
+      mv commerce_api drupalci_testbot/commerce_api
 install:
   - |
     cd drupalci_testbot

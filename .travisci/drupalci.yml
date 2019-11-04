@@ -24,8 +24,7 @@ build:
       container_command:
         commands:
           - "cd ${SOURCE_DIR} && echo $(pwd)"
-          - "cd ${SOURCE_DIR} && ls /var/lib/drupalci"
-          - "cd ${SOURCE_DIR} && ls /var/lib/drupalci/workdir"
+          - "cd ${SOURCE_DIR} && ls /opt/drupalci"
           - "cd ${SOURCE_DIR} && sudo -u www-data composer config repositories.local path ../commerce_api"
       composer_contrib:
         project: commerce_api

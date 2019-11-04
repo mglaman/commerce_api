@@ -5,7 +5,7 @@ commands:
       - run: sudo apt-get update && sudo apt-get install -y libpng-dev libjpeg62-turbo-dev
       - run:
           name: Install PHP Extensions
-          command: sudo docker-php-ext-install gd
+          command: sudo docker-php-ext-install gd bcmath
       - checkout
       - restore_cache:
           keys:
@@ -30,42 +30,24 @@ commands:
             composer require drupal/commerce_api "*"
             cat composer.json
 jobs:
-  lint:
-    docker:
-      - image: circleci/php:7.2-cli
-    steps:
-      - setup-job
-      - run:
-          name: Composer Validate
-          command: |
-            composer validate
-      - run:
-          name: PHPCS
-          command: |
-            ./vendor/bin/phpcs src
   test:
     docker:
       - image: circleci/php:7.2-browsers
     steps:
-      - setup-job
-      - run: sudo apt update && sudo apt-get install -y sqlite3
-      - create-drupal-project
-      - local-require
+      - checkout
+      - setup_remote_docker
       - run:
-          name: Start ChromeDriver
-          command: chromedriver
-          background: true
-      - run:
-          name: Start builtin
-          command: php -S 127.0.0.1:8080 -t web
-          background: true
-      - run: |
-          SIMPLETEST_DB=sqlite://localhost/sites/default/files/.ht.sqlite && \
-          SIMPLETEST_BASE_URL=http://127.0.0.1:8080 && \
-          ./vendor/bin/phpunit modules/contrib/commerce_api
+          name: Install DrupalCI
+          command: |
+            cd ..
+            git clone --branch production https://git.drupalcode.org/project/drupalci_testbot.git
+            mv commerce_api drupalci_testbot/commerce_api
+            cd drupalci_testbot
+            composer install --prefer-dist --no-suggest --no-interaction --no-dev
+      - run: DCI_Composer_Branch=$CIRCLE_BRANCH ./drupalci run commerce_api/.travisci/drupalci.yml
 
 workflows:
   version: 2
-  lint_and_test:
+  test:
     jobs:
-      - lint
+      - test
