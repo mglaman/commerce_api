@@ -10,7 +10,7 @@
   <exclude-pattern>*/css/*</exclude-pattern>
   <exclude-pattern>*/js/*</exclude-pattern>
   <exclude-pattern>*/icons/*</exclude-pattern>
-  <exclude-pattern>README.md</exclude-pattern>
+  <exclude-pattern>*.md</exclude-pattern>
 
   <rule ref="Drupal">
     <!-- Commerce is not yet compliant with the new deprecation format. -->

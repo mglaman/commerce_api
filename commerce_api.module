@@ -5,7 +5,7 @@
  * Provides hooks.
  */
 
-use Drupal\commerce_api\Plugin\Field\ComputedOrderTotalFieldItemList;
+use Drupal\commerce_api\Plugin\Field\ComputedOrderTotal;
 use Drupal\commerce_api\Plugin\Field\ComputedResolvedPrice;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -57,7 +57,7 @@ function commerce_api_entity_base_field_info(EntityTypeInterface $entity_type) {
       ->setLabel(t('Order total'))
       ->setReadOnly(TRUE)
       ->setComputed(TRUE)
-      ->setClass(ComputedOrderTotalFieldItemList::class);
+      ->setClass(ComputedOrderTotal::class);
     return $fields;
   }
   if ($entity_type->id() === 'commerce_product_variation') {

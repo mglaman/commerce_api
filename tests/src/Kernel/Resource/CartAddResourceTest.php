@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\commerce_api\Kernel\Cart;
+namespace Drupal\Tests\commerce_api\Kernel\Resource;
 
 use Drupal\commerce_api\Resource\CartAddResource;
 use Drupal\commerce_price\Price;
@@ -17,6 +17,8 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
+ * Tests the CartAddResource.
+ *
  * @group commerce_api
  */
 final class CartAddResourceTest extends KernelTestBase {

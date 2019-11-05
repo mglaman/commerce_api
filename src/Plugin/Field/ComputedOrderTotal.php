@@ -8,7 +8,7 @@ use Drupal\commerce_price\Price;
 use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\TypedData\ComputedItemListTrait;
 
-final class ComputedOrderTotalFieldItemList extends FieldItemList {
+final class ComputedOrderTotal extends FieldItemList {
   use ComputedItemListTrait;
 
   /**

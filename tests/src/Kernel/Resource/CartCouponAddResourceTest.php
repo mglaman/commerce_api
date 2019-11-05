@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\commerce_api\Kernel\Cart;
+namespace Drupal\Tests\commerce_api\Kernel\Resource;
 
 use Drupal\commerce_api\Resource\CartCouponAddResource;
 use Drupal\commerce_order\Adjustment;
@@ -17,6 +17,8 @@ use Drupal\Tests\commerce_api\Kernel\KernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
+ * Tests the CartCouponAdd resource.
+ *
  * @group commerce_api
  */
 final class CartCouponAddResourceTest extends KernelTestBase {

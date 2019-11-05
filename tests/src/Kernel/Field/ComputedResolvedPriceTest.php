@@ -3,8 +3,6 @@
 namespace Drupal\Tests\commerce_api\Kernel\Field;
 
 use Drupal\commerce_price\Price;
-use Drupal\commerce_product\Entity\Product;
-use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\Tests\commerce_api\Kernel\KernelTestBase;
 
 /**
@@ -13,27 +11,47 @@ use Drupal\Tests\commerce_api\Kernel\KernelTestBase;
 final class ComputedResolvedPriceTest extends KernelTestBase {
 
   /**
-   * Tests the value of the computed resolved price field.
+   * {@inheritdoc}
    */
-  public function testResolvedPrice() {
-    $this->installModule('commerce_price_test');
-    /** @var \Drupal\commerce_product\Entity\Product $product */
-    $product = Product::create([
-      'type' => 'default',
-      'stores' => [$this->store->id()],
-    ]);
-    /** @var \Drupal\commerce_product\Entity\ProductVariation $product_variation */
-    $product_variation = ProductVariation::create([
-      'type' => 'default',
-      'sku' => 'TEST_JSONAPI_SKU',
-      'status' => 1,
-      'price' => new Price('4.00', 'USD'),
-    ]);
-    $product_variation->save();
-    $product->addVariation($product_variation);
-    $product->save();
+  public static $modules = [
+    'commerce_price_test',
+  ];
 
-    $this->assertEquals(new Price('1', 'USD'), $product_variation->get('resolved_price')->first()->toPrice());
+  /**
+   * Tests the value of the computed resolved price field.
+   *
+   * @dataProvider dataProviderResolvedPrice
+   */
+  public function testResolvedPrice(string $sku, Price $price, Price $expected_resolved_price) {
+    $product_variation = $this->createTestProductVariation([], [
+      'sku' => $sku,
+      'status' => 1,
+      'price' => $price,
+    ]);
+
+    $this->assertEquals(
+      $expected_resolved_price,
+      $product_variation->get('resolved_price')->first()->toPrice()
+    );
+  }
+
+  /**
+   * Data provider.
+   *
+   * @return \Generator
+   *   The test data.
+   */
+  public function dataProviderResolvedPrice(): \Generator {
+    yield [
+      'JSONAPI_SKU',
+      new Price('10.0', 'USD'),
+      new Price('10.0', 'USD'),
+    ];
+    yield [
+      'TEST_JSONAPI_SKU',
+      new Price('10', 'USD'),
+      new Price('7', 'USD'),
+    ];
   }
 
 }
