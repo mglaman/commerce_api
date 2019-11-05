@@ -12,8 +12,6 @@ class CouponValidConstraintValidator extends ConstraintValidator {
 
   /**
    * {@inheritdoc}
-   *
-   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   public function validate($value, Constraint $constraint) {
     assert($value instanceof EntityReferenceFieldItemListInterface);

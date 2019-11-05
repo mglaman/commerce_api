@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace Drupal\Tests\commerce_api\Functional\Cart;
 
@@ -41,7 +41,7 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
             'info' => ['href' => HttpExceptionNormalizer::getInfoUrl(404)],
             'via' => ['href' => $url->setAbsolute()->toString()],
           ],
-        ]
+        ],
       ],
     ], Json::decode((string) $response->getBody()));
   }
@@ -63,15 +63,15 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
     $not_my_order_item = $items[0];
 
     $url = Url::fromRoute('commerce_api.jsonapi.cart_remove_item', [
-        'commerce_order' => $not_my_cart->uuid(),
+      'commerce_order' => $not_my_cart->uuid(),
     ]);
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
         [
           'type' => 'commerce_order_item--default',
           'id' => $not_my_order_item->uuid(),
-        ]
-      ]
+        ],
+      ],
     ]);
     $response = $this->request('DELETE', $url, $request_options);
     $this->assertResponseCode(403, $response);
@@ -114,8 +114,8 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
         [
           'type' => 'commerce_order_item--default',
           'id' => $not_my_order_item->uuid(),
-        ]
-      ]
+        ],
+      ],
     ]);
     $response = $this->request('DELETE', $url, $request_options);
     $this->assertResponseCode(422, $response);
@@ -156,8 +156,8 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
         [
           'type' => 'commerce_order_item--default',
           'id' => $order_item2->uuid(),
-        ]
-      ]
+        ],
+      ],
     ]);
     $response = $this->request('DELETE', $url, $request_options);
     $this->assertResponseCode(204, $response);
@@ -179,8 +179,8 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
         [
           'type' => 'commerce_order_item--default',
           'id' => $remaining_order_item->uuid(),
-        ]
-      ]
+        ],
+      ],
     ]);
     $response = $this->request('DELETE', $url, $request_options);
     $this->assertResponseCode(204, $response);

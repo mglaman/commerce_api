@@ -60,7 +60,7 @@ class CartCouponsResourceTest extends CartResourceTestBase {
     $this->assertEquals(count($cart->getItems()), 1);
 
     $url = Url::fromRoute('commerce_api.jsonapi.cart_coupon_add', [
-      'commerce_order' => $cart->uuid()
+      'commerce_order' => $cart->uuid(),
     ]);
     $request_options = $this->getAuthenticationRequestOptions();
     $request_options[RequestOptions::HEADERS]['Accept'] = 'application/vnd.api+json';
@@ -70,8 +70,8 @@ class CartCouponsResourceTest extends CartResourceTestBase {
         [
           'type' => 'commerce_promotion_coupon--commerce_promotion_coupon',
           'id' => $coupon->getCode(),
-        ]
-      ]
+        ],
+      ],
     ]);
 
     $response = $this->request('PATCH', $url, $request_options);
@@ -118,7 +118,7 @@ class CartCouponsResourceTest extends CartResourceTestBase {
 
     // Test an invalid coupon.
     $url = Url::fromRoute('commerce_api.jsonapi.cart_coupon_add', [
-      'commerce_order' => $cart->uuid()
+      'commerce_order' => $cart->uuid(),
     ]);
     $request_options = $this->getAuthenticationRequestOptions();
     $request_options[RequestOptions::HEADERS]['Accept'] = 'application/vnd.api+json';
@@ -128,8 +128,8 @@ class CartCouponsResourceTest extends CartResourceTestBase {
         [
           'type' => 'commerce_promotion_coupon--commerce_promotion_coupon',
           'id' => '12232',
-        ]
-      ]
+        ],
+      ],
     ]);
     $response = $this->request('PATCH', $url, $request_options);
     $this->assertResponseCode(422, $response);
@@ -150,9 +150,9 @@ class CartCouponsResourceTest extends CartResourceTestBase {
           'links' => [
             'via' => [
               'href' => $url->setAbsolute()->toString(),
-            ]
-          ]
-        ]
+            ],
+          ],
+        ],
       ],
     ], Json::decode((string) $response->getBody()));
 
@@ -165,8 +165,8 @@ class CartCouponsResourceTest extends CartResourceTestBase {
         [
           'type' => 'commerce_promotion_coupon--commerce_promotion_coupon',
           'id' => $coupon->getCode(),
-        ]
-      ]
+        ],
+      ],
     ]);
     $response = $this->request('PATCH', $url, $request_options);
     $this->assertResponseCode(422, $response);
@@ -187,9 +187,9 @@ class CartCouponsResourceTest extends CartResourceTestBase {
           'links' => [
             'via' => [
               'href' => $url->setAbsolute()->toString(),
-            ]
-          ]
-        ]
+            ],
+          ],
+        ],
       ],
     ], Json::decode((string) $response->getBody()));
   }

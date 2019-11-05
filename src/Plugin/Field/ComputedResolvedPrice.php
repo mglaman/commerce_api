@@ -10,6 +10,9 @@ use Drupal\Core\TypedData\ComputedItemListTrait;
 final class ComputedResolvedPrice extends FieldItemList {
   use ComputedItemListTrait;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function computeValue() {
     $purchasable_entity = $this->getEntity();
     assert($purchasable_entity instanceof PurchasableEntityInterface);
@@ -23,4 +26,5 @@ final class ComputedResolvedPrice extends FieldItemList {
     $resolved_price = $chain_price_resolver->resolve($purchasable_entity, 1, $context);
     $this->list[0] = $this->createItem(0, $resolved_price);
   }
+
 }

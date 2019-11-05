@@ -11,6 +11,9 @@ use Drupal\Core\TypedData\ComputedItemListTrait;
 final class ComputedOrderTotalFieldItemList extends FieldItemList {
   use ComputedItemListTrait;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function computeValue() {
     $order = $this->getEntity();
     assert($order instanceof OrderInterface);
@@ -19,6 +22,15 @@ final class ComputedOrderTotalFieldItemList extends FieldItemList {
     $this->list[0] = $this->createItem(0, $totals);
   }
 
+  /**
+   * Converts value objects to an array.
+   *
+   * @param mixed $value
+   *   The value.
+   *
+   * @return array
+   *   The value, as an array.
+   */
   protected static function valueObjectsToArray($value) {
     if ($value instanceof Price) {
       return $value->toArray();
@@ -31,4 +43,5 @@ final class ComputedOrderTotalFieldItemList extends FieldItemList {
     }
     return $value;
   }
+
 }

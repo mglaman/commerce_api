@@ -83,6 +83,10 @@ final class CartUpdateItemResource extends CartResourceBase {
    *
    * @return \Drupal\jsonapi\ResourceResponse
    *   The response.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function process(Request $request, OrderInterface $commerce_order, OrderItemInterface $commerce_order_item): ResourceResponse {
     $resource_type = $this->resourceTypeRepository->get($commerce_order_item->getEntityTypeId(), $commerce_order_item->bundle());

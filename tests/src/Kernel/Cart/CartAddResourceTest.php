@@ -31,7 +31,7 @@ final class CartAddResourceTest extends KernelTestBase {
     $request = $this->prophesize(Request::class);
     $request->getContent()->willReturn(Json::encode([
       'data' => [
-        $this->createJsonapiData($entity, 1)
+        $this->createJsonapiData($entity, 1),
       ],
     ]));
 
@@ -46,17 +46,7 @@ final class CartAddResourceTest extends KernelTestBase {
    * Tests exception when product has no stores.
    */
   public function testNoStoresException() {
-    /** @var \Drupal\commerce_product\Entity\Product $product */
-    $product = Product::create([
-      'type' => 'default',
-    ]);
-    /** @var \Drupal\commerce_product\Entity\ProductVariation $product_variation */
-    $product_variation = ProductVariation::create([
-      'type' => 'default',
-    ]);
-    $product_variation->save();
-    $product->addVariation($product_variation);
-    $product->save();
+    $product_variation = $this->createTestProductVariation(['stores' => []], []);
 
     $request = $this->prophesize(Request::class);
     $request->getContent()->willReturn(Json::encode([
@@ -78,18 +68,10 @@ final class CartAddResourceTest extends KernelTestBase {
   public function testNotCurrentStoreException() {
     $additional_store1 = $this->createStore();
     $additional_store2 = $this->createStore();
-    /** @var \Drupal\commerce_product\Entity\Product $product */
-    $product = Product::create([
-      'type' => 'default',
+
+    $product_variation = $this->createTestProductVariation([
       'stores' => [$additional_store2->id(), $additional_store1->id()],
-    ]);
-    /** @var \Drupal\commerce_product\Entity\ProductVariation $product_variation */
-    $product_variation = ProductVariation::create([
-      'type' => 'default',
-    ]);
-    $product_variation->save();
-    $product->addVariation($product_variation);
-    $product->save();
+    ], []);
 
     $request = $this->prophesize(Request::class);
     $request->getContent()->willReturn(Json::encode([
@@ -153,6 +135,9 @@ final class CartAddResourceTest extends KernelTestBase {
     $this->assertEquals(2, $resource_object->getField('quantity')->value);
   }
 
+  /**
+   * Test the combine meta value.
+   */
   public function testCombineAndArity() {
     /** @var \Drupal\commerce_product\Entity\Product $product */
     $product = Product::create([
@@ -180,7 +165,7 @@ final class CartAddResourceTest extends KernelTestBase {
     $request = Request::create('https://localhost/cart/add', 'POST', [], [], [], [], Json::encode([
       'data' => [
         $arity0,
-        $arity1
+        $arity1,
       ],
     ]));
     $response = $controller->process($request, ['commerce_product_variation--default']);
@@ -191,23 +176,18 @@ final class CartAddResourceTest extends KernelTestBase {
     $this->assertEquals(1, $resource_object->getField('quantity')->value);
   }
 
+  /**
+   * Test the returned order item has the resolved price.
+   */
   public function testOrderItemHasResolvedPrice() {
     $this->installModule('commerce_price_test');
-    /** @var \Drupal\commerce_product\Entity\Product $product */
-    $product = Product::create([
-      'type' => 'default',
+    $product_variation = $this->createTestProductVariation([
       'stores' => [$this->store->id()],
-    ]);
-    /** @var \Drupal\commerce_product\Entity\ProductVariation $product_variation */
-    $product_variation = ProductVariation::create([
-      'type' => 'default',
+    ], [
       'sku' => 'TEST_JSONAPI_SKU',
       'status' => 1,
       'price' => new Price('4.00', 'USD'),
     ]);
-    $product_variation->save();
-    $product->addVariation($product_variation);
-    $product->save();
 
     $request = Request::create('https://localhost/cart/add', 'POST', [], [], [], [], Json::encode([
       'data' => [
@@ -224,7 +204,7 @@ final class CartAddResourceTest extends KernelTestBase {
     $purchased_entity = $resource_object->getField('purchased_entity');
     $this->assertEquals($product_variation->id(), $purchased_entity->target_id);
     $this->assertEquals(1, $resource_object->getField('quantity')->value);
-    $this->assertEquals(new Price('1', 'USD'), $resource_object->getField('unit_price')->first()->toPrice());
+    $this->assertEquals(new Price('1.0', 'USD'), $resource_object->getField('unit_price')->first()->toPrice());
 
   }
 

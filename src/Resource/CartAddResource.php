@@ -2,7 +2,6 @@
 
 namespace Drupal\commerce_api\Resource;
 
-use Drupal\commerce\Context;
 use Drupal\commerce\PurchasableEntityInterface;
 use Drupal\commerce_cart\CartManagerInterface;
 use Drupal\commerce_cart\CartProviderInterface;
@@ -14,7 +13,6 @@ use Drupal\commerce_order\Resolver\ChainOrderTypeResolverInterface;
 use Drupal\commerce_price\Resolver\ChainPriceResolverInterface;
 use Drupal\commerce_store\CurrentStoreInterface;
 use Drupal\commerce_store\Entity\StoreInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Render\RenderContext;
@@ -26,8 +24,6 @@ use Drupal\jsonapi\JsonApiResource\ResourceIdentifierInterface;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Drupal\jsonapi\JsonApiResource\ResourceObjectData;
 use Drupal\jsonapi\ResourceResponse;
-use Drupal\jsonapi\ResourceType\ResourceType;
-use Drupal\jsonapi\ResourceType\ResourceTypeRelationship;
 use Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface;
 use Drupal\jsonapi_resources\ResourceResponseFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -162,22 +158,7 @@ final class CartAddResource extends CartResourceBase {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function process(Request $request, array $_purchasable_entity_resource_types = []): ResourceResponse {
-    // @todo `default` may not exist. Order items are not a based field, yet.
-    // @todo once `items` is a base field, change to "virtual".
-    // @see https://www.drupal.org/project/commerce/issues/3002939
-    $resource_type = new ResourceType('commerce_order', 'default', EntityInterface::class, FALSE, TRUE, FALSE, FALSE,
-      [
-        'order_items' => new ResourceTypeRelationship('order_items', 'order_items', TRUE, FALSE),
-      ]
-    );
-    assert($resource_type->getInternalName('order_items') === 'order_items');
-
-    /* @var \Drupal\jsonapi\ResourceType\ResourceType[] $purchasable_resource_types */
-    $purchasable_resource_types = array_map(function ($resource_type_name) {
-      return $this->resourceTypeRepository->getByTypeName($resource_type_name);
-    }, $_purchasable_entity_resource_types);
-
-    $resource_type->setRelatableResourceTypes(['order_items' => $purchasable_resource_types]);
+    $resource_type = $this->getGeneralizedOrderResourceType($_purchasable_entity_resource_types);
     /* @var \Drupal\jsonapi\JsonApiResource\ResourceIdentifier[] $resource_identifiers */
     $resource_identifiers = $this->inner->deserialize($resource_type, $request, ResourceIdentifier::class, 'order_items');
 

@@ -12,8 +12,6 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\jsonapi\Access\EntityAccessChecker;
 use Drupal\jsonapi\Entity\EntityValidationTrait;
 use Drupal\jsonapi\JsonApiResource\ResourceIdentifier;
-use Drupal\jsonapi\JsonApiResource\ResourceObject;
-use Drupal\jsonapi\JsonApiResource\ResourceObjectData;
 use Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface;
 use Drupal\jsonapi_resources\Resource\EntityResourceBase;
 use Drupal\jsonapi_resources\ResourceResponseFactory;
@@ -89,8 +87,6 @@ final class CartCouponAddResource extends EntityResourceBase {
    * @return \Drupal\jsonapi\ResourceResponse
    *   The response.
    *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Drupal\Core\TypedData\Exception\ReadOnlyException
    */

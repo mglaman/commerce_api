@@ -140,6 +140,8 @@ final class CartTokenSession implements CartSessionInterface {
    *
    * @param array $data
    *   The data.
+   *
+   * @throws \Drupal\Core\TempStore\TempStoreException
    */
   private function setTokenCartData(array $data) {
     $token = $this->getCurrentRequestCartToken();

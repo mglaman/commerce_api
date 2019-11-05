@@ -14,8 +14,6 @@ class PurchasedEntityAvailableConstraintValidator extends ConstraintValidator {
 
   /**
    * {@inheritdoc}
-   *
-   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   public function validate($value, Constraint $constraint) {
     assert($value instanceof EntityReferenceFieldItemListInterface);
@@ -48,8 +46,8 @@ class PurchasedEntityAvailableConstraintValidator extends ConstraintValidator {
       $this->context->buildViolation($constraint->message, [
         '%label' => $purchased_entity->label(),
         '%quantity' => $quantity,
-        ])
-        ->atPath((string) '0.target_id')
+      ])
+        ->atPath('0.target_id')
         ->setInvalidValue($value->target_id)
         ->addViolation();
     }

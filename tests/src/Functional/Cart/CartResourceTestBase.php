@@ -8,7 +8,7 @@ use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\jsonapi\Functional\JsonApiRequestTestTrait;
 use Psr\Http\Message\ResponseInterface;
 
-abstract  class CartResourceTestBase extends BrowserTestBase {
+abstract class CartResourceTestBase extends BrowserTestBase {
 
   use StoreCreationTrait;
   use JsonApiRequestTestTrait;
@@ -149,6 +149,14 @@ abstract  class CartResourceTestBase extends BrowserTestBase {
     ];
   }
 
+  /**
+   * Asserts the response code for a response.
+   *
+   * @param int $expected_status_code
+   *   The expected response code.
+   * @param \Psr\Http\Message\ResponseInterface $response
+   *   The response.
+   */
   protected function assertResponseCode($expected_status_code, ResponseInterface $response) {
     $this->assertSame($expected_status_code, $response->getStatusCode(), var_export(Json::decode((string) $response->getBody()), TRUE));
   }

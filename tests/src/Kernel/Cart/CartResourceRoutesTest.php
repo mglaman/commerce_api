@@ -16,11 +16,17 @@ final class CartResourceRoutesTest extends KernelTestBase {
    */
   protected $router;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
     $this->router = $this->container->get('router');
   }
 
+  /**
+   * Test the coupon add route.
+   */
   public function testCouponAddRoute() {
     $this->installModule('commerce_promotion');
     $this->router->getRouteCollection()->get('commerce_api.jsonapi.cart_coupon_add');

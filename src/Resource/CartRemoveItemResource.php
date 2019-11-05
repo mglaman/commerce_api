@@ -8,14 +8,10 @@ use Drupal\commerce_api\EntityResourceShim;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Entity\OrderItemInterface;
 use Drupal\commerce_order\OrderItemStorageInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\jsonapi\Access\EntityAccessChecker;
-use Drupal\jsonapi\Exception\UnprocessableHttpEntityException;
 use Drupal\jsonapi\JsonApiResource\ResourceIdentifier;
 use Drupal\jsonapi\ResourceResponse;
-use Drupal\jsonapi\ResourceType\ResourceType;
-use Drupal\jsonapi\ResourceType\ResourceTypeRelationship;
 use Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface;
 use Drupal\jsonapi_resources\ResourceResponseFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -76,26 +72,17 @@ final class CartRemoveItemResource extends CartResourceBase {
    *   The request.
    * @param \Drupal\commerce_order\Entity\OrderInterface $commerce_order
    *   The order.
+   * @param array $_order_item_resource_types
+   *   An array order item resource types.
    *
    * @return \Drupal\jsonapi\ResourceResponse
    *   The response.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function process(Request $request, OrderInterface $commerce_order, array $_order_item_resource_types = []): ResourceResponse {
-    // @todo `default` may not exist. Order items are not a based field, yet.
-    // @todo once `items` is a base field, change to "virtual".
-    // @see https://www.drupal.org/project/commerce/issues/3002939
-    $resource_type = new ResourceType('commerce_order', 'default', EntityInterface::class, FALSE, TRUE, FALSE, FALSE,
-      [
-        'order_items' => new ResourceTypeRelationship('order_items', 'order_items', TRUE, FALSE),
-      ]
-    );
-    assert($resource_type->getInternalName('order_items') === 'order_items');
-    /* @var \Drupal\jsonapi\ResourceType\ResourceType[] $order_item_resource_types */
-    $order_item_resource_types = array_map(function ($resource_type_name) {
-      return $this->resourceTypeRepository->getByTypeName($resource_type_name);
-    }, $_order_item_resource_types);
-    $resource_type->setRelatableResourceTypes(['order_items' => $order_item_resource_types]);
-
+    $resource_type = $this->getGeneralizedOrderResourceType($_order_item_resource_types);
     $order_item_storage = $this->entityTypeManager->getStorage('commerce_order_item');
     assert($order_item_storage instanceof OrderItemStorageInterface);
 

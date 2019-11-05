@@ -69,7 +69,7 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
           'self' => ['href' => Url::fromRoute('jsonapi.commerce_order--default.individual', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
         ],
         'attributes' => [
-          'drupal_internal__order_id' => $cart->id(),
+          'drupal_internal__order_id' => (int) $cart->id(),
           'order_number' => NULL,
           'total_price' => [
             'number' => '5000.0',
@@ -161,7 +161,7 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
             'self' => ['href' => Url::fromRoute('jsonapi.commerce_product_variation--default.individual', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
           ],
           'attributes' => [
-            'drupal_internal__variation_id' => $this->variation->id(),
+            'drupal_internal__variation_id' => (int) $this->variation->id(),
             'sku' => $this->variation->getSku(),
             'title' => $this->variation->label(),
             'list_price' => NULL,

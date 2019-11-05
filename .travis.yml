@@ -45,7 +45,7 @@ script:
   - phpcs --standard=phpcs.xml tests -s
   - phpcs --standard=phpcs.xml commerce_api.module
 
-  - cd $TRAVIS_BUILD_DIR/../drupal
+  - cd $TRAVIS_BUILD_DIR/../drupal/web
   - ../vendor/bin/phpunit -c core modules/contrib/commerce_api
 notifications:
   email: false

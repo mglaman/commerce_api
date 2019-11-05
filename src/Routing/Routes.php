@@ -12,7 +12,6 @@ use Drupal\commerce_api\Resource\CartRemoveItemResource;
 use Drupal\commerce_api\Resource\CartUpdateItemResource;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\jsonapi\ParamConverter\ResourceTypeConverter;
 use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface;
 use Drupal\jsonapi\Routing\Routes as JsonapiRoutes;

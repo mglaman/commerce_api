@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\commerce_api\Kernel;
 
+use Drupal\commerce_product\Entity\Product;
+use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
 
@@ -42,6 +44,35 @@ abstract class KernelTestBase extends CommerceKernelTestBase {
       'commerce_product',
       'commerce_order',
     ]);
+  }
+
+  /**
+   * Create a test product variation.
+   *
+   * @param array $product_data
+   *   Additional product data.
+   * @param array $variation_data
+   *   Additional variation data.
+   *
+   * @return \Drupal\commerce_product\Entity\ProductVariation
+   *   The test product variation.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  protected function createTestProductVariation(array $product_data, array $variation_data) {
+    /** @var \Drupal\commerce_product\Entity\Product $product */
+    $product = Product::create($product_data + [
+      'type' => 'default',
+      'stores' => [$this->store->id()],
+    ]);
+    /** @var \Drupal\commerce_product\Entity\ProductVariation $product_variation */
+    $product_variation = ProductVariation::create($variation_data + [
+      'type' => 'default',
+    ]);
+    $product_variation->save();
+    $product->addVariation($product_variation);
+    $product->save();
+    return $this->reloadEntity($product_variation);
   }
 
 }

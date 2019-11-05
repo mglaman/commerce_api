@@ -7,8 +7,14 @@ use Drupal\commerce_product\Entity\Product;
 use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\Tests\commerce_api\Kernel\KernelTestBase;
 
+/**
+ * @group commerce_api
+ */
 final class ComputedResolvedPriceTest extends KernelTestBase {
 
+  /**
+   * Tests the value of the computed resolved price field.
+   */
   public function testResolvedPrice() {
     $this->installModule('commerce_price_test');
     /** @var \Drupal\commerce_product\Entity\Product $product */

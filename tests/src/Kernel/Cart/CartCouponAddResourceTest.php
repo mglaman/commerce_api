@@ -131,6 +131,7 @@ final class CartCouponAddResourceTest extends KernelTestBase {
    *
    * @return \Drupal\commerce_promotion\Entity\CouponInterface
    *   The test coupon.
+   *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function getTestCoupon() {

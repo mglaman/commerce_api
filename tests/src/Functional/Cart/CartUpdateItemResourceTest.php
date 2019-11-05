@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace Drupal\Tests\commerce_api\Functional\Cart;
 
@@ -201,7 +201,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
         'attributes' => [
           'quantity' => -1,
         ],
-      ]
+      ],
     ]);
     $response = $this->request('PATCH', $url, $request_options);
     $this->assertResponseCode(422, $response);
@@ -220,7 +220,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
           'status' => '422',
           'detail' => 'quantity.0.value: Quantity: the value may be no less than 0.',
           'source' => [
-            'pointer' => '/data/attributes/quantity/value'
+            'pointer' => '/data/attributes/quantity/value',
           ],
         ],
       ],
