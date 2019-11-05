@@ -28,7 +28,7 @@ class PurchasedEntityAvailableConstraintValidator extends ConstraintValidator {
     $order_item = $value->getEntity();
     assert($order_item instanceof OrderItemInterface);
     $order = $order_item->getOrder();
-    if (!$order instanceof OrderInterface) {
+    if (!$order instanceof OrderInterface || $order->getState()->getId() !== 'draft') {
       return;
     }
 

@@ -33,6 +33,7 @@ function commerce_api_entity_base_field_info_alter(&$fields, EntityTypeInterface
   if ($entity_type->id() === 'commerce_order_item') {
     // @see https://www.drupal.org/node/3088597
     $fields['purchased_entity']->addConstraint('PurchasedEntityAvailable');
+
     // Drupal core doesn't properly add `min` constraints when the minimum value
     // is zero.
     // @todo remove after https://www.drupal.org/project/drupal/issues/3090629.

@@ -27,3 +27,9 @@ services:
     arguments: ['@commerce_cart.cart_session', '@tempstore.shared']
     tags:
       - { name: event_subscriber }
+
+  # @see https://www.drupal.org/project/commerce/issues/3088598
+  commerce_api.published_availability_checker:
+    class: Drupal\commerce_api\AvailabilityChecker\PublishedAvailabilityChecker
+    tags:
+      - { name: commerce.availability_checker }
