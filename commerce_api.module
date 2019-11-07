@@ -7,6 +7,7 @@
 
 use Drupal\commerce_api\Plugin\Field\ComputedOrderTotal;
 use Drupal\commerce_api\Plugin\Field\ComputedResolvedPrice;
+use Drupal\commerce_api\Plugin\openapi\OpenApiGenerator\AdjustedJsonApiGenerator;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -74,3 +75,10 @@ function commerce_api_entity_base_field_info(EntityTypeInterface $entity_type) {
 
   return [];
 }
+
+function commerce_api_openapi_generator_alter(array &$definitions) {
+  if (isset($definitions['jsonapi'])) {
+    $definitions['jsonapi']['class'] = AdjustedJsonApiGenerator::class;
+  }
+}
+
