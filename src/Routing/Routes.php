@@ -97,6 +97,9 @@ class Routes implements ContainerInjectionInterface {
       $routes->add('commerce_api.jsonapi.cart_coupon_add', $this->cartCouponAdd());
     }
 
+    // Prefix all routes with the JSON:API route prefix.
+    $routes->addPrefix('/%jsonapi%');
+
     // All routes must pass _cart_api access check.
     $routes->addRequirements([
       '_access' => 'TRUE',
