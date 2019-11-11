@@ -11,8 +11,10 @@ use Drupal\jsonapi\Query\OffsetPage;
 use Drupal\jsonapi\ResourceResponse;
 use Drupal\jsonapi_resources\Resource\EntityResourceBase;
 use Drupal\search_api\IndexInterface;
+use Drupal\search_api\Item\Field;
 use Drupal\search_api\Item\ItemInterface;
 use Drupal\search_api\ParseMode\ParseModeInterface;
+use Drupal\search_api\Query\QueryInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 final class IndexResource extends EntityResourceBase {
@@ -33,18 +35,11 @@ final class IndexResource extends EntityResourceBase {
     }
     $query->range($pagination->getOffset(), $pagination->getSize());
 
-    $parse_mode = \Drupal::getContainer()->get('plugin.manager.search_api.parse_mode')->createInstance('terms');
-    assert($parse_mode instanceof ParseModeInterface);
-    $query->setParseMode($parse_mode);
-
     if ($request->query->has('filter')) {
-      $filter = $request->query->get('filter');
-      if (empty($filter['fulltext'])) {
-        throw new CacheableBadRequestHttpException($cacheability, sprintf('Only filtering by `fulltext` is supported.'));
-      }
-      $query->keys($filter['fulltext']);
+      $this->applyFiltersToQuery($request, $query, $cacheability);
     }
 
+    // Get the results and convert to JSON:API resource object data.
     $results = $query->execute();
     $result_entities = array_map(static function (ItemInterface $item) {
       return $item->getOriginalObject()->getValue();
@@ -56,6 +51,32 @@ final class IndexResource extends EntityResourceBase {
     $response = $this->createJsonapiResponse($primary_data, $request, 200, [], $pager_links);
     $response->addCacheableDependency($cacheability);
     return $response;
+  }
+
+  protected function applyFiltersToQuery(Request $request, QueryInterface $query, CacheableMetadata $cacheability) {
+    // @todo apply expand functionality to meet JSON:API spec
+    // @see \Drupal\jsonapi\Query\Filter::expand
+    $parse_mode = \Drupal::getContainer()->get('plugin.manager.search_api.parse_mode')->createInstance('terms');
+    assert($parse_mode instanceof ParseModeInterface);
+    $query->setParseMode($parse_mode);
+
+    $filter = $request->query->get('filter');
+    if (isset($filter['fulltext'])) {
+      $query->keys($filter['fulltext']);
+      unset($filter['fulltext']);
+    }
+
+    $index = $query->getIndex();
+    $filterable_fields = array_filter($index->getFields(), static function (Field $field) {
+      return $field->getType() !== 'text';
+    });
+    foreach ($filter as $filterable_field_name => $filterable_field_value) {
+      if (!isset($filterable_fields[$filterable_field_name])) {
+        throw new CacheableBadRequestHttpException($cacheability, sprintf('The %s field is not filterable.', $filterable_field_name));
+      }
+      $query->addCondition($filterable_field_name, $filterable_field_value);
+    }
+    $stop = null;
   }
 
   protected function getPagination(Request $request): OffsetPage {
