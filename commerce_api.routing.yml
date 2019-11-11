@@ -1,2 +1,3 @@
 route_callbacks:
   - '\Drupal\commerce_api\Routing\Routes::routes'
+  - '\Drupal\commerce_api\Routing\SearchApiIndexRoutes::routes'
