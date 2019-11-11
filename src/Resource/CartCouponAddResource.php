@@ -43,21 +43,12 @@ final class CartCouponAddResource extends EntityResourceBase {
   /**
    * Constructs a new CartCouponAddResource object.
    *
-   * @param \Drupal\jsonapi_resources\ResourceResponseFactory $resource_response_factory
-   *   The resource response factory.
-   * @param \Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface $resource_type_repository
-   *   The resource type repository.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\jsonapi\Access\EntityAccessChecker $entity_access_checker
-   *   The entity access checker.
    * @param \Drupal\commerce_api\EntityResourceShim $jsonapi_controller
    *   The JSON:API controller shim.
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The renderer.
    */
-  public function __construct(ResourceResponseFactory $resource_response_factory, ResourceTypeRepositoryInterface $resource_type_repository, EntityTypeManagerInterface $entity_type_manager, EntityAccessChecker $entity_access_checker, EntityResourceShim $jsonapi_controller, RendererInterface $renderer) {
-    parent::__construct($resource_response_factory, $resource_type_repository, $entity_type_manager, $entity_access_checker);
+  public function __construct(EntityResourceShim $jsonapi_controller, RendererInterface $renderer) {
     $this->inner = $jsonapi_controller;
     $this->renderer = $renderer;
   }
@@ -67,10 +58,6 @@ final class CartCouponAddResource extends EntityResourceBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('jsonapi_resources.resource_response_factory'),
-      $container->get('jsonapi.resource_type.repository'),
-      $container->get('entity_type.manager'),
-      $container->get('jsonapi_resources.entity_access_checker'),
       $container->get('commerce_api.jsonapi_controller_shim'),
       $container->get('renderer')
     );

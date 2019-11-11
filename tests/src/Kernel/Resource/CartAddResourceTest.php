@@ -240,11 +240,7 @@ final class CartAddResourceTest extends KernelTestBase {
    * @throws \Exception
    */
   protected function getController() {
-    return new CartAddResource(
-      $this->container->get('jsonapi_resources.resource_response_factory'),
-      $this->container->get('jsonapi.resource_type.repository'),
-      $this->container->get('entity_type.manager'),
-      $this->container->get('jsonapi_resources.entity_access_checker'),
+    $controller = new CartAddResource(
       $this->container->get('commerce_cart.cart_provider'),
       $this->container->get('commerce_cart.cart_manager'),
       $this->container->get('commerce_api.jsonapi_controller_shim'),
@@ -255,6 +251,11 @@ final class CartAddResourceTest extends KernelTestBase {
       $this->container->get('current_user'),
       $this->container->get('renderer')
     );
+    $controller->setResourceResponseFactory($this->container->get('jsonapi_resources.resource_response_factory'));
+    $controller->setResourceTypeRepository($this->container->get('jsonapi.resource_type.repository'));
+    $controller->setEntityTypeManager($this->container->get('entity_type.manager'));
+    $controller->setEntityAccessChecker($this->container->get('jsonapi_resources.entity_access_checker'));
+    return $controller;
   }
 
 }

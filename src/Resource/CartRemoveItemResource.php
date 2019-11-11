@@ -8,12 +8,8 @@ use Drupal\commerce_api\EntityResourceShim;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Entity\OrderItemInterface;
 use Drupal\commerce_order\OrderItemStorageInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\jsonapi\Access\EntityAccessChecker;
 use Drupal\jsonapi\JsonApiResource\ResourceIdentifier;
 use Drupal\jsonapi\ResourceResponse;
-use Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface;
-use Drupal\jsonapi_resources\ResourceResponseFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -30,14 +26,6 @@ final class CartRemoveItemResource extends CartResourceBase {
   /**
    * Constructs a new CartRemoveItemResource object.
    *
-   * @param \Drupal\jsonapi_resources\ResourceResponseFactory $resource_response_factory
-   *   The resource response factory.
-   * @param \Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface $resource_type_repository
-   *   The resource type repository.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\jsonapi\Access\EntityAccessChecker $entity_access_checker
-   *   The entity access checker.
    * @param \Drupal\commerce_cart\CartProviderInterface $cart_provider
    *   The cart provider.
    * @param \Drupal\commerce_cart\CartManagerInterface $cart_manager
@@ -45,8 +33,8 @@ final class CartRemoveItemResource extends CartResourceBase {
    * @param \Drupal\commerce_api\EntityResourceShim $jsonapi_controller
    *   The JSON:API controller shim.
    */
-  public function __construct(ResourceResponseFactory $resource_response_factory, ResourceTypeRepositoryInterface $resource_type_repository, EntityTypeManagerInterface $entity_type_manager, EntityAccessChecker $entity_access_checker, CartProviderInterface $cart_provider, CartManagerInterface $cart_manager, EntityResourceShim $jsonapi_controller) {
-    parent::__construct($resource_response_factory, $resource_type_repository, $entity_type_manager, $entity_access_checker, $cart_provider, $cart_manager);
+  public function __construct(CartProviderInterface $cart_provider, CartManagerInterface $cart_manager, EntityResourceShim $jsonapi_controller) {
+    parent::__construct($cart_provider, $cart_manager);
     $this->inner = $jsonapi_controller;
   }
 
@@ -55,10 +43,6 @@ final class CartRemoveItemResource extends CartResourceBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('jsonapi_resources.resource_response_factory'),
-      $container->get('jsonapi.resource_type.repository'),
-      $container->get('entity_type.manager'),
-      $container->get('jsonapi_resources.entity_access_checker'),
       $container->get('commerce_cart.cart_provider'),
       $container->get('commerce_cart.cart_manager'),
       $container->get('commerce_api.jsonapi_controller_shim')

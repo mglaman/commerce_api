@@ -170,14 +170,15 @@ final class CartCouponAddResourceTest extends KernelTestBase {
    *   The controller.
    */
   protected function getController() {
-    return new CartCouponAddResource(
-      $this->container->get('jsonapi_resources.resource_response_factory'),
-      $this->container->get('jsonapi.resource_type.repository'),
-      $this->container->get('entity_type.manager'),
-      $this->container->get('jsonapi_resources.entity_access_checker'),
+    $controller = new CartCouponAddResource(
       $this->container->get('commerce_api.jsonapi_controller_shim'),
       $this->container->get('renderer')
     );
+    $controller->setResourceResponseFactory($this->container->get('jsonapi_resources.resource_response_factory'));
+    $controller->setResourceTypeRepository($this->container->get('jsonapi.resource_type.repository'));
+    $controller->setEntityTypeManager($this->container->get('entity_type.manager'));
+    $controller->setEntityAccessChecker($this->container->get('jsonapi_resources.entity_access_checker'));
+    return $controller;
   }
 
 }

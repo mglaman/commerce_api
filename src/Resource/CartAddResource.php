@@ -14,18 +14,14 @@ use Drupal\commerce_price\Resolver\ChainPriceResolverInterface;
 use Drupal\commerce_store\CurrentStoreInterface;
 use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\jsonapi\Access\EntityAccessChecker;
 use Drupal\jsonapi\JsonApiResource\ResourceIdentifier;
 use Drupal\jsonapi\JsonApiResource\ResourceIdentifierInterface;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Drupal\jsonapi\JsonApiResource\ResourceObjectData;
 use Drupal\jsonapi\ResourceResponse;
-use Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface;
-use Drupal\jsonapi_resources\ResourceResponseFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -38,13 +34,6 @@ final class CartAddResource extends CartResourceBase {
    * @var \Drupal\commerce_api\EntityResourceShim
    */
   private $inner;
-
-  /**
-   * The chain price resolver.
-   *
-   * @var \Drupal\commerce_price\Resolver\ChainPriceResolverInterface
-   */
-  private $chainPriceResolver;
 
   /**
    * The current store.
@@ -68,13 +57,6 @@ final class CartAddResource extends CartResourceBase {
   private $entityRepository;
 
   /**
-   * The current user account.
-   *
-   * @var \Drupal\Core\Session\AccountInterface
-   */
-  private $currentUser;
-
-  /**
    * The renderer.
    *
    * @var \Drupal\Core\Render\Renderer|object|null
@@ -84,14 +66,6 @@ final class CartAddResource extends CartResourceBase {
   /**
    * Constructs a new CartAddResource object.
    *
-   * @param \Drupal\jsonapi_resources\ResourceResponseFactory $resource_response_factory
-   *   The resource response factory.
-   * @param \Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface $resource_type_repository
-   *   The resource type repository.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\jsonapi\Access\EntityAccessChecker $entity_access_checker
-   *   The entity access checker.
    * @param \Drupal\commerce_cart\CartProviderInterface $cart_provider
    *   The cart provider.
    * @param \Drupal\commerce_cart\CartManagerInterface $cart_manager
@@ -111,14 +85,12 @@ final class CartAddResource extends CartResourceBase {
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The renderer.
    */
-  public function __construct(ResourceResponseFactory $resource_response_factory, ResourceTypeRepositoryInterface $resource_type_repository, EntityTypeManagerInterface $entity_type_manager, EntityAccessChecker $entity_access_checker, CartProviderInterface $cart_provider, CartManagerInterface $cart_manager, EntityResourceShim $jsonapi_controller, ChainOrderTypeResolverInterface $chain_order_type_resolver, CurrentStoreInterface $current_store, ChainPriceResolverInterface $chain_price_resolver, EntityRepositoryInterface $entity_repository, AccountInterface $account, RendererInterface $renderer) {
-    parent::__construct($resource_response_factory, $resource_type_repository, $entity_type_manager, $entity_access_checker, $cart_provider, $cart_manager);
+  public function __construct(CartProviderInterface $cart_provider, CartManagerInterface $cart_manager, EntityResourceShim $jsonapi_controller, ChainOrderTypeResolverInterface $chain_order_type_resolver, CurrentStoreInterface $current_store, ChainPriceResolverInterface $chain_price_resolver, EntityRepositoryInterface $entity_repository, AccountInterface $account, RendererInterface $renderer) {
+    parent::__construct($cart_provider, $cart_manager);
     $this->inner = $jsonapi_controller;
     $this->chainOrderTypeResolver = $chain_order_type_resolver;
     $this->currentStore = $current_store;
-    $this->chainPriceResolver = $chain_price_resolver;
     $this->entityRepository = $entity_repository;
-    $this->currentUser = $account;
     $this->renderer = $renderer;
   }
 
@@ -127,10 +99,6 @@ final class CartAddResource extends CartResourceBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('jsonapi_resources.resource_response_factory'),
-      $container->get('jsonapi.resource_type.repository'),
-      $container->get('entity_type.manager'),
-      $container->get('jsonapi_resources.entity_access_checker'),
       $container->get('commerce_cart.cart_provider'),
       $container->get('commerce_cart.cart_manager'),
       $container->get('commerce_api.jsonapi_controller_shim'),

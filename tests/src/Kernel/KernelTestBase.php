@@ -19,6 +19,7 @@ abstract class KernelTestBase extends CommerceKernelTestBase {
     'entity_reference_revisions',
     'profile',
     'state_machine',
+    'commerce_number_pattern',
     'commerce_order',
     'path',
     'commerce_product',
