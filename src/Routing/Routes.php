@@ -10,6 +10,7 @@ use Drupal\commerce_api\Resource\CartCollectionResource;
 use Drupal\commerce_api\Resource\CartCouponAddResource;
 use Drupal\commerce_api\Resource\CartRemoveItemResource;
 use Drupal\commerce_api\Resource\CartUpdateItemResource;
+use Drupal\commerce_api\Resource\CheckoutResource;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\jsonapi\ResourceType\ResourceType;
@@ -96,6 +97,8 @@ class Routes implements ContainerInjectionInterface {
     if ($this->entityTypeManager->hasDefinition('commerce_promotion_coupon')) {
       $routes->add('commerce_api.jsonapi.cart_coupon_add', $this->cartCouponAdd());
     }
+
+    $routes->add('commerce_api.jsonapi.cart_checkout', $this->cartCheckout());
 
     // Prefix all routes with the JSON:API route prefix.
     $routes->addPrefix('/%jsonapi%');
@@ -283,6 +286,23 @@ class Routes implements ContainerInjectionInterface {
     $route->addDefaults([
       '_jsonapi_resource' => CartCouponAddResource::class,
       '_jsonapi_resource_types' => $coupon_resource_types,
+    ]);
+    $parameters = $route->getOption('parameters') ?: [];
+    $parameters['commerce_order']['type'] = 'entity:commerce_order';
+    $route->setOption('parameters', $parameters);
+    return $route;
+  }
+
+    /**
+   * The cart checkout resource route.
+   *
+   * @return \Symfony\Component\Routing\Route
+   *   The route.
+   */
+  protected function cartCheckout() {
+    $route = new Route('/cart/{commerce_order}');
+    $route->addDefaults([
+      '_jsonapi_resource' => CheckoutResource::class,
     ]);
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['commerce_order']['type'] = 'entity:commerce_order';
