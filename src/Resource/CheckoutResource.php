@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\commerce_api\Resource;
 
+use Drupal\commerce_api\MetaAwareResourceObject;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\jsonapi\Entity\EntityValidationTrait;
@@ -16,8 +17,10 @@ use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\jsonapi\ResourceType\ResourceTypeAttribute;
 use Drupal\jsonapi_resources\Resource\ResourceBase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Route;
+use Symfony\Component\Validator\ConstraintViolation;
 
 final class CheckoutResource extends ResourceBase {
 
@@ -70,12 +73,34 @@ final class CheckoutResource extends ResourceBase {
     $fields = [];
     $fields['email'] = $order->getEmail();
 
-    $resource_object = new ResourceObject(
-      $cacheability,
-      $resource_type,
-      $order->uuid(),
-      NULL,
-      $fields,
+    $meta = [];
+    $violations = $order->validate();
+    if ($violations->count() > 0) {
+      $meta['constraints'] = [];
+      foreach ($violations as $violation) {
+        assert($violation instanceof ConstraintViolation);
+        $error = [];
+        $status_code = 422;
+        if (!empty(Response::$statusTexts[$status_code])) {
+          $error['title'] = Response::$statusTexts[$status_code];
+        }
+        $error += [
+          'status' => (string) $status_code,
+          'detail' => $violation->getMessage(),
+        ];
+        $error['source']['pointer'] = $violation->getPropertyPath();
+        $meta['constraints'][] = ['error' => $error];
+      }
+    }
+
+    $primary_data = [
+      'id' => $order->uuid(),
+      'attributes' => $fields,
+      'relationships' => [],
+      'meta' => $meta,
+    ];
+
+    $resource_object = MetaAwareResourceObject::createFromPrimaryData($resource_type, $primary_data,
       // Links to:
       // - GET shipping-methods,
       // - GET payment-methods,

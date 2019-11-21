@@ -48,11 +48,15 @@ function commerce_api_entity_access(EntityInterface $entity, $operation, Account
  */
 function commerce_api_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
   /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
-  if (isset($fields['coupons']) && ($entity_type->id() === 'commerce_order')) {
-    // @see https://www.drupal.org/node/3041856
-    $fields['coupons']->addConstraint('CouponValid');
+  if ($entity_type->id() === 'commerce_order') {
+    if (isset($fields['coupons'])) {
+      // @see https://www.drupal.org/node/3041856
+      $fields['coupons']->addConstraint('CouponValid');
+    }
+    $fields['order_number']->setRequired(FALSE);
+    $fields['billing_profile']->setRequired(TRUE);
   }
-  if ($entity_type->id() === 'commerce_order_item') {
+  elseif ($entity_type->id() === 'commerce_order_item') {
     // @see https://www.drupal.org/node/3088597
     $fields['purchased_entity']->addConstraint('PurchasedEntityAvailable');
 
