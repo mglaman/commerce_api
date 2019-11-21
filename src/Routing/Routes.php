@@ -300,12 +300,13 @@ class Routes implements ContainerInjectionInterface {
    *   The route.
    */
   protected function cartCheckout() {
-    $route = new Route('/cart/{commerce_order}');
+    $route = new Route('/cart/{order}/checkout');
+    $route->setMethods(['PATCH']);
     $route->addDefaults([
       '_jsonapi_resource' => CheckoutResource::class,
     ]);
     $parameters = $route->getOption('parameters') ?: [];
-    $parameters['commerce_order']['type'] = 'entity:commerce_order';
+    $parameters['order']['type'] = 'entity:commerce_order';
     $route->setOption('parameters', $parameters);
     return $route;
   }
