@@ -103,23 +103,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     static::validate($order, $field_names);
 
     $primary_data = new ResourceObjectData([$this->getResourceObjectFromOrder($order)], 1);
-    return $this->createJsonapiResponse(
-      $primary_data,
-      $request
-    );
-  }
-
-  private function getResourceObjectFromOrder(OrderInterface $order): ResourceObject {
-    $resource_type = $this->getCheckoutOrderResourceType();
-    $cacheability = new CacheableMetadata();
-    $cacheability->addCacheableDependency($order);
-
-    $fields = [];
-    $fields['email'] = $order->getEmail();
-    $shipping_profile = $this->getOrderShippingProfile($order);
-    if (!$shipping_profile->get('address')->isEmpty()) {
-      $fields['shipping_information'] = $shipping_profile->get('address')->first()->getValue();
-    }
 
     $meta = [];
     $violations = $order->validate();
@@ -137,20 +120,40 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       }
     }
 
-    $primary_data = [
-      'id' => $order->uuid(),
-      'attributes' => $fields,
-      'relationships' => [],
-      'meta' => $meta,
-    ];
-
     // Links to:
     // - GET shipping-methods,
     // - GET payment-methods,
     // - POST complete, if valid.
     $links = new LinkCollection([]);
 
-    $resource_object = MetaAwareResourceObject::createFromPrimaryData($resource_type, $primary_data, $links);
+    return $this->createJsonapiResponse(
+      $primary_data,
+      $request,
+      200,
+      [],
+      $links,
+      $meta
+    );
+  }
+
+  private function getResourceObjectFromOrder(OrderInterface $order): ResourceObject {
+    $resource_type = $this->getCheckoutOrderResourceType();
+    $cacheability = new CacheableMetadata();
+    $cacheability->addCacheableDependency($order);
+
+    $fields = [];
+    $fields['email'] = $order->getEmail();
+    $shipping_profile = $this->getOrderShippingProfile($order);
+    if (!$shipping_profile->get('address')->isEmpty()) {
+      $fields['shipping_information'] = $shipping_profile->get('address')->first()->getValue();
+    }
+
+    $primary_data = [
+      'id' => $order->uuid(),
+      'attributes' => $fields,
+      'relationships' => [],
+    ];
+    $resource_object = MetaAwareResourceObject::createFromPrimaryData($resource_type, $primary_data, new LinkCollection([]));
     return $resource_object;
   }
 

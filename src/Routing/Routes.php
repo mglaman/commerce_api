@@ -99,6 +99,7 @@ class Routes implements ContainerInjectionInterface {
     }
 
     $routes->add('commerce_api.jsonapi.cart_checkout', $this->cartCheckout());
+    $routes->add('commerce_api.jsonapi.cart_shipping_methods', $this->cartShippingMethods());
 
     // Prefix all routes with the JSON:API route prefix.
     $routes->addPrefix('/%jsonapi%');
@@ -293,7 +294,7 @@ class Routes implements ContainerInjectionInterface {
     return $route;
   }
 
-    /**
+  /**
    * The cart checkout resource route.
    *
    * @return \Symfony\Component\Routing\Route
@@ -302,6 +303,23 @@ class Routes implements ContainerInjectionInterface {
   protected function cartCheckout() {
     $route = new Route('/cart/{order}/checkout');
     $route->setMethods(['PATCH']);
+    $route->addDefaults([
+      '_jsonapi_resource' => CheckoutResource::class,
+    ]);
+    $parameters = $route->getOption('parameters') ?: [];
+    $parameters['order']['type'] = 'entity:commerce_order';
+    $route->setOption('parameters', $parameters);
+    return $route;
+  }
+  /**
+   * The cart checkout resource route.
+   *
+   * @return \Symfony\Component\Routing\Route
+   *   The route.
+   */
+  protected function cartShippingMethods() {
+    $route = new Route('/cart/{order}/shipping-methods');
+    $route->setMethods(['GET']);
     $route->addDefaults([
       '_jsonapi_resource' => CheckoutResource::class,
     ]);

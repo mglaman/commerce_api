@@ -3,12 +3,14 @@
 namespace Drupal\Tests\commerce_api\Kernel\Cart;
 
 use Drupal\commerce_api\Resource\CheckoutResource;
+use Drupal\commerce_api\Resource\ShippingMethodsResource;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderItem;
 use Drupal\commerce_order\Entity\OrderType;
 use Drupal\commerce_price\Price;
 use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\commerce_product\Entity\ProductVariationType;
+use Drupal\commerce_shipping\Entity\ShippingMethod;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceModifierInterface;
@@ -61,6 +63,8 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
    */
   protected function setUp() {
     parent::setUp();
+    $this->installEntitySchema('commerce_shipment');
+    $this->installEntitySchema('commerce_shipping_method');
     $this->installConfig(['commerce_shipping']);
     /** @var \Drupal\commerce_product\Entity\ProductVariationTypeInterface $product_variation_type */
     $product_variation_type = ProductVariationType::load('default');
@@ -107,13 +111,48 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
     assert($order instanceof Order);
     $order->save();
     $this->order = $order;
+
+    $shipping_method = ShippingMethod::create([
+      'stores' => $this->store->id(),
+      'name' => 'Example',
+      'plugin' => [
+        'target_plugin_id' => 'flat_rate',
+        'target_plugin_configuration' => [
+          'rate_label' => 'Flat rate',
+          'rate_amount' => [
+            'number' => '5',
+            'currency_code' => 'USD',
+          ],
+        ],
+      ],
+      'status' => TRUE,
+      'weight' => 1,
+    ]);
+    $shipping_method->save();
+
+    $another_shipping_method = ShippingMethod::create([
+      'stores' => $this->store->id(),
+      'name' => 'Another shipping method',
+      'plugin' => [
+        'target_plugin_id' => 'flat_rate',
+        'target_plugin_configuration' => [
+          'rate_label' => 'Flat rate',
+          'rate_amount' => [
+            'number' => '20',
+            'currency_code' => 'USD',
+          ],
+        ],
+      ],
+      'status' => TRUE,
+      'weight' => 0,
+    ]);
+    $another_shipping_method->save();
   }
 
   /**
    * @dataProvider dataDocuments
-   * @dataProvider dataShippingDocuments
    */
-  public function testRequestAndResponse(array $test_document, array $expected_document_data, array $expected_document_links) {
+  public function testRequestAndResponse(array $test_document, array $expected_document_data, array $expected_document_meta, array $expected_document_links) {
     $controller = $this->getCheckoutResourceController();
     $document['data'] = [
       'type' => 'checkout_order--checkout_order',
@@ -132,6 +171,7 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
     );
 
     $response = $this->processRequest($request, $controller);
+    file_put_contents('../example.json', $response);
 
     $decoded_document = Json::decode($response->getContent());
     if (isset($decoded_document['errors'])) {
@@ -139,6 +179,7 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
     }
     else {
       $this->assertEquals($expected_document_data, $decoded_document['data'], var_export($decoded_document['data'], TRUE));
+      $this->assertEquals($expected_document_meta, $decoded_document['meta'] ?? [], var_export($decoded_document['meta'] ?? [], TRUE));
       $this->assertEquals($expected_document_links, $decoded_document['links'], var_export($decoded_document['links'], TRUE));
     }
   }
@@ -147,7 +188,7 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
    * @dataProvider dataShippingDocuments
    */
   public function testShipping(array $test_document, array $expected_document_data, array $expected_document_links) {
-    $controller = $this->getCheckoutResourceController();
+    $checkoutResourceController = $this->getCheckoutResourceController();
     $document['data'] = [
       'type' => 'checkout_order--checkout_order',
       'id' => self::TEST_ORDER_UUID,
@@ -157,20 +198,27 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
     ];
 
     $request = $this->performMockedRequest(
-      $controller,
+      $checkoutResourceController,
       'commerce_api.jsonapi.cart_checkout',
       'https://localhost/cart/' . self::TEST_ORDER_UUID . '/checkout',
       'PATCH',
       $document
     );
-    $this->processRequest($request, $controller);
+    $this->processRequest($request, $checkoutResourceController);
+
+    $checkoutShippingMethodsController = new ShippingMethodsResource();
+    $checkoutShippingMethodsController->setResourceResponseFactory($this->container->get('jsonapi_resources.resource_response_factory'));
+    $checkoutShippingMethodsController->setResourceTypeRepository($this->container->get('jsonapi.resource_type.repository'));
 
     $request = $this->performMockedRequest(
-      $controller,
+      $checkoutShippingMethodsController,
       'commerce_api.jsonapi.cart_shipping_methods',
       'https://localhost/cart/' . self::TEST_ORDER_UUID . '/shipping-methods',
       'GET'
     );
+    $response = $this->processRequest($request, $checkoutShippingMethodsController);
+    $decoded_document = Json::decode($response->getContent());
+    $this->assertEquals($expected_document_data, $decoded_document['data'], var_export($decoded_document['data'], TRUE));
   }
 
   public function dataDocuments(): \Generator {
@@ -192,14 +240,14 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
         'attributes' => [
           'email' => 'tester@example.com',
         ],
-        'meta' => [
-          'constraints' => [
-            [
-              'error' => [
-                'detail' => 'This value should not be null.',
-                'source' => [
-                  'pointer' => 'billing_profile',
-                ],
+      ],
+      [
+        'constraints' => [
+          [
+            'error' => [
+              'detail' => 'This value should not be null.',
+              'source' => [
+                'pointer' => 'billing_profile',
               ],
             ],
           ],
@@ -223,17 +271,9 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
           ],
         ],
       ],
+      [],
       $default_links,
     ];
-  }
-
-  public function dataShippingDocuments(): \Generator {
-    $default_links = [
-      'self' => [
-        'href' => 'https://localhost/cart/' . self::TEST_ORDER_UUID . '/checkout',
-      ],
-    ];
-
     yield [
       [
         'attributes' => [
@@ -255,14 +295,14 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
             'postal_code' => '94043',
           ],
         ],
-        'meta' => [
-          'constraints' => [
-            [
-              'error' => [
-                'detail' => 'This value should not be null.',
-                'source' => [
-                  'pointer' => 'billing_profile',
-                ],
+      ],
+      [
+        'constraints' => [
+          [
+            'error' => [
+              'detail' => 'This value should not be null.',
+              'source' => [
+                'pointer' => 'billing_profile',
               ],
             ],
           ],
@@ -294,19 +334,86 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
             'postal_code' => '11111',
           ],
         ],
-        'meta' => [
-          'constraints' => [
-            [
-              'error' => [
-                'detail' => 'This value should not be null.',
-                'source' => [
-                  'pointer' => 'billing_profile',
-                ],
+      ],
+      [
+        'constraints' => [
+          [
+            'error' => [
+              'detail' => 'This value should not be null.',
+              'source' => [
+                'pointer' => 'billing_profile',
               ],
             ],
           ],
         ],
       ],
+      $default_links,
+    ];
+  }
+
+  public function dataShippingDocuments(): \Generator {
+    $default_links = [
+      'self' => [
+        'href' => 'https://localhost/cart/' . self::TEST_ORDER_UUID . '/checkout',
+      ],
+    ];
+
+    yield [
+      [
+        'attributes' => [
+          'email' => 'tester@example.com',
+          'shipping_information' => [
+            // Required to always send the country code.
+            'country_code' => 'US',
+            'postal_code' => '94043',
+          ],
+        ],
+      ],
+      [
+        [
+          'id' => '2--default',
+          'type' => 'shipping_rate_option--shipping_rate_option',
+          'attributes' => [
+            'label' => 'Flat rate: $20.00',
+            'methodId' => '2',
+            'rate' => [
+              'rateId' => '0',
+              'amount' => [
+                'number' => '20',
+                'currency_code' => 'USD',
+              ],
+              'deliveryDate' => NULL,
+              'terms' => NULL,
+            ],
+            'service' => [
+              'serviceId' => 'default',
+              'label' => 'Flat rate',
+            ],
+          ],
+        ],
+        [
+          'id' => '1--default',
+          'type' => 'shipping_rate_option--shipping_rate_option',
+          'attributes' => [
+            'label' => 'Flat rate: $5.00',
+            'methodId' => '1',
+            'rate' => [
+              'rateId' => '0',
+              'amount' => [
+                'number' => '5',
+                'currency_code' => 'USD',
+              ],
+              'deliveryDate' => NULL,
+              'terms' => NULL,
+            ],
+            'service' => [
+              'serviceId' => 'default',
+              'label' => 'Flat rate',
+            ],
+          ],
+        ],
+      ],
+      [],
       $default_links,
     ];
   }
