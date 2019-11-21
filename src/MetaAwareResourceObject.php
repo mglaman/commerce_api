@@ -35,7 +35,7 @@ final class MetaAwareResourceObject extends ResourceObject {
   public static function createFromPrimaryData(ResourceType $resource_type, array $primary_data, LinkCollection $links) {
     $id = $primary_data['id'];
     $fields = array_merge($primary_data['attributes'] ?? [], $primary_data['relationships'] ?? [], []);
-    return new self(new CacheableMetadata(), $resource_type, $id, NULL, $fields, $links);
+    return new self(new CacheableMetadata(), $resource_type, $id, NULL, $fields, $links, $primary_data['meta'] ?? []);
   }
 
 }
