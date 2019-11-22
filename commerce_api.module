@@ -36,7 +36,7 @@ function commerce_api_entity_access(EntityInterface $entity, $operation, Account
     $cart_session = \Drupal::getContainer()->get('commerce_cart.cart_provider');
     if ($operation === 'view') {
       $cart_ids = $cart_session->getCartIds($account);
-      $result =  AccessResult::allowedIf(in_array((int) $entity->id(), $cart_ids, TRUE));
+      $result = AccessResult::allowedIf(in_array((int) $entity->id(), $cart_ids, TRUE));
       return $result;
     }
   }
@@ -101,6 +101,11 @@ function commerce_api_entity_base_field_info(EntityTypeInterface $entity_type) {
   return [];
 }
 
+/**
+ * Implements hook_openapi_generator_alter().
+ *
+ * Prevents Cart API resources from crashing OpenAPI.
+ */
 function commerce_api_openapi_generator_alter(array &$definitions) {
   if (isset($definitions['jsonapi'])) {
     $definitions['jsonapi']['class'] = AdjustedJsonApiGenerator::class;

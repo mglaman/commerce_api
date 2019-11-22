@@ -20,6 +20,7 @@ use Drupal\jsonapi_resources\Unstable\Controller\ArgumentResolver\DocumentResolv
 use Drupal\Tests\commerce_api\Kernel\KernelTestBase;
 use Symfony\Cmf\Component\Routing\RouteObjectInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -36,12 +37,17 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
 
   private const TEST_ORDER_UUID = 'd59cd06e-c674-490d-aad9-541a1625e47f';
 
+  /**
+   * {@inheritdoc}
+   */
   public static $modules = [
     'physical',
     'commerce_shipping',
   ];
 
   /**
+   * The test order.
+   *
    * @var \Drupal\commerce_order\Entity\OrderInterface
    */
   private $order;
@@ -147,10 +153,12 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
   }
 
   /**
+   * Tests checkout PATCH requests.
+   *
    * @dataProvider dataDocuments
    */
   public function testRequestAndResponse(array $test_document, array $expected_document_data, array $expected_document_meta, array $expected_document_links) {
-    $controller = $this->getCheckoutResourceController();
+    $controller = $this->getCheckoutResource();
     $document['data'] = [
       'type' => 'checkout_order--checkout_order',
       'id' => self::TEST_ORDER_UUID,
@@ -168,7 +176,6 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
     );
 
     $response = $this->processRequest($request, $controller);
-    file_put_contents('../example.json', $response);
 
     $decoded_document = Json::decode($response->getContent());
     if (isset($decoded_document['errors'])) {
@@ -182,10 +189,12 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
   }
 
   /**
+   * Tests using checkout with shipping options.
+   *
    * @dataProvider dataShippingDocuments
    */
-  public function testShipping(array $test_document, array $expected_document_data, array $expected_document_links) {
-    $checkoutResourceController = $this->getCheckoutResourceController();
+  public function testShipping(array $test_document, array $expected_document_data) {
+    $checkoutResourceController = $this->getCheckoutResource();
     $document['data'] = [
       'type' => 'checkout_order--checkout_order',
       'id' => self::TEST_ORDER_UUID,
@@ -216,8 +225,17 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
     $response = $this->processRequest($request, $checkoutShippingMethodsController);
     $decoded_document = Json::decode($response->getContent());
     $this->assertEquals($expected_document_data, $decoded_document['data'], var_export($decoded_document['data'], TRUE));
+
+    // @todo add a 3rd param for selecting the rate and PATCH the option.
+    // use that response and assert shipping is selected.
   }
 
+  /**
+   * Test documents for PATCHing checkout.
+   *
+   * @return \Generator
+   *   The test data.
+   */
   public function dataDocuments(): \Generator {
     $default_links = [
       'self' => [
@@ -241,7 +259,7 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
       [
         'constraints' => [
           [
-            'error' => [
+            'required' => [
               'detail' => 'This value should not be null.',
               'source' => [
                 'pointer' => 'billing_profile',
@@ -296,7 +314,7 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
       [
         'constraints' => [
           [
-            'error' => [
+            'required' => [
               'detail' => 'This value should not be null.',
               'source' => [
                 'pointer' => 'billing_profile',
@@ -335,7 +353,7 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
       [
         'constraints' => [
           [
-            'error' => [
+            'required' => [
               'detail' => 'This value should not be null.',
               'source' => [
                 'pointer' => 'billing_profile',
@@ -348,6 +366,12 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
     ];
   }
 
+  /**
+   * Test data containing shipping requests for checkout.
+   *
+   * @return \Generator
+   *   The test data.
+   */
   public function dataShippingDocuments(): \Generator {
     $default_links = [
       'self' => [
@@ -415,20 +439,15 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
     ];
   }
 
-  private function getResolvedDocument(Request $request) {
-    $document_resolver = $this->container->get('jsonapi_resources.argument_resolver.document');
-    assert($document_resolver instanceof DocumentResolver);
-    $argument_metadata = $this->prophesize(ArgumentMetadata::class);
-    $args = [];
-    foreach ($document_resolver->resolve($request, $argument_metadata->reveal()) as $item) {
-      $args[] = $item;
-    }
-    $resolved_document = reset($args);
-    assert($resolved_document instanceof JsonApiDocumentTopLevel, gettype($resolved_document));
-    return $resolved_document;
-  }
-
-  private function getCheckoutResourceController(): CheckoutResource {
+  /**
+   * Gets the checkout resource.
+   *
+   * @return \Drupal\commerce_api\Resource\CheckoutResource
+   *   The resource.
+   *
+   * @throws \Exception
+   */
+  private function getCheckoutResource(): CheckoutResource {
     $controller = new CheckoutResource(
       $this->container->get('entity_type.manager'),
       $this->container->get('entity_type.bundle.info')
@@ -438,20 +457,52 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
     return $controller;
   }
 
-  private function performMockedRequest(ResourceBase $controller, string $route_name, string $uri, string $method, array $document = []) {
+  /**
+   * Perform a mock request and return the request pushed to the stack.
+   *
+   * @param \Drupal\jsonapi_resources\Resource\ResourceBase $resource
+   *   The resource.
+   * @param string $route_name
+   *   The route name.
+   * @param string $uri
+   *   The uri.
+   * @param string $method
+   *   The method.
+   * @param array $document
+   *   The document.
+   *
+   * @return \Symfony\Component\HttpFoundation\Request
+   *   The request.
+   *
+   * @throws \Exception
+   */
+  private function performMockedRequest(ResourceBase $resource, string $route_name, string $uri, string $method, array $document = []): Request {
     $request = Request::create($uri, $method, [], [], [], [], $document ? Json::encode($document) : NULL);
 
     $route = $this->container->get('router')->getRouteCollection()->get($route_name);
     $request->attributes->set('_format', 'api_json');
     $request->attributes->set(RouteObjectInterface::ROUTE_OBJECT, $route);
-    $resource_types = $controller->getRouteResourceTypes($route, $route_name);
+    $resource_types = $resource->getRouteResourceTypes($route, $route_name);
     $request->attributes->set('resource_types', $resource_types);
     $this->container->get('request_stack')->push($request);
 
     return $request;
   }
 
-  private function processRequest(Request $request, ResourceBase $controller) {
+  /**
+   * Process the request with the resource controller.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   * @param \Drupal\jsonapi_resources\Resource\ResourceBase $controller
+   *   The resource.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
+   *
+   * @throws \Exception
+   */
+  private function processRequest(Request $request, ResourceBase $controller): Response {
     try {
       if ($request->getMethod() !== 'GET') {
         $resolved_document = $this->getResolvedDocument($request);
@@ -470,6 +521,32 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
     $filter_response_event = new FilterResponseEvent($this->container->get('kernel'), $request, HttpKernelInterface::MASTER_REQUEST, $response);
     $this->container->get('jsonapi.resource_response.subscriber')->onResponse($filter_response_event);
     return $filter_response_event->getResponse();
+  }
+
+  /**
+   * Gets the resolved document from the request.
+   *
+   * This resolves the document argument for processing the request.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   *
+   * @return \Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel
+   *   The top level document.
+   *
+   * @throws \Exception
+   */
+  private function getResolvedDocument(Request $request) {
+    $document_resolver = $this->container->get('jsonapi_resources.argument_resolver.document');
+    assert($document_resolver instanceof DocumentResolver);
+    $argument_metadata = $this->prophesize(ArgumentMetadata::class);
+    $args = [];
+    foreach ($document_resolver->resolve($request, $argument_metadata->reveal()) as $item) {
+      $args[] = $item;
+    }
+    $resolved_document = reset($args);
+    assert($resolved_document instanceof JsonApiDocumentTopLevel, gettype($resolved_document));
+    return $resolved_document;
   }
 
 }

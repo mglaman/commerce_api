@@ -1,15 +1,12 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace Drupal\commerce_api\Resource;
 
-use Drupal\commerce_api\MetaAwareResourceObject;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Entity\EntityTypeBundleInfo;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\jsonapi\Entity\EntityValidationTrait;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
@@ -31,6 +28,11 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
 
   use EntityValidationTrait;
 
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
   private $entityTypeManager;
 
   /**
@@ -40,11 +42,22 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    */
   private $entityTypeBundleInfo;
 
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfo $entity_type_bundle_info) {
-    $this->entityTypeManager = $entityTypeManager;
+  /**
+   * CheckoutResource constructor.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   *   The entity type bundle info.
+   */
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
+    $this->entityTypeManager = $entity_type_manager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public static function create(ContainerInterface $container) {
     return new self(
       $container->get('entity_type.manager'),
@@ -67,6 +80,8 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   public function process(Request $request, OrderInterface $order, JsonApiDocumentTopLevel $document): ResourceResponse {
     $data = $document->getData();
@@ -77,10 +92,15 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     assert($resource_object instanceof ResourceObject);
 
     $field_names = [];
+    // If the `email` fiel was provided, set it on the order.
     if ($resource_object->hasField('email')) {
       $field_names[] = 'mail';
       $order->setEmail($resource_object->getField('email'));
     }
+
+    // If shipping information was provided, do Shipping stuff.
+    // @todo this is 😱😭.
+    // @todo https://www.drupal.org/project/commerce_shipping/issues/3096130
     if ($resource_object->hasField('shipping_information')) {
       $field_names[] = 'shipments';
       $shipping_information = $resource_object->getField('shipping_information');
@@ -100,23 +120,29 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       }
     }
 
+    // Validate the provided fields, which will throw 422 if invalid.
+    // HOWEVER! It doesn't recursively validate referenced entities. So it will
+    // validate `shipments` has valid values, but not the shipments. And then
+    // it will only validate shipping_profile is a valid reference, but not its
+    // address.
+    // @todo investigate recursive/nested validation? 🤔
     static::validate($order, $field_names);
 
     $primary_data = new ResourceObjectData([$this->getResourceObjectFromOrder($order)], 1);
 
     $meta = [];
-    $violations = $order->validate();
-
-    $violations->filterByFieldAccess();
+    $violations = $order->validate()->filterByFieldAccess();
     if ($violations->count() > 0) {
       $meta['constraints'] = [];
       foreach ($violations as $violation) {
         assert($violation instanceof ConstraintViolation);
-        $error = [
+        $required = [
           'detail' => $violation->getMessage(),
+          'source' => [
+            'pointer' => $violation->getPropertyPath(),
+          ],
         ];
-        $error['source']['pointer'] = $violation->getPropertyPath();
-        $meta['constraints'][] = ['error' => $error];
+        $meta['constraints'][] = ['required' => $required];
       }
     }
 
@@ -136,6 +162,19 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     );
   }
 
+  /**
+   * Get the checkout order resource object.
+   *
+   * @param \Drupal\commerce_order\Entity\OrderInterface $order
+   *   The order.
+   *
+   * @return \Drupal\jsonapi\JsonApiResource\ResourceObject
+   *   The resource object.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
+   */
   private function getResourceObjectFromOrder(OrderInterface $order): ResourceObject {
     $resource_type = $this->getCheckoutOrderResourceType();
     $cacheability = new CacheableMetadata();
@@ -144,6 +183,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $fields = [];
     $fields['email'] = $order->getEmail();
     $shipping_profile = $this->getOrderShippingProfile($order);
+    assert($shipping_profile instanceof ProfileInterface);
     if (!$shipping_profile->get('address')->isEmpty()) {
       $fields['shipping_information'] = $shipping_profile->get('address')->first()->getValue();
     }
@@ -158,15 +198,21 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     );
   }
 
+  /**
+   * Get the checkout order resource type.
+   *
+   * This is the custom resource type used for this resource.
+   *
+   * @return \Drupal\jsonapi\ResourceType\ResourceType
+   *   The resource type.
+   */
   private function getCheckoutOrderResourceType(): ResourceType {
     $fields = [];
     $fields['email'] = new ResourceTypeAttribute('email', 'email');
-    $fields['shipping_information'] = new ResourceTypeAttribute('shipping_information',
-      NULL, TRUE, FALSE);
-    $fields['billing_information'] = new ResourceTypeAttribute('billing_information',
-      NULL, TRUE, FALSE);
-    $fields['payment_instrument'] = new ResourceTypeAttribute('payment_instrument',
-      NULL, TRUE, FALSE);
+    // @todo add a shipping rate field.
+    $fields['shipping_information'] = new ResourceTypeAttribute('shipping_information', NULL, TRUE, FALSE);
+    $fields['billing_information'] = new ResourceTypeAttribute('billing_information', NULL, TRUE, FALSE);
+    $fields['payment_instrument'] = new ResourceTypeAttribute('payment_instrument', NULL, TRUE, FALSE);
 
     $resource_type = new ResourceType(
       'checkout_order',
@@ -189,7 +235,19 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     return [$this->getCheckoutOrderResourceType()];
   }
 
-  private function getOrderShippingProfile(OrderInterface $order) {
+  /**
+   * Get the order's shipping profile.
+   *
+   * @param \Drupal\commerce_order\Entity\OrderInterface $order
+   *   The order.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface|\Drupal\profile\Entity\ProfileInterface
+   *   The profile.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  private function getOrderShippingProfile(OrderInterface $order): ProfileInterface {
     $shipping_profile = NULL;
     /** @var \Drupal\commerce_shipping\Entity\ShipmentInterface $shipment */
     foreach ($order->get('shipments')->referencedEntities() as $shipment) {

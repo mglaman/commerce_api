@@ -1,20 +1,22 @@
 {
-  "name": "drupal/commerce_api",
-  "type": "drupal-module",
-  "description": "Provides an HTTP interface to interact with Drupal Commerce.",
-  "keywords": ["Drupal"],
-  "license": "GPL-2.0+",
-  "homepage": "https://www.drupal.org/project/commerce_api",
-  "minimum-stability": "dev",
-  "support": {
-    "issues": "https://www.drupal.org/project/issues/commerce_api",
-    "source": "http://cgit.drupalcode.org/commerce_api"
-  },
-  "require": {
-      "drupal/commerce": "^2.15",
-      "drupal/jsonapi_resources": "^1.0@beta",
-      "drupal/core": "^8.8@alpha"
-  },
+    "name": "drupal/commerce_api",
+    "type": "drupal-module",
+    "description": "Provides an HTTP interface to interact with Drupal Commerce.",
+    "keywords": [
+        "Drupal"
+    ],
+    "license": "GPL-2.0+",
+    "homepage": "https://www.drupal.org/project/commerce_api",
+    "minimum-stability": "dev",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/commerce_api",
+        "source": "http://cgit.drupalcode.org/commerce_api"
+    },
+    "require": {
+        "drupal/commerce": "^2.15",
+        "drupal/jsonapi_resources": "^1.0@beta",
+        "drupal/core": "^8.8@alpha"
+    },
     "extra": {
         "patches": {
             "drupal/commerce_shipping": {
