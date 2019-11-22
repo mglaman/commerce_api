@@ -148,13 +148,14 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $fields['shipping_information'] = $shipping_profile->get('address')->first()->getValue();
     }
 
-    $primary_data = [
-      'id' => $order->uuid(),
-      'attributes' => $fields,
-      'relationships' => [],
-    ];
-    $resource_object = MetaAwareResourceObject::createFromPrimaryData($resource_type, $primary_data, new LinkCollection([]));
-    return $resource_object;
+    return new ResourceObject(
+      new CacheableMetadata(),
+      $resource_type,
+      $order->uuid(),
+      NULL,
+      $fields,
+      new LinkCollection([])
+    );
   }
 
   private function getCheckoutOrderResourceType(): ResourceType {

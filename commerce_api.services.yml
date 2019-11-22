@@ -33,11 +33,3 @@ services:
     class: Drupal\commerce_api\AvailabilityChecker\PublishedAvailabilityChecker
     tags:
       - { name: commerce.availability_checker }
-
-  commerce_api.normalizer.decorated_resource_object_normalizer:
-    class: Drupal\jsonapi\Normalizer\JsonapiImpostor\DecoratedResourceObjectNormalizer
-    decorates: serializer.normalizer.resource_object.jsonapi
-    parent: serializer.normalizer.resource_object.jsonapi
-  # This tag is commented out because it breaks the namespace impostor workaround. However, this tag is manually replicated in the JsonApiHypermediaServiceProvider.
-  # tags:
-  #   - { name: service_collector, tag: jsonapi_hypermedia_provider, call: addHypermediaProvider }

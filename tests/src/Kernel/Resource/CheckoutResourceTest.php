@@ -14,7 +14,6 @@ use Drupal\commerce_shipping\Entity\ShippingMethod;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceModifierInterface;
-use Drupal\Core\Url;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
 use Drupal\jsonapi_resources\Resource\ResourceBase;
 use Drupal\jsonapi_resources\Unstable\Controller\ArgumentResolver\DocumentResolver;
@@ -34,8 +33,6 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  * @requires commerce_shipping
  */
 final class CheckoutResourceTest extends KernelTestBase implements ServiceModifierInterface {
-
-//  protected $runTestInSeparateProcess = FALSE;
 
   private const TEST_ORDER_UUID = 'd59cd06e-c674-490d-aad9-541a1625e47f';
 

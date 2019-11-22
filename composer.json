@@ -14,5 +14,12 @@
       "drupal/commerce": "^2.15",
       "drupal/jsonapi_resources": "^1.0@beta",
       "drupal/core": "^8.8@alpha"
-  }
+  },
+    "extra": {
+        "patches": {
+            "drupal/commerce_shipping": {
+                "ShippingRateOptions": "https://www.drupal.org/files/issues/2019-11-19/commerce_shipping-3095420-3.patch"
+            }
+        }
+    }
 }
