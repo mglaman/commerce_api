@@ -8,8 +8,10 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Url;
 use Drupal\jsonapi\Entity\EntityValidationTrait;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
+use Drupal\jsonapi\JsonApiResource\Link;
 use Drupal\jsonapi\JsonApiResource\LinkCollection;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Drupal\jsonapi\JsonApiResource\ResourceObjectData;
@@ -150,14 +152,20 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     // - GET shipping-methods,
     // - GET payment-methods,
     // - POST complete, if valid.
-    $links = new LinkCollection([]);
+    $link_collection = new LinkCollection([]);
+    if (!$order->get('shipments')->isEmpty()) {
+      $link = new Link(new CacheableMetadata(), Url::fromRoute('commerce_api.jsonapi.cart_shipping_methods', [
+        'order' => $order->uuid(),
+      ]), 'shipping-methods');
+      $link_collection->withLink('shipping-methods', $link);
+    }
 
     return $this->createJsonapiResponse(
       $primary_data,
       $request,
       200,
       [],
-      $links,
+      $link_collection,
       $meta
     );
   }
