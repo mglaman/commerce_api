@@ -115,33 +115,9 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $this->repackOrderShipments($order, $shipping_profile);
     }
 
+    // Again this is 😱.
     if ($resource_object->hasField('shipping_method')) {
-      list($shipping_method_id, $shipping_service_id) = explode('--', $resource_object->getField('shipping_method'));
-      $shipments = $order->get('shipments')->referencedEntities();
-      foreach ($shipments as $shipment) {
-        assert($shipment instanceof ShipmentInterface);
-        $shipment->setShippingMethodId($shipping_method_id);
-        $shipment->setShippingService($shipping_service_id);
-
-        $shipping_method_storage = $this->entityTypeManager->getStorage('commerce_shipping_method');
-        /** @var \Drupal\commerce_shipping\Entity\ShippingMethodInterface $shipping_method */
-        $shipping_method = $shipping_method_storage->load($shipping_method_id);
-        $shipping_method_plugin = $shipping_method->getPlugin();
-        if ($shipment->getPackageType() === NULL) {
-          $shipment->setPackageType($shipping_method_plugin->getDefaultPackageType());
-        }
-        $rates = $shipping_method_plugin->calculateRates($shipment);
-        $select_rate = array_reduce($rates, function (ShippingRate $carry, ShippingRate $shippingRate) use ($shipping_service_id) {
-          if ($shippingRate->getService()->getId() === $shipping_service_id) {
-            return $shippingRate;
-          }
-          return $carry;
-        }, reset($rates));
-        $shipping_method_plugin->selectRate($shipment, $select_rate);
-
-        static::validate($shipment, ['shipping_method', 'shipping_service']);
-        $shipment->save();
-      }
+      $this->applyShippingRateToShipments($order, $resource_object->getField('shipping_method'));
     }
 
     // Validate the provided fields, which will throw 422 if invalid.
@@ -151,6 +127,10 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     // address.
     // @todo investigate recursive/nested validation? 🤔
     static::validate($order, $field_names);
+    $shipments = $order->get('shipments')->referencedEntities();
+    foreach ($shipments as $shipment) {
+      $shipment->save();
+    }
     $order->save();
 
     $primary_data = new ResourceObjectData([$this->getResourceObjectFromOrder($order)], 1);
@@ -173,12 +153,40 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     return $this->createJsonapiResponse($primary_data, $request, 200, [], $link_collection, $meta);
   }
 
+  private function applyShippingRateToShipments(OrderInterface $order, string $shipping_rate_option_id) {
+    list($shipping_method_id, $shipping_service_id) = explode('--', $shipping_rate_option_id);
+    $shipments = $order->get('shipments')->referencedEntities();
+    $shipping_method_storage = $this->entityTypeManager->getStorage('commerce_shipping_method');
+    /** @var \Drupal\commerce_shipping\Entity\ShippingMethodInterface $shipping_method */
+    $shipping_method = $shipping_method_storage->load($shipping_method_id);
+    $shipping_method_plugin = $shipping_method->getPlugin();
+
+    foreach ($shipments as $shipment) {
+      assert($shipment instanceof ShipmentInterface);
+      $shipment->setShippingMethodId($shipping_method_id);
+      if ($shipment->getPackageType() === NULL) {
+        $shipment->setPackageType($shipping_method_plugin->getDefaultPackageType());
+      }
+      $rates = $shipping_method_plugin->calculateRates($shipment);
+      $select_rate = array_reduce($rates, static function (ShippingRate $carry, ShippingRate $shippingRate) use ($shipping_service_id) {
+        if ($shippingRate->getService()->getId() === $shipping_service_id) {
+          return $shippingRate;
+        }
+        return $carry;
+      }, reset($rates));
+      $shipping_method_plugin->selectRate($shipment, $select_rate);
+      static::validate($shipment, ['shipping_method', 'shipping_service']);
+      $shipment->save();
+    }
+  }
+
   private function repackOrderShipments(OrderInterface $order, ProfileInterface $shipping_profile) {
     $shipments = $order->get('shipments')->referencedEntities();
     list($shipments, $removed_shipments) = \Drupal::getContainer()->get('commerce_shipping.packer_manager')->packToShipments($order, $shipping_profile, $shipments);
     foreach ($shipments as $shipment) {
       assert($shipment instanceof ShipmentInterface);
       $shipment->setShippingProfile($shipping_profile);
+      $shipment->save();
     }
     $order->set('shipments', $shipments);
     foreach ($removed_shipments as $shipment) {
@@ -217,7 +225,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   private function getResourceObjectFromOrder(OrderInterface $order): ResourceObject {
-    // for some reason adjustments after refresh are not available unless
+    // For some reason adjustments after refresh are not available unless
     // we reload here. same with saved shipment data. Something is screwing
     // with the references.
     $order = $this->entityTypeManager->getStorage('commerce_order')->load($order->id());
@@ -238,7 +246,9 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     if (!$shipments->isEmpty()) {
       $shipment = $shipments->first()->entity;
       assert($shipment instanceof ShipmentInterface);
-      $fields['shipping_method'] = $shipment->getShippingMethodId() . '--' . $shipment->getShippingService();
+      if ($shipment->getShippingMethodId() !== NULL) {
+        $fields['shipping_method'] = $shipment->getShippingMethodId() . '--' . $shipment->getShippingService();
+      }
     }
 
     $fields['order_total'] = $order->get('order_total')->first()->getValue();
