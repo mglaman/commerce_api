@@ -89,6 +89,14 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
             ],
           ],
         ],
+        [
+          'required' => [
+            'detail' => 'This value should not be null.',
+            'source' => [
+              'pointer' => 'shipping_information',
+            ],
+          ],
+        ],
       ),
     ];
     yield [

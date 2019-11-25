@@ -196,6 +196,13 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
 
   private function addMetaRequiredConstraints(array &$meta, OrderInterface $order): void {
     $violations = $order->validate()->filterByFieldAccess();
+
+    if ($this->getOrderShippingProfile($order)->isNew()) {
+      $violations->add(
+        new ConstraintViolation('This value should not be null.', '', [], 'test', 'shipping_information', NULL)
+      );
+    }
+
     if ($violations->count() > 0) {
       $meta['constraints'] = [];
       foreach ($violations as $violation) {
