@@ -103,6 +103,22 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $order->setEmail($resource_object->getField('email'));
     }
 
+    if ($resource_object->hasField('billing_information')) {
+      // @todo cannot validate entity reference, due to access.
+      // @see 'billing_profile.0.target_id: This entity (profile: 1) cannot be referenced.
+      // $field_names[] = 'billing_profile';
+      $billing_information = $resource_object->getField('billing_information');
+      $billing_profile = $order->getBillingProfile() ?: $this->entityTypeManager->getStorage('profile')->create([
+        'type' => 'customer',
+        'uid' => 0,
+      ]);
+      assert($billing_profile instanceof ProfileInterface);
+      // @todo allow partial constraint validation?
+      $billing_profile->set('address', $billing_information);
+      $billing_profile->save();
+      $order->setBillingProfile($billing_profile);
+    }
+
     // If shipping information was provided, do Shipping stuff.
     // @todo this is 😱😭.
     // @todo https://www.drupal.org/project/commerce_shipping/issues/3096130
@@ -110,6 +126,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $field_names[] = 'shipments';
       $shipping_information = $resource_object->getField('shipping_information');
       $shipping_profile = $this->getOrderShippingProfile($order);
+      // @todo allow partial constraint validation?
       $shipping_profile->set('address', $shipping_information);
       $shipping_profile->save();
       $this->repackOrderShipments($order, $shipping_profile);

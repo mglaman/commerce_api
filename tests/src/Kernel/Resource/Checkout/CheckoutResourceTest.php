@@ -81,6 +81,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           ],
         ],
       ],
+      [
         [
           'required' => [
             'detail' => 'This value should not be null.',
@@ -97,6 +98,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
             ],
           ],
         ],
+      ]
       ),
     ];
     yield [
@@ -156,10 +158,12 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         ],
       ],
         [
-          'required' => [
-            'detail' => 'This value should not be null.',
-            'source' => [
-              'pointer' => 'billing_profile',
+          [
+            'required' => [
+              'detail' => 'This value should not be null.',
+              'source' => [
+                'pointer' => 'billing_profile',
+              ],
             ],
           ],
         ],
@@ -202,10 +206,12 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         ],
       ],
         [
-          'required' => [
-            'detail' => 'This value should not be null.',
-            'source' => [
-              'pointer' => 'billing_profile',
+          [
+            'required' => [
+              'detail' => 'This value should not be null.',
+              'source' => [
+                'pointer' => 'billing_profile',
+              ],
             ],
           ],
         ],
@@ -264,10 +270,12 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         ],
       ],
         [
-          'required' => [
-            'detail' => 'This value should not be null.',
-            'source' => [
-              'pointer' => 'billing_profile',
+          [
+            'required' => [
+              'detail' => 'This value should not be null.',
+              'source' => [
+                'pointer' => 'billing_profile',
+              ],
             ],
           ],
         ],
@@ -340,14 +348,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           ],
         ],
       ],
-        [
-          'required' => [
-            'detail' => 'This value should not be null.',
-            'source' => [
-              'pointer' => 'billing_profile',
-            ],
-          ],
-        ],
+        NULL,
         [
           'shipping-methods' => [
             'href' => 'http://localhost/jsonapi/cart/' . self::TEST_ORDER_UUID . '/shipping-methods',

@@ -257,7 +257,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
   }
 
   protected function buildResponseJsonApiDocument(array $attributes, ?array $constraints, array $links = []) {
-    return [
+    $document = [
       'jsonapi' => [
         'meta' => [
           'links' => [
@@ -272,14 +272,18 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
         'attributes' => $attributes,
       ],
       'meta' => [
-        'constraints' => [$constraints],
+        'constraints' => $constraints,
       ],
       'links' => [
-          'self' => [
-            'href' => 'https://localhost/cart/' . self::TEST_ORDER_UUID . '/checkout',
-          ],
-        ] + $links,
+        'self' => [
+          'href' => 'https://localhost/cart/' . self::TEST_ORDER_UUID . '/checkout',
+        ],
+      ] + $links,
     ];
+    if ($constraints === NULL) {
+      unset($document['meta']);
+    }
+    return $document;
   }
 
 }
