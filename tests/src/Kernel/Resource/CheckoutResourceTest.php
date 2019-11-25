@@ -37,6 +37,8 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
 
   private const TEST_ORDER_UUID = 'd59cd06e-c674-490d-aad9-541a1625e47f';
 
+//  protected $runTestInSeparateProcess = FALSE;
+
   /**
    * {@inheritdoc}
    */
@@ -193,7 +195,7 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
    *
    * @dataProvider dataShippingDocuments
    */
-  public function testShipping(array $test_document, array $expected_document_data) {
+  public function testShipping(array $test_document, array $expected_shipping_methods, string $shipping_method, array $expected_order_document) {
     $checkoutResourceController = $this->getCheckoutResource();
     $document['data'] = [
       'type' => 'checkout_order--checkout_order',
@@ -224,10 +226,26 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
     );
     $response = $this->processRequest($request, $checkoutShippingMethodsController);
     $decoded_document = Json::decode($response->getContent());
-    $this->assertEquals($expected_document_data, $decoded_document['data'], var_export($decoded_document['data'], TRUE));
+    $this->assertEquals($expected_shipping_methods, $decoded_document['data'], var_export($decoded_document['data'], TRUE));
 
-    // @todo add a 3rd param for selecting the rate and PATCH the option.
-    // use that response and assert shipping is selected.
+    $document['data'] = [
+      'type' => 'checkout_order--checkout_order',
+      'id' => self::TEST_ORDER_UUID,
+      'attributes' => [
+        'shipping_method' => $shipping_method,
+      ],
+    ];
+
+    $request = $this->performMockedRequest(
+      $checkoutResourceController,
+      'commerce_api.jsonapi.cart_checkout',
+      'https://localhost/cart/' . self::TEST_ORDER_UUID . '/checkout',
+      'PATCH',
+      $document
+    );
+    $response = $this->processRequest($request, $checkoutResourceController);
+    $decoded_document = Json::decode($response->getContent());
+    $this->assertEquals($expected_order_document, $decoded_document['data'], var_export($decoded_document['data'], TRUE));
   }
 
   /**
@@ -323,7 +341,11 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
           ],
         ],
       ],
-      $default_links,
+      $default_links + [
+        'shipping-methods' => [
+          'href' => 'http://localhost/jsonapi/cart/' . self::TEST_ORDER_UUID . '/shipping-methods',
+        ],
+      ],
     ];
     yield [
       [
@@ -362,7 +384,11 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
           ],
         ],
       ],
-      $default_links,
+      $default_links + [
+        'shipping-methods' => [
+          'href' => 'http://localhost/jsonapi/cart/' . self::TEST_ORDER_UUID . '/shipping-methods',
+        ],
+      ],
     ];
   }
 
@@ -373,12 +399,6 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
    *   The test data.
    */
   public function dataShippingDocuments(): \Generator {
-    $default_links = [
-      'self' => [
-        'href' => 'https://localhost/cart/' . self::TEST_ORDER_UUID . '/checkout',
-      ],
-    ];
-
     yield [
       [
         'attributes' => [
@@ -434,8 +454,47 @@ final class CheckoutResourceTest extends KernelTestBase implements ServiceModifi
           ],
         ],
       ],
-      [],
-      $default_links,
+      '2--default',
+      [
+        'id' => self::TEST_ORDER_UUID,
+        'type' => 'checkout_order--checkout_order',
+        'attributes' => [
+          'email' => 'tester@example.com',
+          'shipping_information' => [
+            'country_code' => 'US',
+            'postal_code' => '94043',
+          ],
+          'shipping_method' => '2--default',
+          'order_total' => [
+            'subtotal' => [
+              'number' => '4.0',
+              'currency_code' => 'USD',
+            ],
+            'adjustments' => [
+              [
+                'type' => 'shipping',
+                'label' => 'Shipping',
+                'amount' => [
+                  'number' => '20.00',
+                  'currency_code' => 'USD',
+                ],
+                'percentage' => NULL,
+                'source_id' => 1,
+                'included' => FALSE,
+                'locked' => FALSE,
+                'total' => [
+                  'number' => '20.00',
+                  'currency_code' => 'USD',
+                ],
+              ],
+            ],
+            'total' => [
+              'number' => '24.0',
+              'currency_code' => 'USD',
+            ],
+          ],
+        ],
+      ],
     ];
   }
 

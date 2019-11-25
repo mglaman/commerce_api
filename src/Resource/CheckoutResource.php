@@ -4,10 +4,12 @@ namespace Drupal\commerce_api\Resource;
 
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
+use Drupal\commerce_shipping\ShippingRate;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\Core\Url;
 use Drupal\jsonapi\Entity\EntityValidationTrait;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
@@ -18,6 +20,7 @@ use Drupal\jsonapi\JsonApiResource\ResourceObjectData;
 use Drupal\jsonapi\ResourceResponse;
 use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\jsonapi\ResourceType\ResourceTypeAttribute;
+use Drupal\jsonapi\ResourceType\ResourceTypeRelationship;
 use Drupal\jsonapi_resources\Resource\ResourceBase;
 use Drupal\profile\Entity\ProfileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -107,18 +110,37 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $field_names[] = 'shipments';
       $shipping_information = $resource_object->getField('shipping_information');
       $shipping_profile = $this->getOrderShippingProfile($order);
-      assert($shipping_profile instanceof ProfileInterface);
       $shipping_profile->set('address', $shipping_information);
+      $shipping_profile->save();
+      $this->repackOrderShipments($order, $shipping_profile);
+    }
+
+    if ($resource_object->hasField('shipping_method')) {
+      list($shipping_method_id, $shipping_service_id) = explode('--', $resource_object->getField('shipping_method'));
       $shipments = $order->get('shipments')->referencedEntities();
-      list($shipments, $removed_shipments) = \Drupal::getContainer()->get('commerce_shipping.packer_manager')->packToShipments($order, $shipping_profile, $shipments);
       foreach ($shipments as $shipment) {
         assert($shipment instanceof ShipmentInterface);
-        $shipment->setShippingProfile($shipping_profile);
-        static::validate($shipment, ['shipping_profile']);
-      }
-      $order->set('shipments', $shipments);
-      foreach ($removed_shipments as $shipment) {
-        $shipment->delete();
+        $shipment->setShippingMethodId($shipping_method_id);
+        $shipment->setShippingService($shipping_service_id);
+
+        $shipping_method_storage = $this->entityTypeManager->getStorage('commerce_shipping_method');
+        /** @var \Drupal\commerce_shipping\Entity\ShippingMethodInterface $shipping_method */
+        $shipping_method = $shipping_method_storage->load($shipping_method_id);
+        $shipping_method_plugin = $shipping_method->getPlugin();
+        if ($shipment->getPackageType() === NULL) {
+          $shipment->setPackageType($shipping_method_plugin->getDefaultPackageType());
+        }
+        $rates = $shipping_method_plugin->calculateRates($shipment);
+        $select_rate = array_reduce($rates, function (ShippingRate $carry, ShippingRate $shippingRate) use ($shipping_service_id) {
+          if ($shippingRate->getService()->getId() === $shipping_service_id) {
+            return $shippingRate;
+          }
+          return $carry;
+        }, reset($rates));
+        $shipping_method_plugin->selectRate($shipment, $select_rate);
+
+        static::validate($shipment, ['shipping_method', 'shipping_service']);
+        $shipment->save();
       }
     }
 
@@ -129,10 +151,42 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     // address.
     // @todo investigate recursive/nested validation? 🤔
     static::validate($order, $field_names);
+    $order->save();
 
     $primary_data = new ResourceObjectData([$this->getResourceObjectFromOrder($order)], 1);
 
     $meta = [];
+    $this->addMetaRequiredConstraints($meta, $order);
+
+    // Links to:
+    // - GET shipping-methods,
+    // - GET payment-methods,
+    // - POST complete, if valid.
+    $link_collection = new LinkCollection([]);
+    if (!$order->get('shipments')->isEmpty()) {
+      $link = new Link(new CacheableMetadata(), Url::fromRoute('commerce_api.jsonapi.cart_shipping_methods', [
+        'order' => $order->uuid(),
+      ]), 'shipping-methods');
+      $link_collection = $link_collection->withLink('shipping-methods', $link);
+    }
+
+    return $this->createJsonapiResponse($primary_data, $request, 200, [], $link_collection, $meta);
+  }
+
+  private function repackOrderShipments(OrderInterface $order, ProfileInterface $shipping_profile) {
+    $shipments = $order->get('shipments')->referencedEntities();
+    list($shipments, $removed_shipments) = \Drupal::getContainer()->get('commerce_shipping.packer_manager')->packToShipments($order, $shipping_profile, $shipments);
+    foreach ($shipments as $shipment) {
+      assert($shipment instanceof ShipmentInterface);
+      $shipment->setShippingProfile($shipping_profile);
+    }
+    $order->set('shipments', $shipments);
+    foreach ($removed_shipments as $shipment) {
+      $shipment->delete();
+    }
+  }
+
+  private function addMetaRequiredConstraints(array &$meta, OrderInterface $order): void {
     $violations = $order->validate()->filterByFieldAccess();
     if ($violations->count() > 0) {
       $meta['constraints'] = [];
@@ -147,27 +201,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
         $meta['constraints'][] = ['required' => $required];
       }
     }
-
-    // Links to:
-    // - GET shipping-methods,
-    // - GET payment-methods,
-    // - POST complete, if valid.
-    $link_collection = new LinkCollection([]);
-    if (!$order->get('shipments')->isEmpty()) {
-      $link = new Link(new CacheableMetadata(), Url::fromRoute('commerce_api.jsonapi.cart_shipping_methods', [
-        'order' => $order->uuid(),
-      ]), 'shipping-methods');
-      $link_collection->withLink('shipping-methods', $link);
-    }
-
-    return $this->createJsonapiResponse(
-      $primary_data,
-      $request,
-      200,
-      [],
-      $link_collection,
-      $meta
-    );
   }
 
   /**
@@ -184,6 +217,11 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   private function getResourceObjectFromOrder(OrderInterface $order): ResourceObject {
+    // for some reason adjustments after refresh are not available unless
+    // we reload here. same with saved shipment data. Something is screwing
+    // with the references.
+    $order = $this->entityTypeManager->getStorage('commerce_order')->load($order->id());
+
     $resource_type = $this->getCheckoutOrderResourceType();
     $cacheability = new CacheableMetadata();
     $cacheability->addCacheableDependency($order);
@@ -193,8 +231,17 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $shipping_profile = $this->getOrderShippingProfile($order);
     assert($shipping_profile instanceof ProfileInterface);
     if (!$shipping_profile->get('address')->isEmpty()) {
-      $fields['shipping_information'] = $shipping_profile->get('address')->first()->getValue();
+      $fields['shipping_information'] = array_filter($shipping_profile->get('address')->first()->getValue());
     }
+    $shipments = $order->get('shipments');
+    assert($shipments instanceof EntityReferenceFieldItemList);
+    if (!$shipments->isEmpty()) {
+      $shipment = $shipments->first()->entity;
+      assert($shipment instanceof ShipmentInterface);
+      $fields['shipping_method'] = $shipment->getShippingMethodId() . '--' . $shipment->getShippingService();
+    }
+
+    $fields['order_total'] = $order->get('order_total')->first()->getValue();
 
     return new ResourceObject(
       new CacheableMetadata(),
@@ -217,10 +264,14 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
   private function getCheckoutOrderResourceType(): ResourceType {
     $fields = [];
     $fields['email'] = new ResourceTypeAttribute('email', 'email');
-    // @todo add a shipping rate field.
     $fields['shipping_information'] = new ResourceTypeAttribute('shipping_information', NULL, TRUE, FALSE);
+    $fields['shipping_method'] = new ResourceTypeAttribute('shipping_method');
     $fields['billing_information'] = new ResourceTypeAttribute('billing_information', NULL, TRUE, FALSE);
-    $fields['payment_instrument'] = new ResourceTypeAttribute('payment_instrument', NULL, TRUE, FALSE);
+    $fields['payment_instrument'] = new ResourceTypeAttribute('payment_instrument');
+    $fields['order_total'] = new ResourceTypeAttribute('order_total', NULL, TRUE, FALSE);
+
+    // @todo return the available shipping methods as a resource identifier.
+    // $fields['shipping_methods'] = new ResourceTypeRelationship('shipping_methods', 'shipping_methods', TRUE, FALSE);
 
     $resource_type = new ResourceType(
       'checkout_order',
@@ -256,14 +307,9 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   private function getOrderShippingProfile(OrderInterface $order): ProfileInterface {
-    $shipping_profile = NULL;
-    /** @var \Drupal\commerce_shipping\Entity\ShipmentInterface $shipment */
-    foreach ($order->get('shipments')->referencedEntities() as $shipment) {
-      $shipping_profile = $shipment->getShippingProfile();
-      if ($shipping_profile !== NULL) {
-        break;
-      }
-    }
+    $profiles = $order->collectProfiles();
+    $shipping_profile = $profiles['shipping'] ?? NULL;
+
     if ($shipping_profile === NULL) {
       $profile_type_id = 'customer';
       // Check whether the order type has another profile type ID specified.

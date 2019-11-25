@@ -19,9 +19,6 @@
     },
     "extra": {
         "patches": {
-            "drupal/commerce_shipping": {
-                "ShippingRateOptions": "https://www.drupal.org/files/issues/2019-11-19/commerce_shipping-3095420-3.patch"
-            }
         }
     }
 }

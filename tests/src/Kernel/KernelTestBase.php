@@ -32,6 +32,7 @@ abstract class KernelTestBase extends CommerceKernelTestBase {
    */
   protected function setUp() {
     parent::setUp();
+    $this->installEntitySchema('profile');
     $this->installEntitySchema('commerce_order');
     $this->installEntitySchema('commerce_order_item');
     $this->installEntitySchema('commerce_product');
