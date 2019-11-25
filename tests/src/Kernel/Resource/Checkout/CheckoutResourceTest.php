@@ -278,6 +278,83 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         ]
       ),
     ];
+    yield [
+      [
+        'attributes' => [
+          'email' => 'tester@example.com',
+          'shipping_information' => [
+            'country_code' => 'US',
+            'postal_code' => '94043',
+          ],
+          'shipping_method' => '2--default',
+          'billing_information' => [
+            'country_code' => 'US',
+            'postal_code' => '94043',
+            'given_name' => 'Bryan',
+            'family_name' => 'Centarro',
+          ],
+          'payment_instrument' => [
+            // Payment method type.
+            'type' => 'credit_card',
+            // 😬 everything uses a nonce?
+            'nonce' => 'abc123',
+            // How do know the fields required, all different this is braintree.
+            'card_type' => 'visa',
+            'last2' => '22',
+          ],
+        ],
+      ],
+      $this->buildResponseJsonApiDocument([
+        'email' => 'tester@example.com',
+        'shipping_information' => [
+          'country_code' => 'US',
+          'postal_code' => '94043',
+        ],
+        'shipping_method' => '2--default',
+        'order_total' => [
+          'subtotal' => [
+            'number' => '4.0',
+            'currency_code' => 'USD',
+          ],
+          'adjustments' => [
+            [
+              'type' => 'shipping',
+              'label' => 'Shipping',
+              'amount' => [
+                'number' => '20.00',
+                'currency_code' => 'USD',
+              ],
+              'percentage' => NULL,
+              'source_id' => 1,
+              'included' => FALSE,
+              'locked' => FALSE,
+              'total' => [
+                'number' => '20.00',
+                'currency_code' => 'USD',
+              ],
+            ],
+          ],
+          'total' => [
+            'number' => '24.0',
+            'currency_code' => 'USD',
+          ],
+        ],
+      ],
+        [
+          'required' => [
+            'detail' => 'This value should not be null.',
+            'source' => [
+              'pointer' => 'billing_profile',
+            ],
+          ],
+        ],
+        [
+          'shipping-methods' => [
+            'href' => 'http://localhost/jsonapi/cart/' . self::TEST_ORDER_UUID . '/shipping-methods',
+          ],
+        ]
+      ),
+    ];
   }
 
 }
