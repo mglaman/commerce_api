@@ -10,6 +10,8 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
+use Drupal\Core\Render\RenderContext;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Url;
 use Drupal\jsonapi\Entity\EntityValidationTrait;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
@@ -84,7 +86,10 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
-  public function process(Request $request, OrderInterface $order, ?JsonApiDocumentTopLevel $document = NULL): ResourceResponse {
+  public function process(Request $request, array $resource_types, OrderInterface $order, ?JsonApiDocumentTopLevel $document = NULL): ResourceResponse {
+    // Must use this due to strict checking in JsonapiResourceController;
+    // @todo fix in https://www.drupal.org/project/jsonapi_resources/issues/3096949
+    $resource_type = reset($resource_types);
     if ($document) {
       $data = $document->getData();
       if ($data->getCardinality() !== 1) {
@@ -147,12 +152,23 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
         $shipment->save();
       }
       $order->save();
+      // For some reason adjustments after refresh are not available unless
+      // we reload here. same with saved shipment data. Something is screwing
+      // with the references.
+      $order = $this->entityTypeManager->getStorage('commerce_order')->load($order->id());
+      assert($order instanceof OrderInterface);
     }
 
-    $primary_data = new ResourceObjectData([$this->getResourceObjectFromOrder($order)], 1);
+    $primary_data = new ResourceObjectData([$this->getResourceObjectFromOrder($order, $resource_type)], 1);
 
+    $renderer = \Drupal::getContainer()->get('renderer');
+    assert($renderer instanceof RendererInterface);
+    $context = new RenderContext();
     $meta = [];
-    $this->addMetaRequiredConstraints($meta, $order);
+    $renderer->executeInRenderContext($context, function () use ($meta, $order) {
+      $this->addMetaRequiredConstraints($meta, $order);
+    });
+
 
     // Links to:
     // - GET shipping-methods,
@@ -166,7 +182,11 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $link_collection = $link_collection->withLink('shipping-methods', $link);
     }
 
-    return $this->createJsonapiResponse($primary_data, $request, 200, [], $link_collection, $meta);
+    $response = $this->createJsonapiResponse($primary_data, $request, 200, [], $link_collection, $meta);
+    if (!$context->isEmpty()) {
+      $response->addCacheableDependency($context->pop());
+    }
+    return $response;
   }
 
   private function applyShippingRateToShipments(OrderInterface $order, string $shipping_rate_option_id) {
@@ -237,17 +257,12 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
-  private function getResourceObjectFromOrder(OrderInterface $order): ResourceObject {
-    // For some reason adjustments after refresh are not available unless
-    // we reload here. same with saved shipment data. Something is screwing
-    // with the references.
-    $order = $this->entityTypeManager->getStorage('commerce_order')->load($order->id());
-
-    $resource_type = $this->getCheckoutOrderResourceType();
+  private function getResourceObjectFromOrder(OrderInterface $order, ResourceType $resource_type): ResourceObject {
     $cacheability = new CacheableMetadata();
     $cacheability->addCacheableDependency($order);
 
     $fields = [];
+    $fields['state'] = $order->getState()->value;
     $fields['email'] = $order->getEmail();
     $shipping_profile = $this->getOrderShippingProfile($order);
     assert($shipping_profile instanceof ProfileInterface);
@@ -286,6 +301,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    */
   private function getCheckoutOrderResourceType(): ResourceType {
     $fields = [];
+    $fields['state'] = new ResourceTypeAttribute('state', 'state');
     $fields['email'] = new ResourceTypeAttribute('email', 'email');
     $fields['shipping_information'] = new ResourceTypeAttribute('shipping_information', NULL, TRUE, FALSE);
     $fields['shipping_method'] = new ResourceTypeAttribute('shipping_method');
