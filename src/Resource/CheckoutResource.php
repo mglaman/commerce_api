@@ -4,10 +4,10 @@ namespace Drupal\commerce_api\Resource;
 
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
+use Drupal\commerce_shipping\ShippingOrderManagerInterface;
 use Drupal\commerce_shipping\ShippingRate;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\Core\Url;
@@ -20,7 +20,6 @@ use Drupal\jsonapi\JsonApiResource\ResourceObjectData;
 use Drupal\jsonapi\ResourceResponse;
 use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\jsonapi\ResourceType\ResourceTypeAttribute;
-use Drupal\jsonapi\ResourceType\ResourceTypeRelationship;
 use Drupal\jsonapi_resources\Resource\ResourceBase;
 use Drupal\profile\Entity\ProfileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -41,23 +40,20 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
   private $entityTypeManager;
 
   /**
-   * The entity type bundle info.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeBundleInfo
+   * @var \Drupal\commerce_shipping\ShippingOrderManagerInterface
    */
-  private $entityTypeBundleInfo;
+  private $shippingOrderManager;
 
   /**
    * CheckoutResource constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
-   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
-   *   The entity type bundle info.
+   * @param \Drupal\commerce_shipping\ShippingOrderManagerInterface $shipping_order_manager
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ShippingOrderManagerInterface $shipping_order_manager) {
     $this->entityTypeManager = $entity_type_manager;
-    $this->entityTypeBundleInfo = $entity_type_bundle_info;
+    $this->shippingOrderManager = $shipping_order_manager;
   }
 
   /**
@@ -66,7 +62,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
   public static function create(ContainerInterface $container) {
     return new self(
       $container->get('entity_type.manager'),
-      $container->get('entity_type.bundle.info')
+      $container->get('commerce_shipping.order_manager')
     );
   }
 
@@ -129,7 +125,8 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       // @todo allow partial constraint validation?
       $shipping_profile->set('address', $shipping_information);
       $shipping_profile->save();
-      $this->repackOrderShipments($order, $shipping_profile);
+      $shipments = $this->shippingOrderManager->pack($order, $shipping_profile);
+      $order->set('shipments', $shipments);
     }
 
     // Again this is 😱.
@@ -185,29 +182,19 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
         $shipment->setPackageType($shipping_method_plugin->getDefaultPackageType());
       }
       $rates = $shipping_method_plugin->calculateRates($shipment);
-      $select_rate = array_reduce($rates, static function (ShippingRate $carry, ShippingRate $shippingRate) use ($shipping_service_id) {
-        if ($shippingRate->getService()->getId() === $shipping_service_id) {
-          return $shippingRate;
-        }
-        return $carry;
-      }, reset($rates));
+      if (count($rates) === 1) {
+        $select_rate = reset($rates);
+      }
+      else {
+        $select_rate = array_reduce($rates, static function (ShippingRate $carry, ShippingRate $shippingRate) use ($shipping_service_id) {
+          if ($shippingRate->getService()->getId() === $shipping_service_id) {
+            return $shippingRate;
+          }
+          return $carry;
+        }, reset($rates));
+      }
       $shipping_method_plugin->selectRate($shipment, $select_rate);
-      static::validate($shipment, ['shipping_method', 'shipping_service']);
       $shipment->save();
-    }
-  }
-
-  private function repackOrderShipments(OrderInterface $order, ProfileInterface $shipping_profile) {
-    $shipments = $order->get('shipments')->referencedEntities();
-    list($shipments, $removed_shipments) = \Drupal::getContainer()->get('commerce_shipping.packer_manager')->packToShipments($order, $shipping_profile, $shipments);
-    foreach ($shipments as $shipment) {
-      assert($shipment instanceof ShipmentInterface);
-      $shipment->setShippingProfile($shipping_profile);
-      $shipment->save();
-    }
-    $order->set('shipments', $shipments);
-    foreach ($removed_shipments as $shipment) {
-      $shipment->delete();
     }
   }
 
@@ -336,30 +323,9 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    *
    * @return \Drupal\Core\Entity\EntityInterface|\Drupal\profile\Entity\ProfileInterface
    *   The profile.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   private function getOrderShippingProfile(OrderInterface $order): ProfileInterface {
-    $profiles = $order->collectProfiles();
-    $shipping_profile = $profiles['shipping'] ?? NULL;
-
-    if ($shipping_profile === NULL) {
-      $profile_type_id = 'customer';
-      // Check whether the order type has another profile type ID specified.
-      $order_type_id = $order->bundle();
-      $order_bundle_info = $this->entityTypeBundleInfo->getBundleInfo('commerce_order');
-      if (!empty($order_bundle_info[$order_type_id]['shipping_profile_type'])) {
-        $profile_type_id = $order_bundle_info[$order_type_id]['shipping_profile_type'];
-      }
-
-      $shipping_profile = $this->entityTypeManager->getStorage('profile')->create([
-        'type' => $profile_type_id,
-        'uid' => 0,
-      ]);
-    }
-
-    return $shipping_profile;
+    return $this->shippingOrderManager->getProfile($order) ?: $this->shippingOrderManager->createProfile($order);
   }
 
 }

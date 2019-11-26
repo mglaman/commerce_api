@@ -14,11 +14,15 @@
     },
     "require": {
         "drupal/commerce": "^2.15",
+        "drupal/commerce_shipping": "^2.0@beta",
         "drupal/jsonapi_resources": "^1.0@beta",
         "drupal/core": "^8.8@alpha"
     },
     "extra": {
         "patches": {
+            "drupal/commerce_shipping": {
+                "Shipping Order Manager": "https://www.drupal.org/files/issues/2019-11-26/commerce_shipping_3096456-11.patch"
+            }
         }
     }
 }
