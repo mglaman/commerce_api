@@ -84,68 +84,70 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
-  public function process(Request $request, OrderInterface $order, JsonApiDocumentTopLevel $document): ResourceResponse {
-    $data = $document->getData();
-    if ($data->getCardinality() !== 1) {
-      throw new UnprocessableEntityHttpException("The request document's primary data must not be an array.");
-    }
-    $resource_object = $data->getIterator()->current();
-    assert($resource_object instanceof ResourceObject);
+  public function process(Request $request, OrderInterface $order, ?JsonApiDocumentTopLevel $document = NULL): ResourceResponse {
+    if ($document) {
+      $data = $document->getData();
+      if ($data->getCardinality() !== 1) {
+        throw new UnprocessableEntityHttpException("The request document's primary data must not be an array.");
+      }
+      $resource_object = $data->getIterator()->current();
+      assert($resource_object instanceof ResourceObject);
 
-    $field_names = [];
-    // If the `email` fiel was provided, set it on the order.
-    if ($resource_object->hasField('email')) {
-      $field_names[] = 'mail';
-      $order->setEmail($resource_object->getField('email'));
-    }
+      $field_names = [];
+      // If the `email` fiel was provided, set it on the order.
+      if ($resource_object->hasField('email')) {
+        $field_names[] = 'mail';
+        $order->setEmail($resource_object->getField('email'));
+      }
 
-    if ($resource_object->hasField('billing_information')) {
-      // @todo cannot validate entity reference, due to access.
-      // @see 'billing_profile.0.target_id: This entity (profile: 1) cannot be referenced.
-      // $field_names[] = 'billing_profile';
-      $billing_information = $resource_object->getField('billing_information');
-      $billing_profile = $order->getBillingProfile() ?: $this->entityTypeManager->getStorage('profile')->create([
-        'type' => 'customer',
-        'uid' => 0,
-      ]);
-      assert($billing_profile instanceof ProfileInterface);
-      // @todo allow partial constraint validation?
-      $billing_profile->set('address', $billing_information);
-      $billing_profile->save();
-      $order->setBillingProfile($billing_profile);
-    }
+      if ($resource_object->hasField('billing_information')) {
+        // @todo cannot validate entity reference, due to access.
+        // @see 'billing_profile.0.target_id: This entity (profile: 1) cannot be referenced.
+        // $field_names[] = 'billing_profile';
+        $billing_information = $resource_object->getField('billing_information');
+        $billing_profile = $order->getBillingProfile() ?: $this->entityTypeManager->getStorage('profile')->create([
+          'type' => 'customer',
+          'uid' => 0,
+        ]);
+        assert($billing_profile instanceof ProfileInterface);
+        // @todo allow partial constraint validation?
+        $billing_profile->set('address', $billing_information);
+        $billing_profile->save();
+        $order->setBillingProfile($billing_profile);
+      }
 
-    // If shipping information was provided, do Shipping stuff.
-    // @todo this is 😱😭.
-    // @todo https://www.drupal.org/project/commerce_shipping/issues/3096130
-    if ($resource_object->hasField('shipping_information')) {
-      $field_names[] = 'shipments';
-      $shipping_information = $resource_object->getField('shipping_information');
-      $shipping_profile = $this->getOrderShippingProfile($order);
-      // @todo allow partial constraint validation?
-      $shipping_profile->set('address', $shipping_information);
-      $shipping_profile->save();
-      $shipments = $this->shippingOrderManager->pack($order, $shipping_profile);
-      $order->set('shipments', $shipments);
-    }
+      // If shipping information was provided, do Shipping stuff.
+      // @todo this is 😱😭.
+      // @todo https://www.drupal.org/project/commerce_shipping/issues/3096130
+      if ($resource_object->hasField('shipping_information')) {
+        $field_names[] = 'shipments';
+        $shipping_information = $resource_object->getField('shipping_information');
+        $shipping_profile = $this->getOrderShippingProfile($order);
+        // @todo allow partial constraint validation?
+        $shipping_profile->set('address', $shipping_information);
+        $shipping_profile->save();
+        $shipments = $this->shippingOrderManager->pack($order, $shipping_profile);
+        $order->set('shipments', $shipments);
+      }
 
-    // Again this is 😱.
-    if ($resource_object->hasField('shipping_method')) {
-      $this->applyShippingRateToShipments($order, $resource_object->getField('shipping_method'));
-    }
+      // Again this is 😱.
+      if ($resource_object->hasField('shipping_method')) {
+        $this->applyShippingRateToShipments($order, $resource_object->getField('shipping_method'));
+      }
 
-    // Validate the provided fields, which will throw 422 if invalid.
-    // HOWEVER! It doesn't recursively validate referenced entities. So it will
-    // validate `shipments` has valid values, but not the shipments. And then
-    // it will only validate shipping_profile is a valid reference, but not its
-    // address.
-    // @todo investigate recursive/nested validation? 🤔
-    static::validate($order, $field_names);
-    $shipments = $order->get('shipments')->referencedEntities();
-    foreach ($shipments as $shipment) {
-      $shipment->save();
+      // Validate the provided fields, which will throw 422 if invalid.
+      // HOWEVER! It doesn't recursively validate referenced entities. So it will
+      // validate `shipments` has valid values, but not the shipments. And then
+      // it will only validate shipping_profile is a valid reference, but not its
+      // address.
+      // @todo investigate recursive/nested validation? 🤔
+      static::validate($order, $field_names);
+      $shipments = $order->get('shipments')->referencedEntities();
+      foreach ($shipments as $shipment) {
+        $shipment->save();
+      }
+      $order->save();
     }
-    $order->save();
 
     $primary_data = new ResourceObjectData([$this->getResourceObjectFromOrder($order)], 1);
 
