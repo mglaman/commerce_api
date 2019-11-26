@@ -38,7 +38,9 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
     );
     $this->processRequest($request, $checkoutResourceController);
 
-    $checkoutShippingMethodsController = new ShippingMethodsResource();
+    $checkoutShippingMethodsController = new ShippingMethodsResource(
+      $this->container->get('commerce_shipping.rate_options_builder')
+    );
     $checkoutShippingMethodsController->setResourceResponseFactory($this->container->get('jsonapi_resources.resource_response_factory'));
     $checkoutShippingMethodsController->setResourceTypeRepository($this->container->get('jsonapi.resource_type.repository'));
 
@@ -108,42 +110,30 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
           'id' => '2--default',
           'type' => 'shipping_rate_option--shipping_rate_option',
           'attributes' => [
-            'label' => 'Flat rate: $20.00',
+            'label' => 'Flat rate',
             'methodId' => '2',
-            'rate' => [
-              'rateId' => '0',
-              'amount' => [
-                'number' => '20',
-                'currency_code' => 'USD',
-              ],
-              'deliveryDate' => NULL,
-              'terms' => NULL,
+            'serviceId' => 'default',
+            'amount' => [
+              'number' => '20',
+              'currency_code' => 'USD',
             ],
-            'service' => [
-              'serviceId' => 'default',
-              'label' => 'Flat rate',
-            ],
+            'deliveryDate' => NULL,
+            'terms' => NULL,
           ],
         ],
         [
           'id' => '1--default',
           'type' => 'shipping_rate_option--shipping_rate_option',
           'attributes' => [
-            'label' => 'Flat rate: $5.00',
+            'label' => 'Flat rate',
             'methodId' => '1',
-            'rate' => [
-              'rateId' => '0',
-              'amount' => [
-                'number' => '5',
-                'currency_code' => 'USD',
-              ],
-              'deliveryDate' => NULL,
-              'terms' => NULL,
+            'serviceId' => 'default',
+            'amount' => [
+              'number' => '5',
+              'currency_code' => 'USD',
             ],
-            'service' => [
-              'serviceId' => 'default',
-              'label' => 'Flat rate',
-            ],
+            'deliveryDate' => NULL,
+            'terms' => NULL,
           ],
         ],
       ],
@@ -184,7 +174,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
           ],
         ],
       ],
-        $constraints,
+        [$constraints],
         $links
       ),
     ];

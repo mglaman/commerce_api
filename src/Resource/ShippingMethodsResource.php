@@ -5,6 +5,7 @@ namespace Drupal\commerce_api\Resource;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\commerce_shipping\ShippingRateOption;
+use Drupal\commerce_shipping\ShippingRateOptionsBuilderInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
@@ -22,11 +23,19 @@ use Symfony\Component\Routing\Route;
 
 final class ShippingMethodsResource extends ResourceBase implements ContainerInjectionInterface {
 
-  public function __construct() {
+  /**
+   * @var \Drupal\commerce_shipping\ShippingRateOptionsBuilderInterface
+   */
+  private $shippingRateOptionsBuilder;
+
+  public function __construct(ShippingRateOptionsBuilderInterface $shipping_rate_options_builder) {
+    $this->shippingRateOptionsBuilder = $shipping_rate_options_builder;
   }
 
   public static function create(ContainerInterface $container) {
-    return new self();
+    return new self(
+      $container->get('commerce_shipping.rate_options_builder')
+    );
   }
 
   public function process(Request $request, OrderInterface $order): ResourceResponse {
@@ -37,7 +46,6 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
     $cacheability = new CacheableMetadata();
     $cacheability->addCacheableDependency($order);
     $resource_type = $this->getShippingRateOptionResourceType();
-    $rate_options_builder = \Drupal::getContainer()->get('commerce_shipping.rate_options_builder');
     $options = [];
     foreach ($shipments as $shipment) {
       assert($shipment instanceof ShipmentInterface);
@@ -52,23 +60,17 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
           $option->getId(),
           NULL,
           [
-            'label' => $option->getLabel(),
+            'label' => $service->getLabel(),
             'methodId' => $option->getShippingMethodId(),
-            'rate' => [
-              'rateId' => $rate->getId(),
-              'amount' => $rate->getAmount()->toArray(),
-              'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
-              'terms' => $rate->getDeliveryTerms(),
-            ],
-            'service' => [
-              'serviceId' => $service->getId(),
-              'label' => $service->getLabel(),
-            ],
+            'serviceId' => $service->getId(),
+            'amount' => $rate->getAmount()->toArray(),
+            'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
+            'terms' => $rate->getDeliveryTerms(),
           ],
-          // @todo link to provide PATCH data :?
+          // @todo link template to provide PATCH data :?
           new LinkCollection([])
         );
-      }, $rate_options_builder->buildOptions($shipment));
+      }, $this->shippingRateOptionsBuilder->buildOptions($shipment));
     }
     $options = array_merge([], ...$options);
     $response = $this->createJsonapiResponse(new ResourceObjectData($options), $request);
