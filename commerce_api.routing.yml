@@ -1,2 +1,2 @@
 route_callbacks:
-  - '\Drupal\commerce_api\Routing\Routes::cartRoutes'
+  - '\Drupal\commerce_api\Routing\Routes::routes'
