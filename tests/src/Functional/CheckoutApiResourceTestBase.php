@@ -15,6 +15,8 @@ abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
   use StoreCreationTrait;
   use JsonApiRequestTestTrait;
 
+  protected $defaultTheme = 'stark';
+
   /**
    * The store entity.
    *

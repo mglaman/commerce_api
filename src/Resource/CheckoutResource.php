@@ -22,6 +22,7 @@ use Drupal\jsonapi\JsonApiResource\ResourceObjectData;
 use Drupal\jsonapi\ResourceResponse;
 use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\jsonapi\ResourceType\ResourceTypeAttribute;
+use Drupal\jsonapi\ResourceType\ResourceTypeRelationship;
 use Drupal\jsonapi_resources\Resource\ResourceBase;
 use Drupal\profile\Entity\ProfileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -284,6 +285,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       }
     }
 
+    $fields['order_items'] = $order->get('order_items');
     $fields['order_total'] = $order->get('order_total')->first()->getValue();
 
     return new ResourceObject(
@@ -320,6 +322,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
 
     // @todo return the available shipping methods as a resource identifier.
     // $fields['shipping_methods'] = new ResourceTypeRelationship('shipping_methods', 'shipping_methods', TRUE, FALSE);
+    $fields['order_items'] = new ResourceTypeRelationship('order_items', 'order_items', TRUE, FALSE);
 
     // @todo custom resource object so ID does not contain `--`
     $resource_type = new ResourceType(
@@ -332,7 +335,11 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       FALSE,
       $fields
     );
-    $resource_type->setRelatableResourceTypes([]);
+    $resource_type->setRelatableResourceTypes([
+      'order_items' => array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) {
+        return $resource_type->getEntityTypeId() === 'commerce_order_item';
+      }),
+    ]);
     return $resource_type;
   }
 

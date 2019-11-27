@@ -9,6 +9,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Url;
 use Drupal\Tests\commerce_api\Functional\CheckoutApiResourceTestBase;
 use GuzzleHttp\RequestOptions;
+use Prophecy\Argument;
 
 final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
 
@@ -34,6 +35,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     $checkout_body = Json::decode((string) $response->getBody());
     $this->assertSame(200, $response->getStatusCode(), var_export($checkout_body, TRUE));
 
+    $order_item_id = $checkout_body['data']['relationships']['order_items']['data'][0]['id'] ?? null;
     $this->assertEquals([
       'id' => $test_cart_id,
       'type' => 'checkout_order--checkout_order',
@@ -45,7 +47,17 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
           'adjustments' => [],
           'total' => ['number' => '1000.0', 'currency_code' => 'USD'],
         ],
-      ]
+      ],
+      'relationships' => [
+        'order_items' => [
+          'data' => [
+            [
+              'type' => 'commerce_order_item--default',
+              'id' => $order_item_id,
+            ]
+          ]
+        ],
+      ],
     ], $checkout_body['data']);
     $this->assertEquals([
       'constraints' => [
@@ -162,7 +174,17 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
           ],
           'total' => ['number' => '1005.0', 'currency_code' => 'USD'],
         ],
-      ]
+      ],
+      'relationships' => [
+        'order_items' => [
+          'data' => [
+            [
+              'type' => 'commerce_order_item--default',
+              'id' => $order_item_id,
+            ]
+          ]
+        ],
+      ],
     ], $checkout_body['data']);
     $this->assertEquals([
       'constraints' => [
