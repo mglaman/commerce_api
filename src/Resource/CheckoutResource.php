@@ -286,7 +286,8 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     }
 
     $fields['order_items'] = $order->get('order_items');
-    $fields['order_total'] = $order->get('order_total')->first()->getValue();
+    $fields['total_price'] = $order->get('total_price');
+    $fields['order_total'] = $order->get('order_total');
 
     return new ResourceObject(
       new CacheableMetadata(),
@@ -319,6 +320,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $fields['billing_information'] = new ResourceTypeAttribute('billing_information', NULL, TRUE, FALSE);
     $fields['payment_instrument'] = new ResourceTypeAttribute('payment_instrument');
     $fields['order_total'] = new ResourceTypeAttribute('order_total', NULL, TRUE, FALSE);
+    $fields['total_price'] = new ResourceTypeAttribute('total_price', NULL, TRUE, FALSE);
 
     // @todo return the available shipping methods as a resource identifier.
     // $fields['shipping_methods'] = new ResourceTypeRelationship('shipping_methods', 'shipping_methods', TRUE, FALSE);
