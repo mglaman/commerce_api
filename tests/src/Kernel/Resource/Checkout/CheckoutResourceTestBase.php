@@ -210,13 +210,17 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
    * @throws \Exception
    */
   protected function processRequest(Request $request, ResourceBase $controller): Response {
+    $resource_types = $controller->getRouteResourceTypes(
+      $request->attributes->get(RouteObjectInterface::ROUTE_OBJECT),
+      'fake_route_name',
+    );
     try {
       if ($request->getMethod() !== 'GET') {
         $resolved_document = $this->getResolvedDocument($request);
-        $response = $controller->process($request, $this->order, $resolved_document);
+        $response = $controller->process($request, $resource_types, $this->order, $resolved_document);
       }
       else {
-        $response = $controller->process($request, $this->order);
+        $response = $controller->process($request, $resource_types, $this->order);
       }
     }
     catch (\Exception $e) {

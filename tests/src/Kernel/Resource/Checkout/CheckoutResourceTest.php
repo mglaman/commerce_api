@@ -69,6 +69,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       ],
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
+        'state' => 'draft',
         'order_total' => [
           'subtotal' => [
             'number' => '4.0',
@@ -141,6 +142,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       ],
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
+        'state' => 'draft',
         'shipping_information' => [
           'country_code' => 'US',
           'postal_code' => '94043',
@@ -188,6 +190,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       ],
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
+        'state' => 'draft',
         'shipping_information' => [
           'country_code' => 'US',
           'administrative_area' => 'CA',
@@ -235,6 +238,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       ],
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
+        'state' => 'draft',
         'shipping_information' => [
           'country_code' => 'US',
           'postal_code' => '94043',
@@ -290,6 +294,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       [
         'attributes' => [
           'email' => 'tester@example.com',
+          'state' => 'draft',
           'shipping_information' => [
             'country_code' => 'US',
             'postal_code' => '94043',
@@ -314,6 +319,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       ],
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
+        'state' => 'draft',
         'shipping_information' => [
           'country_code' => 'US',
           'postal_code' => '94043',
