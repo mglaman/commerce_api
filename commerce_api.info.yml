@@ -6,6 +6,7 @@ package: 'Commerce (web services)'
 dependencies:
   - commerce:commerce
   - commerce:commerce_cart
+  - commerce_shipping:commerce_shipping
   - drupal:jsonapi
   - drupal:serialization
   - jsonapi_resources:jsonapi_resources

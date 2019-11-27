@@ -11,6 +11,7 @@ use Drupal\commerce_api\Resource\CartCouponAddResource;
 use Drupal\commerce_api\Resource\CartRemoveItemResource;
 use Drupal\commerce_api\Resource\CartUpdateItemResource;
 use Drupal\commerce_api\Resource\CheckoutResource;
+use Drupal\commerce_api\Resource\ShippingMethodsResource;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\jsonapi\ResourceType\ResourceType;
@@ -321,7 +322,7 @@ class Routes implements ContainerInjectionInterface {
     $route = new Route('/cart/{order}/shipping-methods');
     $route->setMethods(['GET']);
     $route->addDefaults([
-      '_jsonapi_resource' => CheckoutResource::class,
+      '_jsonapi_resource' => ShippingMethodsResource::class,
     ]);
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['order']['type'] = 'entity:commerce_order';

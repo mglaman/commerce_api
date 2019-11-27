@@ -140,6 +140,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
       '2--default',
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
+        'state' => 'draft',
         'shipping_information' => [
           'country_code' => 'US',
           'postal_code' => '94043',

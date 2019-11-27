@@ -38,14 +38,14 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
     );
   }
 
-  public function process(Request $request, OrderInterface $order): ResourceResponse {
+  public function process(Request $request, array $resource_types, OrderInterface $order): ResourceResponse {
     $shipments = $order->get('shipments')->referencedEntities();
     if (empty($shipments)) {
       throw new UnprocessableHttpEntityException();
     }
     $cacheability = new CacheableMetadata();
     $cacheability->addCacheableDependency($order);
-    $resource_type = $this->getShippingRateOptionResourceType();
+    $resource_type = reset($resource_types);
     $options = [];
     foreach ($shipments as $shipment) {
       assert($shipment instanceof ShipmentInterface);

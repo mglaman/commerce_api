@@ -30,6 +30,10 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Validator\ConstraintViolation;
 
+/**
+ * @todo :/ this means we have a custom resource that isn't the normal order.
+ *          is that OK? it's like a meta resource
+ */
 final class CheckoutResource extends ResourceBase implements ContainerInjectionInterface {
 
   use EntityValidationTrait;
@@ -147,10 +151,10 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       // address.
       // @todo investigate recursive/nested validation? 🤔
       static::validate($order, $field_names);
-      $shipments = $order->get('shipments')->referencedEntities();
-      foreach ($shipments as $shipment) {
-        $shipment->save();
-      }
+      // $shipments = $order->get('shipments')->referencedEntities();
+      // foreach ($shipments as $shipment) {
+      //   $shipment->save();
+      // }
       $order->save();
       // For some reason adjustments after refresh are not available unless
       // we reload here. same with saved shipment data. Something is screwing
@@ -165,7 +169,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     assert($renderer instanceof RendererInterface);
     $context = new RenderContext();
     $meta = [];
-    $renderer->executeInRenderContext($context, function () use ($meta, $order) {
+    $renderer->executeInRenderContext($context, function () use (&$meta, $order) {
       $this->addMetaRequiredConstraints($meta, $order);
     });
 
@@ -266,6 +270,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $fields['email'] = $order->getEmail();
     $shipping_profile = $this->getOrderShippingProfile($order);
     assert($shipping_profile instanceof ProfileInterface);
+    // @todo this needs constraints if the address isn't completely populated.
     if (!$shipping_profile->get('address')->isEmpty()) {
       $fields['shipping_information'] = array_filter($shipping_profile->get('address')->first()->getValue());
     }
@@ -300,6 +305,10 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    *   The resource type.
    */
   private function getCheckoutOrderResourceType(): ResourceType {
+    // @todo need to add more of the same fields from orders.
+    // @todo the main point is to _not_ require additional endpoints for setting billing information and shipping information.
+    // the real "fix" would be allowing updating a relationship value as if it was embedded in the entity - which is the billing profile.
+
     $fields = [];
     $fields['state'] = new ResourceTypeAttribute('state', 'state');
     $fields['email'] = new ResourceTypeAttribute('email', 'email');
@@ -312,6 +321,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     // @todo return the available shipping methods as a resource identifier.
     // $fields['shipping_methods'] = new ResourceTypeRelationship('shipping_methods', 'shipping_methods', TRUE, FALSE);
 
+    // @todo custom resource object so ID does not contain `--`
     $resource_type = new ResourceType(
       'checkout_order',
       'checkout_order',
