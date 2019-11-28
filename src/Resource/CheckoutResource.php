@@ -6,6 +6,7 @@ use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\commerce_shipping\ShippingOrderManagerInterface;
 use Drupal\commerce_shipping\ShippingRate;
+use Drupal\commerce_shipping\ShippingRateOption;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -267,8 +268,9 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $cacheability->addCacheableDependency($order);
 
     $fields = [];
-    $fields['state'] = $order->getState()->value;
-    $fields['email'] = $order->getEmail();
+    $fields['state'] = $order->get('state');
+    $fields['email'] = $order->get('mail');
+
     $shipping_profile = $this->getOrderShippingProfile($order);
     assert($shipping_profile instanceof ProfileInterface);
     // @todo this needs constraints if the address isn't completely populated.
@@ -285,9 +287,29 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       }
     }
 
+    $options = [];
+    foreach ($shipments->referencedEntities() as $shipment) {
+      assert($shipment instanceof ShipmentInterface);
+      $options[] = array_map(static function (ShippingRateOption $option) use ($resource_type) {
+        $rate = $option->getShippingRate();
+        $delivery_date = $rate->getDeliveryDate();
+        $service = $rate->getService();
+        return [
+          'label' => $service->getLabel(),
+          'methodId' => $option->getShippingMethodId(),
+          'serviceId' => $service->getId(),
+          'amount' => $rate->getAmount()->toArray(),
+          'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
+          'terms' => $rate->getDeliveryTerms(),
+        ];
+      }, \Drupal::service('commerce_shipping.rate_options_builder')->buildOptions($shipment));
+    }
+    $options = array_merge([], ...$options);
+    $fields['shipping_methods'] = $options;
+
     $fields['order_items'] = $order->get('order_items');
-    $fields['total_price'] = $order->get('total_price');
-    $fields['order_total'] = $order->get('order_total');
+    $fields['total_price'] = $order->get('total_price')->first()->getValue();
+    $fields['order_total'] = $order->get('order_total')->first()->getValue();
 
     return new ResourceObject(
       new CacheableMetadata(),
@@ -308,6 +330,9 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    *   The resource type.
    */
   private function getCheckoutOrderResourceType(): ResourceType {
+    $order_item_resource_types = array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) {
+      return $resource_type->getEntityTypeId() === 'commerce_order_item';
+    });
     // @todo need to add more of the same fields from orders.
     // @todo the main point is to _not_ require additional endpoints for setting billing information and shipping information.
     // the real "fix" would be allowing updating a relationship value as if it was embedded in the entity - which is the billing profile.
@@ -323,8 +348,13 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $fields['total_price'] = new ResourceTypeAttribute('total_price', NULL, TRUE, FALSE);
 
     // @todo return the available shipping methods as a resource identifier.
-    // $fields['shipping_methods'] = new ResourceTypeRelationship('shipping_methods', 'shipping_methods', TRUE, FALSE);
-    $fields['order_items'] = new ResourceTypeRelationship('order_items', 'order_items', TRUE, FALSE);
+    $shipping_methods_field = new ResourceTypeRelationship('shipping_methods', 'shipping_methods', TRUE, FALSE);
+    $fields['shipping_methods'] = $shipping_methods_field->withRelatableResourceTypes([
+      'shipping_rate_option--shipping_rate_option' => $this->getShippingRateOptionResourceType(),
+    ]);;
+
+    $order_item_field = new ResourceTypeRelationship('order_items', 'order_items', TRUE, FALSE);
+    $fields['order_items'] = $order_item_field->withRelatableResourceTypes($order_item_resource_types);
 
     // @todo custom resource object so ID does not contain `--`
     $resource_type = new ResourceType(
@@ -338,9 +368,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $fields
     );
     $resource_type->setRelatableResourceTypes([
-      'order_items' => array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) {
-        return $resource_type->getEntityTypeId() === 'commerce_order_item';
-      }),
+      'order_items' => $order_item_resource_types,
     ]);
     return $resource_type;
   }
@@ -363,6 +391,27 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    */
   private function getOrderShippingProfile(OrderInterface $order): ProfileInterface {
     return $this->shippingOrderManager->getProfile($order) ?: $this->shippingOrderManager->createProfile($order);
+  }
+
+  private function getShippingRateOptionResourceType(): ResourceType {
+    $resource_type = new ResourceType(
+      'shipping_rate_option',
+      'shipping_rate_option',
+      NULL,
+      FALSE,
+      FALSE,
+      FALSE,
+      FALSE,
+      [
+        'optionId' => new ResourceTypeAttribute('optionId', 'optionId'),
+        'label' => new ResourceTypeAttribute('label', 'label'),
+        'methodId' => new ResourceTypeAttribute('methodId', 'methodId'),
+        'rate' => new ResourceTypeAttribute('rate', 'rate'),
+
+      ]
+    );
+    $resource_type->setRelatableResourceTypes([]);
+    return $resource_type;
   }
 
 }

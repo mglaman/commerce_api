@@ -84,6 +84,7 @@ function commerce_api_entity_base_field_info(EntityTypeInterface $entity_type) {
       ->setLabel(t('Order total'))
       ->setReadOnly(TRUE)
       ->setComputed(TRUE)
+      ->setCardinality(1)
       ->setClass(ComputedOrderTotal::class);
     return $fields;
   }
@@ -93,6 +94,7 @@ function commerce_api_entity_base_field_info(EntityTypeInterface $entity_type) {
       ->setLabel(t('Resolved price'))
       ->setReadOnly(TRUE)
       ->setComputed(TRUE)
+      ->setCardinality(1)
       ->setSetting('source_field', 'price')
       ->setClass(ComputedResolvedPrice::class);
     return $fields;
