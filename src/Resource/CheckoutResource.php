@@ -287,6 +287,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       }
     }
 
+    // @todo this would be better if we had a nornalizer to format a value object and ensure spec.
     $options = [];
     foreach ($shipments->referencedEntities() as $shipment) {
       assert($shipment instanceof ShipmentInterface);
@@ -295,21 +296,25 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
         $delivery_date = $rate->getDeliveryDate();
         $service = $rate->getService();
         return [
-          'label' => $service->getLabel(),
-          'methodId' => $option->getShippingMethodId(),
-          'serviceId' => $service->getId(),
-          'amount' => $rate->getAmount()->toArray(),
-          'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
-          'terms' => $rate->getDeliveryTerms(),
+          'type' => 'shipping--service',
+          'id' => $option->getId(),
+          'meta' => [
+            'label' => $service->getLabel(),
+            'methodId' => $option->getShippingMethodId(),
+            'serviceId' => $service->getId(),
+            'amount' => $rate->getAmount()->toArray(),
+            'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
+            'terms' => $rate->getDeliveryTerms(),
+          ]
         ];
       }, \Drupal::service('commerce_shipping.rate_options_builder')->buildOptions($shipment));
     }
     $options = array_merge([], ...$options);
-    $fields['shipping_methods'] = $options;
+    $fields['shipping_methods'] = ['data' => array_values($options)];
 
     $fields['order_items'] = $order->get('order_items');
-    $fields['total_price'] = $order->get('total_price')->first()->getValue();
-    $fields['order_total'] = $order->get('order_total')->first()->getValue();
+    $fields['total_price'] = $order->get('total_price');
+    $fields['order_total'] = $order->get('order_total');
 
     return new ResourceObject(
       new CacheableMetadata(),
@@ -340,12 +345,12 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $fields = [];
     $fields['state'] = new ResourceTypeAttribute('state', 'state');
     $fields['email'] = new ResourceTypeAttribute('email', 'email');
-    $fields['shipping_information'] = new ResourceTypeAttribute('shipping_information', NULL, TRUE, FALSE);
+    $fields['shipping_information'] = new ResourceTypeAttribute('shipping_information');
     $fields['shipping_method'] = new ResourceTypeAttribute('shipping_method');
-    $fields['billing_information'] = new ResourceTypeAttribute('billing_information', NULL, TRUE, FALSE);
+    $fields['billing_information'] = new ResourceTypeAttribute('billing_information');
     $fields['payment_instrument'] = new ResourceTypeAttribute('payment_instrument');
-    $fields['order_total'] = new ResourceTypeAttribute('order_total', NULL, TRUE, FALSE);
-    $fields['total_price'] = new ResourceTypeAttribute('total_price', NULL, TRUE, FALSE);
+    $fields['order_total'] = new ResourceTypeAttribute('order_total');
+    $fields['total_price'] = new ResourceTypeAttribute('total_price');
 
     // @todo return the available shipping methods as a resource identifier.
     $shipping_methods_field = new ResourceTypeRelationship('shipping_methods', 'shipping_methods', TRUE, FALSE);
