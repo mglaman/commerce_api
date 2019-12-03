@@ -212,7 +212,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
   protected function processRequest(Request $request, ResourceBase $controller): Response {
     $resource_types = $controller->getRouteResourceTypes(
       $request->attributes->get(RouteObjectInterface::ROUTE_OBJECT),
-      'fake_route_name',
+      'fake_route_name'
     );
     try {
       if ($request->getMethod() !== 'GET') {
