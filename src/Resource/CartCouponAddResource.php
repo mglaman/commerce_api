@@ -102,7 +102,7 @@ final class CartCouponAddResource extends EntityResourceBase {
     /* @var \Drupal\Core\Field\EntityReferenceFieldItemListInterface $field_list */
     $field_list = $commerce_order->{$internal_relationship_field_name};
     $field_list->setValue($coupons);
-    self::validate($commerce_order);
+    self::validate($commerce_order, ['coupons']);
     $commerce_order->save();
 
     return $this->inner->getRelationship(
