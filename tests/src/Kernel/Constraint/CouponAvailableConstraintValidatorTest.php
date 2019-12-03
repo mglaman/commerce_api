@@ -82,23 +82,23 @@ class CouponAvailableConstraintValidatorTest extends KernelTestBase {
     $coupon->save();
 
     $order->get('coupons')->setValue([$coupon]);
-    $constraints = $order->validate();
+    $constraints = $order->get('coupons')->validate();
     $this->assertCount(0, $constraints);
 
     $coupon->setEnabled(FALSE);
     // We must save, since ::referencedEntities reloads entities.
     $coupon->save();
-    $constraints = $order->validate();
-    $this->assertEquals(sprintf('The coupon <em class="placeholder">%s</em> is not available for this order.', $coupon->getCode()), $constraints->get(0)->getMessage());
+    $constraints = $order->get('coupons')->validate();
+    $this->assertEquals(sprintf('The coupon <em class="placeholder">%s</em> is not available for this order.', $coupon->getCode()), $constraints->get(0)->getMessage(), $constraints->get(0)->getPropertyPath());
     $coupon->setEnabled(TRUE);
     $coupon->save();
 
-    $constraints = $order->validate();
+    $constraints = $order->get('coupons')->validate();
     $this->assertCount(0, $constraints);
 
     $this->container->get('commerce_promotion.usage')->register($order, $promotion, $coupon);
-    $constraints = $order->validate();
-    $this->assertEquals('coupons.0.target_id', $constraints->get(0)->getPropertyPath());
+    $constraints = $order->get('coupons')->validate();
+    $this->assertEquals('0.target_id', $constraints->get(0)->getPropertyPath());
     $this->assertEquals(sprintf('The coupon <em class="placeholder">%s</em> is not available for this order.', $coupon->getCode()), $constraints->get(0)->getMessage());
 
     $promotion->setUsageLimit(2);
@@ -106,7 +106,7 @@ class CouponAvailableConstraintValidatorTest extends KernelTestBase {
     $coupon->setUsageLimit(2);
     $coupon->save();
 
-    $constraints = $order->validate();
+    $constraints = $order->get('coupons')->validate();
     $this->assertCount(0, $constraints);
 
     $order->getState()->applyTransitionById('place');
@@ -116,7 +116,7 @@ class CouponAvailableConstraintValidatorTest extends KernelTestBase {
     $coupon->save();
 
     // Placed orders should not validate coupons, as price calculation is done.
-    $constraints = $order->validate();
+    $constraints = $order->get('coupons')->validate();
     $this->assertCount(0, $constraints);
   }
 
