@@ -14,6 +14,7 @@ use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Url;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\jsonapi\Entity\EntityValidationTrait;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
 use Drupal\jsonapi\JsonApiResource\Link;
@@ -259,8 +260,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    * @return \Drupal\jsonapi\JsonApiResource\ResourceObject
    *   The resource object.
    *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   private function getResourceObjectFromOrder(OrderInterface $order, ResourceType $resource_type): ResourceObject {
@@ -268,8 +267,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $cacheability->addCacheableDependency($order);
 
     $fields = [];
-    $fields['state'] = $order->get('state');
-    $fields['email'] = $order->get('mail');
 
     $shipping_profile = $this->getOrderShippingProfile($order);
     assert($shipping_profile instanceof ProfileInterface);
@@ -311,7 +308,8 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     }
     $options = array_merge([], ...$options);
     $fields['shipping_methods'] = ['data' => array_values($options)];
-
+    $fields['state'] = $order->getState()->getId();
+    $fields['email'] = $order->getEmail();
     $fields['order_items'] = $order->get('order_items');
     $fields['total_price'] = $order->get('total_price');
     $fields['order_total'] = $order->get('order_total');
@@ -343,8 +341,8 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     // the real "fix" would be allowing updating a relationship value as if it was embedded in the entity - which is the billing profile.
 
     $fields = [];
-    $fields['state'] = new ResourceTypeAttribute('state', 'state');
-    $fields['email'] = new ResourceTypeAttribute('email', 'email');
+    $fields['state'] = new ResourceTypeAttribute('state');
+    $fields['email'] = new ResourceTypeAttribute('email');
     $fields['shipping_information'] = new ResourceTypeAttribute('shipping_information');
     $fields['shipping_method'] = new ResourceTypeAttribute('shipping_method');
     $fields['billing_information'] = new ResourceTypeAttribute('billing_information');
