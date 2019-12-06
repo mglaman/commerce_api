@@ -2,6 +2,8 @@
 
 namespace Drupal\commerce_api\Resource;
 
+use Drupal\commerce_api\Events\CheckoutResourceEvents;
+use Drupal\commerce_api\Events\CheckoutResourceMetaEvent;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\commerce_shipping\ShippingOrderManagerInterface;
@@ -28,6 +30,7 @@ use Drupal\jsonapi\ResourceType\ResourceTypeRelationship;
 use Drupal\jsonapi_resources\Resource\ResourceBase;
 use Drupal\profile\Entity\ProfileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Route;
@@ -54,15 +57,23 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
   private $shippingOrderManager;
 
   /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  private $eventDispatcher;
+
+  /**
    * CheckoutResource constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\commerce_shipping\ShippingOrderManagerInterface $shipping_order_manager
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ShippingOrderManagerInterface $shipping_order_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ShippingOrderManagerInterface $shipping_order_manager, EventDispatcherInterface $event_dispatcher) {
     $this->entityTypeManager = $entity_type_manager;
     $this->shippingOrderManager = $shipping_order_manager;
+    $this->eventDispatcher = $event_dispatcher;
   }
 
   /**
@@ -154,10 +165,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       // address.
       // @todo investigate recursive/nested validation? 🤔
       static::validate($order, $field_names);
-      // $shipments = $order->get('shipments')->referencedEntities();
-      // foreach ($shipments as $shipment) {
-      //   $shipment->save();
-      // }
       $order->save();
       // For some reason adjustments after refresh are not available unless
       // we reload here. same with saved shipment data. Something is screwing
@@ -197,7 +204,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
   }
 
   private function applyShippingRateToShipments(OrderInterface $order, string $shipping_rate_option_id) {
-    list($shipping_method_id, $shipping_service_id) = explode('--', $shipping_rate_option_id);
+    [$shipping_method_id, $shipping_service_id] = explode('--', $shipping_rate_option_id);
     $shipments = $order->get('shipments')->referencedEntities();
     $shipping_method_storage = $this->entityTypeManager->getStorage('commerce_shipping_method');
     /** @var \Drupal\commerce_shipping\Entity\ShippingMethodInterface $shipping_method */
@@ -249,6 +256,10 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
         $meta['constraints'][] = ['required' => $required];
       }
     }
+
+    $event = new CheckoutResourceMetaEvent($order, $meta);
+    $this->eventDispatcher->dispatch(CheckoutResourceEvents::CHECKOUT_META, $event);
+    $meta = $event->getMeta();
   }
 
   /**
