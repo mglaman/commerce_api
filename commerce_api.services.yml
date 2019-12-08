@@ -33,3 +33,9 @@ services:
     class: Drupal\commerce_api\AvailabilityChecker\PublishedAvailabilityChecker
     tags:
       - { name: commerce.availability_checker }
+
+  commerce_api.store_header_resolver:
+    class: Drupal\commerce_api\Resolvers\CurrentStoreHeaderResolver
+    arguments: ['@request_stack', '@entity.repository']
+    tags:
+      - { name: commerce_store.store_resolver, priority: 100 }
