@@ -1,2 +1,9 @@
 route_callbacks:
   - '\Drupal\commerce_api\Routing\Routes::routes'
+commerce_api.current_store:
+  path: '/%jsonapi%/current-store'
+  defaults:
+    _jsonapi_resource: Drupal\commerce_api\Resource\CurrentStoreResource
+    _jsonapi_resource_types: ['commerce_store--online']
+  requirements:
+    _access: 'TRUE'

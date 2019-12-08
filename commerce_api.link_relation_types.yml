@@ -4,3 +4,7 @@ shipping-methods:
   uri: 'https://drupal.org/project/commerce_api/link-relations/#shipping-methods'
   description: "The link's target points to a resource that has shipping methods on the link's context."
   notes: "This link relation type extends the `related` link relation type. It inherits all of the same semantics while adding new semantics of its own."
+current-store:
+  # uri: 'https://drupal.org/project/commerce_api/link-relations/#shipping-methods'
+  description: "The link's target points to a resource that has shipping methods on the link's context."
+  notes: "This link relation type extends the `related` link relation type. It inherits all of the same semantics while adding new semantics of its own."
