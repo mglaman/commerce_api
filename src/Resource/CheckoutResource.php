@@ -82,7 +82,8 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
   public static function create(ContainerInterface $container) {
     return new self(
       $container->get('entity_type.manager'),
-      $container->get('commerce_shipping.order_manager')
+      $container->get('commerce_shipping.order_manager'),
+      $container->get('event_dispatcher')
     );
   }
 
