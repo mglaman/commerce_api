@@ -81,6 +81,11 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
             'currency_code' => 'USD',
           ],
         ],
+        'total_price' => [
+          'number' => '4.0',
+          'currency_code' => 'USD',
+          'formatted' => '$4.00',
+        ],
       ],
       [
         [
@@ -158,6 +163,11 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
             'currency_code' => 'USD',
           ],
         ],
+        'total_price' => [
+          'number' => '4.0',
+          'currency_code' => 'USD',
+          'formatted' => '$4.00',
+        ],
       ],
         [
           [
@@ -165,6 +175,42 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
               'detail' => 'This value should not be null.',
               'source' => [
                 'pointer' => 'billing_profile',
+              ],
+            ],
+          ],
+        ],
+        [
+          'shipping_methods' => [
+            'data' => [
+              [
+                'type' => 'shipping--service',
+                'id' => '2--default',
+                'meta' => [
+                  'label' => 'Flat rate',
+                  'methodId' => '2',
+                  'serviceId' => 'default',
+                  'amount' => [
+                    'number' => '20',
+                    'currency_code' => 'USD',
+                  ],
+                  'deliveryDate' => NULL,
+                  'terms' => NULL,
+                ],
+              ],
+              [
+                'type' => 'shipping--service',
+                'id' => '1--default',
+                'meta' => [
+                  'label' => 'Flat rate',
+                  'methodId' => '1',
+                  'serviceId' => 'default',
+                  'amount' => [
+                    'number' => '5',
+                    'currency_code' => 'USD',
+                  ],
+                  'deliveryDate' => NULL,
+                  'terms' => NULL,
+                ],
               ],
             ],
           ],
@@ -207,6 +253,11 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
             'currency_code' => 'USD',
           ],
         ],
+        'total_price' => [
+          'number' => '4.0',
+          'currency_code' => 'USD',
+          'formatted' => '$4.00',
+        ],
       ],
         [
           [
@@ -214,6 +265,42 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
               'detail' => 'This value should not be null.',
               'source' => [
                 'pointer' => 'billing_profile',
+              ],
+            ],
+          ],
+        ],
+        [
+          'shipping_methods' => [
+            'data' => [
+              [
+                'type' => 'shipping--service',
+                'id' => '2--default',
+                'meta' => [
+                  'label' => 'Flat rate',
+                  'methodId' => '2',
+                  'serviceId' => 'default',
+                  'amount' => [
+                    'number' => '20',
+                    'currency_code' => 'USD',
+                  ],
+                  'deliveryDate' => NULL,
+                  'terms' => NULL,
+                ],
+              ],
+              [
+                'type' => 'shipping--service',
+                'id' => '1--default',
+                'meta' => [
+                  'label' => 'Flat rate',
+                  'methodId' => '1',
+                  'serviceId' => 'default',
+                  'amount' => [
+                    'number' => '5',
+                    'currency_code' => 'USD',
+                  ],
+                  'deliveryDate' => NULL,
+                  'terms' => NULL,
+                ],
               ],
             ],
           ],
@@ -272,6 +359,11 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
             'currency_code' => 'USD',
           ],
         ],
+        'total_price' => [
+          'number' => '24.0',
+          'currency_code' => 'USD',
+          'formatted' => '$24.00',
+        ],
       ],
         [
           [
@@ -279,6 +371,42 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
               'detail' => 'This value should not be null.',
               'source' => [
                 'pointer' => 'billing_profile',
+              ],
+            ],
+          ],
+        ],
+        [
+          'shipping_methods' => [
+            'data' => [
+              [
+                'type' => 'shipping--service',
+                'id' => '2--default',
+                'meta' => [
+                  'label' => 'Flat rate',
+                  'methodId' => '2',
+                  'serviceId' => 'default',
+                  'amount' => [
+                    'number' => '20',
+                    'currency_code' => 'USD',
+                  ],
+                  'deliveryDate' => NULL,
+                  'terms' => NULL,
+                ],
+              ],
+              [
+                'type' => 'shipping--service',
+                'id' => '1--default',
+                'meta' => [
+                  'label' => 'Flat rate',
+                  'methodId' => '1',
+                  'serviceId' => 'default',
+                  'amount' => [
+                    'number' => '5',
+                    'currency_code' => 'USD',
+                  ],
+                  'deliveryDate' => NULL,
+                  'terms' => NULL,
+                ],
               ],
             ],
           ],
@@ -353,11 +481,128 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
             'currency_code' => 'USD',
           ],
         ],
+        'total_price' => [
+          'number' => '24.0',
+          'currency_code' => 'USD',
+          'formatted' => '$24.00',
+        ],
       ],
         NULL,
         [
+          'shipping_methods' => [
+            'data' => [
+              [
+                'type' => 'shipping--service',
+                'id' => '2--default',
+                'meta' => [
+                  'label' => 'Flat rate',
+                  'methodId' => '2',
+                  'serviceId' => 'default',
+                  'amount' => [
+                    'number' => '20',
+                    'currency_code' => 'USD',
+                  ],
+                  'deliveryDate' => NULL,
+                  'terms' => NULL,
+                ],
+              ],
+              [
+                'type' => 'shipping--service',
+                'id' => '1--default',
+                'meta' => [
+                  'label' => 'Flat rate',
+                  'methodId' => '1',
+                  'serviceId' => 'default',
+                  'amount' => [
+                    'number' => '5',
+                    'currency_code' => 'USD',
+                  ],
+                  'deliveryDate' => NULL,
+                  'terms' => NULL,
+                ],
+              ],
+            ],
+          ],
+        ],
+        [
           'shipping-methods' => [
             'href' => 'http://localhost/jsonapi/cart/' . self::TEST_ORDER_UUID . '/shipping-methods',
+          ],
+        ]
+      ),
+    ];
+    yield [
+      [
+        'attributes' => [
+          'email' => 'tester@example.com',
+          'payment_gateway' => 'invalid'
+        ],
+      ],
+      [
+        'jsonapi' => [
+          'meta' => [
+            'links' => [
+              'self' => ['href' => 'http://jsonapi.org/format/1.0/'],
+            ],
+          ],
+          'version' => '1.0',
+        ],
+        'errors' => [
+          [
+            'title' => 'Unprocessable Entity',
+            'status' => '422',
+            'detail' => 'payment_gateway.0.target_id: The referenced entity (commerce_payment_gateway: invalid) does not exist.',
+            'source' => [
+              'pointer' => '/data/attributes/payment_gateway/target_id',
+            ],
+          ],
+        ],
+      ],
+    ];
+    yield [
+      [
+        'attributes' => [
+          'email' => 'tester@example.com',
+          'payment_gateway' => 'onsite'
+        ],
+      ],
+      $this->buildResponseJsonApiDocument([
+        'email' => 'tester@example.com',
+        'state' => 'draft',
+        'payment_gateway' => 'onsite',
+        'order_total' => [
+          'subtotal' => [
+            'number' => '4.0',
+            'currency_code' => 'USD',
+          ],
+          'adjustments' => [],
+          'total' => [
+            'number' => '4.0',
+            'currency_code' => 'USD',
+          ],
+        ],
+        'total_price' => [
+          'number' => '4.0',
+          'currency_code' => 'USD',
+          'formatted' => '$4.00',
+        ],
+      ],
+        [
+          [
+            'required' => [
+              'detail' => 'This value should not be null.',
+              'source' => [
+                'pointer' => 'billing_profile',
+              ],
+            ],
+          ],
+          [
+            'required' => [
+              'detail' => 'This value should not be null.',
+              'source' => [
+                'pointer' => 'shipping_information',
+              ],
+            ],
           ],
         ]
       ),

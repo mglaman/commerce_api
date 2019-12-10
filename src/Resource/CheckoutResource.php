@@ -118,7 +118,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       assert($resource_object instanceof ResourceObject);
 
       $field_names = [];
-      // If the `email` fiel was provided, set it on the order.
+      // If the `email` field was provided, set it on the order.
       if ($resource_object->hasField('email')) {
         $field_names[] = 'mail';
         $order->setEmail($resource_object->getField('email'));
@@ -157,6 +157,11 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       // Again this is 😱.
       if ($resource_object->hasField('shipping_method')) {
         $this->applyShippingRateToShipments($order, $resource_object->getField('shipping_method'));
+      }
+
+      if ($resource_object->hasField('payment_gateway')) {
+        $field_names[] = 'payment_gateway';
+        $order->set('payment_gateway', $resource_object->getField('payment_gateway'));
       }
 
       // Validate the provided fields, which will throw 422 if invalid.
@@ -280,6 +285,11 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
 
     $fields = [];
 
+    $payment_gateway = $order->get('payment_gateway');
+    if (!$payment_gateway->isEmpty()) {
+      $fields['payment_gateway'] = $payment_gateway->first()->target_id;
+    }
+
     $shipping_profile = $this->getOrderShippingProfile($order);
     assert($shipping_profile instanceof ProfileInterface);
     // @todo this needs constraints if the address isn't completely populated.
@@ -319,7 +329,9 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       }, \Drupal::service('commerce_shipping.rate_options_builder')->buildOptions($shipment));
     }
     $options = array_merge([], ...$options);
-    $fields['shipping_methods'] = ['data' => array_values($options)];
+    if (count($options) > 0 ) {
+      $fields['shipping_methods'] = ['data' => array_values($options)];
+    }
     $fields['state'] = $order->getState()->getId();
     $fields['email'] = $order->getEmail();
     $fields['order_items'] = $order->get('order_items');
@@ -358,6 +370,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $fields['shipping_information'] = new ResourceTypeAttribute('shipping_information');
     $fields['shipping_method'] = new ResourceTypeAttribute('shipping_method');
     $fields['billing_information'] = new ResourceTypeAttribute('billing_information');
+    $fields['payment_gateway'] = new ResourceTypeAttribute('payment_gateway');
     $fields['payment_instrument'] = new ResourceTypeAttribute('payment_instrument');
     $fields['order_total'] = new ResourceTypeAttribute('order_total');
     $fields['total_price'] = new ResourceTypeAttribute('total_price');
@@ -366,7 +379,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $shipping_methods_field = new ResourceTypeRelationship('shipping_methods', 'shipping_methods', TRUE, FALSE);
     $fields['shipping_methods'] = $shipping_methods_field->withRelatableResourceTypes([
       'shipping_rate_option--shipping_rate_option' => $this->getShippingRateOptionResourceType(),
-    ]);;
+    ]);
 
     $order_item_field = new ResourceTypeRelationship('order_items', 'order_items', TRUE, FALSE);
     $fields['order_items'] = $order_item_field->withRelatableResourceTypes($order_item_resource_types);

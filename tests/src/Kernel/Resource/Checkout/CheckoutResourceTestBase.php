@@ -6,6 +6,7 @@ use Drupal\commerce_api\Resource\CheckoutResource;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderItem;
 use Drupal\commerce_order\Entity\OrderType;
+use Drupal\commerce_payment\Entity\PaymentGateway;
 use Drupal\commerce_price\Price;
 use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\commerce_product\Entity\ProductVariationType;
@@ -33,9 +34,12 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
   public static $modules = [
     'physical',
     'commerce_shipping',
+    'commerce_payment',
+    'commerce_payment_example',
   ];
 
   protected const TEST_ORDER_UUID = 'd59cd06e-c674-490d-aad9-541a1625e47f';
+  protected const TEST_ORDER_ITEM_UUID = 'e8daecd7-6444-4d9a-9bd1-84dc5466dba7';
 
 //    protected $runTestInSeparateProcess = FALSE;
 
@@ -63,6 +67,18 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
     $this->installEntitySchema('commerce_shipment');
     $this->installEntitySchema('commerce_shipping_method');
     $this->installConfig(['commerce_shipping']);
+
+    $onsite_gateway = PaymentGateway::create([
+      'id' => 'onsite',
+      'label' => 'On-site',
+      'plugin' => 'example_onsite',
+      'configuration' => [
+        'api_key' => '2342fewfsfs',
+        'payment_method_types' => ['credit_card'],
+      ],
+    ]);
+    $onsite_gateway->save();
+
     /** @var \Drupal\commerce_product\Entity\ProductVariationTypeInterface $product_variation_type */
     $product_variation_type = ProductVariationType::load('default');
     $product_variation_type->setGenerateTitle(FALSE);
@@ -90,6 +106,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
     ]);
     $product_variation->save();
     $order_item = OrderItem::create([
+      'uuid' => self::TEST_ORDER_ITEM_UUID,
       'type' => 'default',
       'quantity' => '1',
       'title' => $product_variation->label(),
@@ -157,7 +174,8 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
   protected function getCheckoutResource(): CheckoutResource {
     $controller = new CheckoutResource(
       $this->container->get('entity_type.manager'),
-      $this->container->get('commerce_shipping.order_manager')
+      $this->container->get('commerce_shipping.order_manager'),
+      $this->container->get('event_dispatcher')
     );
     $controller->setResourceResponseFactory($this->container->get('jsonapi_resources.resource_response_factory'));
     $controller->setResourceTypeRepository($this->container->get('jsonapi.resource_type.repository'));
@@ -260,7 +278,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
     return $resolved_document;
   }
 
-  protected function buildResponseJsonApiDocument(array $attributes, ?array $constraints, array $links = []) {
+  protected function buildResponseJsonApiDocument(array $attributes, ?array $constraints = null, array $relationships = [], array $links = []) {
     $document = [
       'jsonapi' => [
         'meta' => [
@@ -274,6 +292,16 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
         'id' => self::TEST_ORDER_UUID,
         'type' => 'checkout_order--checkout_order',
         'attributes' => $attributes,
+        'relationships' => [
+          'order_items' => [
+            'data' => [
+              [
+                'id' => self::TEST_ORDER_ITEM_UUID,
+                'type' => 'commerce_order_item--default',
+              ]
+            ],
+          ],
+          ] +$relationships,
       ],
       'meta' => [
         'constraints' => $constraints,
@@ -286,6 +314,9 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
     ];
     if ($constraints === NULL) {
       unset($document['meta']);
+    }
+    if ($relationships === NULL) {
+      unset ($document['data']['relationships']);
     }
     return $document;
   }

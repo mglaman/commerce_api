@@ -55,6 +55,10 @@ function commerce_api_entity_base_field_info_alter(&$fields, EntityTypeInterface
     }
     $fields['order_number']->setRequired(FALSE);
     $fields['billing_profile']->setRequired(TRUE);
+
+    if (isset($fields['payment_gateway'])) {
+      // @todo add a constraint which marks it required if order total > 0;
+    }
   }
   elseif ($entity_type->id() === 'commerce_order_item') {
     // @see https://www.drupal.org/node/3088597
