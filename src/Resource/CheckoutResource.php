@@ -299,7 +299,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $fields['shipping_information'] = array_filter($shipping_profile->get('address')->first()->getValue());
     }
     $shipments = $order->get('shipments');
-    assert($shipments instanceof EntityReferenceFieldItemList);
+    assert($shipments instanceof EntityReferenceFieldItemListInterface);
     if (!$shipments->isEmpty()) {
       $shipment = $shipments->first()->entity;
       assert($shipment instanceof ShipmentInterface);

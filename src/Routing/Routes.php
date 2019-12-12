@@ -11,6 +11,7 @@ use Drupal\commerce_api\Resource\CartCouponAddResource;
 use Drupal\commerce_api\Resource\CartRemoveItemResource;
 use Drupal\commerce_api\Resource\CartUpdateItemResource;
 use Drupal\commerce_api\Resource\CheckoutResource;
+use Drupal\commerce_api\Resource\PaymentGateway\OnReturnResource;
 use Drupal\commerce_api\Resource\ShippingMethodsResource;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -101,6 +102,7 @@ class Routes implements ContainerInjectionInterface {
 
     $routes->add('commerce_api.jsonapi.cart_checkout', $this->cartCheckout());
     $routes->add('commerce_api.jsonapi.cart_shipping_methods', $this->cartShippingMethods());
+    $routes->add('commerce_api.jsonapi.checkout_payment_gateway_return', $this->checkoutPaymentGatewayReturn());
 
     // Prefix all routes with the JSON:API route prefix.
     $routes->addPrefix('/%jsonapi%');
@@ -326,6 +328,26 @@ class Routes implements ContainerInjectionInterface {
     ]);
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['order']['type'] = 'entity:commerce_order';
+    $route->setOption('parameters', $parameters);
+    return $route;
+  }
+
+  protected function checkoutPaymentGatewayReturn() {
+    $order_resource_types = array_filter($this->resourceTypeRepository->all(), static function (ResourceType $resource_type) {
+      return $resource_type->getEntityTypeId() === 'commerce_order';
+    });
+    $order_resource_types = array_map(static function (ResourceType $resource_type) {
+      return $resource_type->getTypeName();
+    }, $order_resource_types);
+
+    $route = new Route('/checkout/{commerce_order}/payment/{payment_gateway}/return');
+    $route->setMethods(['GET']);
+    $route->addDefaults([
+      '_jsonapi_resource' => OnReturnResource::class,
+      '_jsonapi_resource_types' => $order_resource_types,
+    ]);
+    $parameters = $route->getOption('parameters') ?: [];
+    $parameters['commerce_order']['type'] = 'entity:commerce_order';
     $route->setOption('parameters', $parameters);
     return $route;
   }

@@ -15,6 +15,7 @@
     "require": {
         "drupal/commerce": "^2.15",
         "drupal/commerce_shipping": "^2.0@beta",
+        "drupal/jsonapi_hypermedia": "^1.0",
         "drupal/jsonapi_resources": "^1.0@beta",
         "drupal/core": "^8.8@alpha"
     },
