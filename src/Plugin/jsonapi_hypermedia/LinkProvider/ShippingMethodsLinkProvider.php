@@ -21,8 +21,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 * @todo provide a derivative for each order resource type.
 *
 * @JsonapiHypermediaLinkProvider(
-*   id = "commerce_api.payment_gateway.approve",
-*   link_relation_type = "payment-gateway-approve",
+*   id = "commerce_api.shipping.shipping_methods",
+*   link_relation_type = "shipping-methods",
 *   link_context = {
 *     "resource_object" = TRUE,
 *   },
@@ -30,7 +30,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 *
 * @internal
 */
-final class PaymentGatewayOnReturnLinkprovider extends LinkProviderBase implements ContainerFactoryPluginInterface {
+final class ShippingMethodsLinkProvider extends LinkProviderBase implements ContainerFactoryPluginInterface {
 
     /**
    * The entity repository.
@@ -71,19 +71,15 @@ final class PaymentGatewayOnReturnLinkprovider extends LinkProviderBase implemen
     $cache_metadata = new CacheableMetadata();
     $cache_metadata->addCacheableDependency($entity);
 
-    if ($entity->get('payment_gateway')->isEmpty()) {
+    if ($entity->get('shipments')->isEmpty()) {
       return AccessRestrictedLink::createInaccessibleLink($cache_metadata);
     }
-    $payment_gateway = $entity->get('payment_gateway')->entity;
-    assert($payment_gateway instanceof PaymentGatewayInterface);
-    $cache_metadata->addCacheableDependency($payment_gateway);
 
     return AccessRestrictedLink::createLink(
       AccessResult::allowed(),
       $cache_metadata,
-      new Url('commerce_api.jsonapi.checkout_payment_gateway_return', [
-        'commerce_order' => $entity->uuid(),
-        'payment_gateway' => $payment_gateway->uuid(),
+      new Url('commerce_api.jsonapi.cart_shipping_methods', [
+        'order' => $entity->uuid(),
       ]),
       $this->getLinkRelationType()
     );

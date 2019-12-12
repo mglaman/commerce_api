@@ -348,6 +348,7 @@ class Routes implements ContainerInjectionInterface {
     ]);
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['commerce_order']['type'] = 'entity:commerce_order';
+    $parameters['payment_gateway']['type'] = 'entity:commerce_payment_gateway';
     $route->setOption('parameters', $parameters);
     return $route;
   }

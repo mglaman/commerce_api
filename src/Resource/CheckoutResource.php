@@ -27,6 +27,7 @@ use Drupal\jsonapi\ResourceResponse;
 use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\jsonapi\ResourceType\ResourceTypeAttribute;
 use Drupal\jsonapi\ResourceType\ResourceTypeRelationship;
+use Drupal\jsonapi_hypermedia\Plugin\LinkProviderManagerInterface;
 use Drupal\jsonapi_resources\Resource\ResourceBase;
 use Drupal\profile\Entity\ProfileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -179,30 +180,19 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       assert($order instanceof OrderInterface);
     }
 
-    $primary_data = new ResourceObjectData([$this->getResourceObjectFromOrder($order, $resource_type)], 1);
+    $resource_object = $this->getResourceObjectFromOrder($order, $resource_type);
+    $primary_data = new ResourceObjectData([$resource_object], 1);
 
     $renderer = \Drupal::getContainer()->get('renderer');
     assert($renderer instanceof RendererInterface);
     $context = new RenderContext();
-    $meta = [];
-    $renderer->executeInRenderContext($context, function () use (&$meta, $order) {
-      $this->addMetaRequiredConstraints($meta, $order);
+
+    $hypermedia_links_manager = \Drupal::service('jsonapi_hypermedia_provider.manager');
+    assert($hypermedia_links_manager instanceof LinkProviderManagerInterface);
+    $link_collection = $renderer->executeInRenderContext($context, function () use ($hypermedia_links_manager, $resource_object) {
+      return $hypermedia_links_manager->getLinkCollection($resource_object);
     });
-
-
-    // Links to:
-    // - GET shipping-methods,
-    // - GET payment-methods,
-    // - POST complete, if valid.
-    $link_collection = new LinkCollection([]);
-    if (!$order->get('shipments')->isEmpty()) {
-      $link = new Link(new CacheableMetadata(), Url::fromRoute('commerce_api.jsonapi.cart_shipping_methods', [
-        'order' => $order->uuid(),
-      ]), 'shipping-methods');
-      $link_collection = $link_collection->withLink('shipping-methods', $link);
-    }
-
-    $response = $this->createJsonapiResponse($primary_data, $request, 200, [], $link_collection, $meta);
+    $response = $this->createJsonapiResponse($primary_data, $request, 200, [], $link_collection);
     if (!$context->isEmpty()) {
       $response->addCacheableDependency($context->pop());
     }
@@ -240,34 +230,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $shipping_method_plugin->selectRate($shipment, $select_rate);
       $shipment->save();
     }
-  }
-
-  private function addMetaRequiredConstraints(array &$meta, OrderInterface $order): void {
-    $violations = $order->validate()->filterByFieldAccess();
-
-    if ($this->getOrderShippingProfile($order)->isNew()) {
-      $violations->add(
-        new ConstraintViolation('This value should not be null.', '', [], 'test', 'shipping_information', NULL)
-      );
-    }
-
-    if ($violations->count() > 0) {
-      $meta['constraints'] = [];
-      foreach ($violations as $violation) {
-        assert($violation instanceof ConstraintViolation);
-        $required = [
-          'detail' => $violation->getMessage(),
-          'source' => [
-            'pointer' => $violation->getPropertyPath(),
-          ],
-        ];
-        $meta['constraints'][] = ['required' => $required];
-      }
-    }
-
-    $event = new CheckoutResourceMetaEvent($order, $meta);
-    $this->eventDispatcher->dispatch(CheckoutResourceEvents::CHECKOUT_META, $event);
-    $meta = $event->getMeta();
   }
 
   /**
