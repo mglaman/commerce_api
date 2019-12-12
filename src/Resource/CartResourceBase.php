@@ -17,6 +17,8 @@ use Symfony\Component\HttpFoundation\Request;
  */
 abstract class CartResourceBase extends EntityResourceBase implements ContainerInjectionInterface {
 
+  use FixIncludeTrait;
+
   /**
    * The cart provider.
    *
@@ -52,19 +54,6 @@ abstract class CartResourceBase extends EntityResourceBase implements ContainerI
       $container->get('commerce_cart.cart_provider'),
       $container->get('commerce_cart.cart_manager')
     );
-  }
-
-  /**
-   * Fixes the includes parameter to ensure order_item.
-   *
-   * @todo determine if to remove, allow people to include if they want.
-   *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   The current request.
-   */
-  protected function fixInclude(Request $request) {
-    $include = $request->query->get('include');
-    $request->query->set('include', $include . (empty($include) ? '' : ',') . 'order_items,order_items.purchased_entity');
   }
 
   /**

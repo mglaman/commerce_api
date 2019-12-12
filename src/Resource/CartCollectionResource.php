@@ -23,7 +23,7 @@ final class CartCollectionResource extends CartResourceBase {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function process(Request $request) {
-    $this->fixInclude($request);
+    $this->fixOrderInclude($request);
     $carts = $this->cartProvider->getCarts();
     $top_level_data = $this->createCollectionDataFromEntities($carts);
     $response = $this->createJsonapiResponse($top_level_data, $request);

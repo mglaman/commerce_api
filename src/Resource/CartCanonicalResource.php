@@ -23,7 +23,7 @@ final class CartCanonicalResource extends CartResourceBase {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function process(Request $request, OrderInterface $commerce_order): ResourceResponse {
-    $this->fixInclude($request);
+    $this->fixOrderInclude($request);
     $top_level_data = $this->createIndividualDataFromEntity($commerce_order);
     return $this->createJsonapiResponse($top_level_data, $request);
   }
