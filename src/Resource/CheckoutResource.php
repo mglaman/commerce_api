@@ -12,7 +12,7 @@ use Drupal\commerce_shipping\ShippingRateOption;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Field\EntityReferenceFieldItemList;
+use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Url;
@@ -211,7 +211,9 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
 
   private function applyShippingRateToShipments(OrderInterface $order, string $shipping_rate_option_id) {
     [$shipping_method_id, $shipping_service_id] = explode('--', $shipping_rate_option_id);
-    $shipments = $order->get('shipments')->referencedEntities();
+    $shipments_field = $order->get('shipments');
+    assert($shipments_field instanceof EntityReferenceFieldItemListInterface);
+    $shipments = $shipments_field->referencedEntities();
     $shipping_method_storage = $this->entityTypeManager->getStorage('commerce_shipping_method');
     /** @var \Drupal\commerce_shipping\Entity\ShippingMethodInterface $shipping_method */
     $shipping_method = $shipping_method_storage->load($shipping_method_id);
