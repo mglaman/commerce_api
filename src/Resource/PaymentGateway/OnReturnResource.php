@@ -8,7 +8,10 @@ use Drupal\commerce_payment\Entity\PaymentGatewayInterface;
 use Drupal\commerce_payment\Exception\PaymentGatewayException;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\OffsitePaymentGatewayInterface;
 use Drupal\Core\Access\AccessException;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\jsonapi_resources\Resource\EntityResourceBase;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -16,11 +19,29 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @see Drupal\commerce_payment\Controller\PaymentCheckoutController.
  */
-final class OnReturnResource extends EntityResourceBase {
+final class OnReturnResource extends EntityResourceBase implements ContainerInjectionInterface {
 
   use FixIncludeTrait;
 
+  private $logger;
+
+  public function __construct(LoggerInterface $logger) {
+    $this->logger = $logger;
+  }
+
+  public function create(ContainerInterface $container) {
+    return new self($container->get('logger.channel.commerce_payment'));
+  }
+
   public function process(Request $request, OrderInterface $commerce_order, PaymentGatewayInterface $payment_gateway) {
+    // @todo should this actually be a "not allowed" exception?
+    // instead be kind and just return the order object to be reentrant.
+    if ($commerce_order->getState()->getId() !== 'draft') {
+      $this->fixOrderInclude($request);
+      $top_level_data = $this->createIndividualDataFromEntity($commerce_order);
+      return $this->createJsonapiResponse($top_level_data, $request);
+    }
+
     if ($commerce_order->get('payment_gateway')->target_id !== $payment_gateway->id()) {
       throw new AccessException('The payment gateway is not for this order.');
     }
@@ -31,14 +52,21 @@ final class OnReturnResource extends EntityResourceBase {
 
     try {
       $payment_gateway_plugin->onReturn($commerce_order, $request);
+      // The on return method is concerned with creating/completing payments,
+      // so we can assume the order has been finished and place it.
+      $commerce_order->getState()->applyTransitionById('place');
+      $commerce_order->save();
     }
     catch (PaymentGatewayException $e) {
       $this->logger->error($e->getMessage());
-      $this->messenger->addError(t('Payment failed at the payment server. Please review your information and try again.'));
+      throw new PaymentGatewayException(
+        'Payment failed at the payment server. Please review your information and try again.',
+        $e->getCode(),
+        $e
+      );
     }
 
     $this->fixOrderInclude($request);
-    // @todo payment gateways need to be able to attach metadata to this.
     $top_level_data = $this->createIndividualDataFromEntity($commerce_order);
     return $this->createJsonapiResponse($top_level_data, $request);
   }
