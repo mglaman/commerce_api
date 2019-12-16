@@ -340,7 +340,7 @@ class Routes implements ContainerInjectionInterface {
       return $resource_type->getTypeName();
     }, $order_resource_types);
 
-    $route = new Route('/checkout/{commerce_order}/payment/{payment_gateway}/return');
+    $route = new Route('/checkout/{commerce_order}/payment/return');
     $route->setMethods(['GET']);
     $route->addDefaults([
       '_jsonapi_resource' => OnReturnResource::class,
@@ -348,7 +348,6 @@ class Routes implements ContainerInjectionInterface {
     ]);
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['commerce_order']['type'] = 'entity:commerce_order';
-    $parameters['payment_gateway']['type'] = 'entity:commerce_payment_gateway';
     $route->setOption('parameters', $parameters);
     return $route;
   }

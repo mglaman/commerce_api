@@ -33,7 +33,7 @@ final class OnReturnResource extends EntityResourceBase implements ContainerInje
     return new self($container->get('logger.channel.commerce_payment'));
   }
 
-  public function process(Request $request, OrderInterface $commerce_order, PaymentGatewayInterface $payment_gateway) {
+  public function process(Request $request, OrderInterface $commerce_order) {
     // @todo should this actually be a "not allowed" exception?
     // instead be kind and just return the order object to be reentrant.
     if ($commerce_order->getState()->getId() !== 'draft') {
@@ -42,11 +42,17 @@ final class OnReturnResource extends EntityResourceBase implements ContainerInje
       return $this->createJsonapiResponse($top_level_data, $request);
     }
 
-    if ($commerce_order->get('payment_gateway')->target_id !== $payment_gateway->id()) {
-      throw new AccessException('The payment gateway is not for this order.');
+    if ($commerce_order->get('payment_gateway')->isEmpty()) {
+      throw new AccessException('A payment gateway is not set for this order.');
     }
+    $payment_gateway = $commerce_order->get('payment_gateway')->entity;
+    if (!$payment_gateway instanceof PaymentGatewayInterface) {
+      throw new AccessException('A payment gateway is not set for this order.');
+    }
+
     $payment_gateway_plugin = $payment_gateway->getPlugin();
     if (!$payment_gateway_plugin instanceof OffsitePaymentGatewayInterface) {
+      // @todo this message feels too internal to expose to a frontend.
       throw new AccessException('The payment gateway for the order does not implement ' . OffsitePaymentGatewayInterface::class);
     }
 
