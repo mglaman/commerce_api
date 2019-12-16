@@ -29,7 +29,7 @@ final class OnReturnResource extends EntityResourceBase implements ContainerInje
     $this->logger = $logger;
   }
 
-  public function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container) {
     return new self($container->get('logger.channel.commerce_payment'));
   }
 
