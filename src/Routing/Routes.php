@@ -107,10 +107,9 @@ class Routes implements ContainerInjectionInterface {
     // Prefix all routes with the JSON:API route prefix.
     $routes->addPrefix('/%jsonapi%');
 
-    // All routes must pass _cart_api access check.
     $routes->addRequirements([
       '_access' => 'TRUE',
-      '_cart_api' => 'TRUE',
+      '_commerce_api_route' => 'TRUE',
     ]);
 
     // Set a resource type so entity UUID parameter conversion works.
@@ -164,6 +163,7 @@ class Routes implements ContainerInjectionInterface {
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['commerce_order']['type'] = 'entity:commerce_order';
     $route->setOption('parameters', $parameters);
+    $route->setRequirement('_entity_access', 'commerce_order.view');
     return $route;
   }
 
@@ -182,6 +182,7 @@ class Routes implements ContainerInjectionInterface {
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['commerce_order']['type'] = 'entity:commerce_order';
     $route->setOption('parameters', $parameters);
+    $route->setRequirement('_entity_access', 'commerce_order.update');
     return $route;
   }
 
@@ -214,7 +215,6 @@ class Routes implements ContainerInjectionInterface {
       '_jsonapi_resource_types' => $order_item_resource_types,
     ]);
     $route->setMethods(['POST']);
-
     return $route;
   }
 
@@ -241,6 +241,7 @@ class Routes implements ContainerInjectionInterface {
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['commerce_order']['type'] = 'entity:commerce_order';
     $route->setOption('parameters', $parameters);
+    $route->setRequirement('_entity_access', 'commerce_order.update');
     return $route;
   }
 
@@ -268,6 +269,8 @@ class Routes implements ContainerInjectionInterface {
     $parameters['commerce_order']['type'] = 'entity:commerce_order';
     $parameters['commerce_order_item']['type'] = 'entity:commerce_order_item';
     $route->setOption('parameters', $parameters);
+    $route->setRequirement('_entity_access', 'commerce_order.update');
+    $route->setRequirement('_entity_access', 'commerce_order_item.update');
     return $route;
   }
 
@@ -294,6 +297,7 @@ class Routes implements ContainerInjectionInterface {
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['commerce_order']['type'] = 'entity:commerce_order';
     $route->setOption('parameters', $parameters);
+    $route->setRequirement('_entity_access', 'commerce_order.update');
     return $route;
   }
 
@@ -312,6 +316,7 @@ class Routes implements ContainerInjectionInterface {
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['order']['type'] = 'entity:commerce_order';
     $route->setOption('parameters', $parameters);
+    $route->setRequirement('_entity_access', 'order.update');
     return $route;
   }
   /**
@@ -329,6 +334,7 @@ class Routes implements ContainerInjectionInterface {
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['order']['type'] = 'entity:commerce_order';
     $route->setOption('parameters', $parameters);
+    $route->setRequirement('_entity_access', 'order.view');
     return $route;
   }
 
@@ -349,6 +355,7 @@ class Routes implements ContainerInjectionInterface {
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['commerce_order']['type'] = 'entity:commerce_order';
     $route->setOption('parameters', $parameters);
+    $route->setRequirement('_entity_access', 'commerce_order.view');
     return $route;
   }
 

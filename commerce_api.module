@@ -8,7 +8,9 @@
 use Drupal\commerce_api\Plugin\Field\ComputedOrderTotal;
 use Drupal\commerce_api\Plugin\Field\ComputedResolvedPrice;
 use Drupal\commerce_api\Plugin\openapi\OpenApiGenerator\AdjustedJsonApiGenerator;
+use Drupal\commerce_cart\CartSessionInterface;
 use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\commerce_order\Entity\OrderItemInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -30,14 +32,30 @@ function commerce_api_entity_field_access($operation, FieldDefinitionInterface $
  *
  * Allows anonymous users to view their own orders without
  * granting the `view own commerce_order` permission.
+ *
+ * @todo decide about UPDATE and DELETE.
+ *       ideally UPDATE would be handled on field level.
  */
 function commerce_api_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-  if ($entity instanceof OrderInterface) {
-    $cart_session = \Drupal::getContainer()->get('commerce_cart.cart_provider');
+  if ($entity instanceof OrderInterface || $entity instanceof OrderItemInterface) {
+    if ($entity instanceof OrderItemInterface) {
+      $order_id = $entity->getOrderId();
+    }
+    else {
+      $order_id = $entity->id();
+    }
+
+    $cart_session = \Drupal::getContainer()->get('commerce_cart.cart_session');
+    assert($cart_session instanceof CartSessionInterface);
+
+    // Active carts may be modified.
+    $active_cart = $cart_session->hasCartId($order_id, CartSessionInterface::ACTIVE);
+    $completed_cart = $cart_session->hasCartId($order_id, CartSessionInterface::COMPLETED);
     if ($operation === 'view') {
-      $cart_ids = $cart_session->getCartIds($account);
-      $result = AccessResult::allowedIf(in_array((int) $entity->id(), $cart_ids, TRUE));
-      return $result;
+     return AccessResult::allowedIf($active_cart || $completed_cart);
+    }
+    elseif ($operation === 'update') {
+      return AccessResult::allowedIf($active_cart);
     }
   }
   return AccessResult::neutral();

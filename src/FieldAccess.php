@@ -35,7 +35,7 @@ class FieldAccess implements FieldAccessInterface {
   public function handle($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL): AccessResultInterface {
     $route = $this->routeMatch->getRouteObject();
     // Only check access if this is running on our API routes.
-    if (!$route || !$route->hasRequirement('_cart_api')) {
+    if (!$route || !$route->hasRequirement('_commerce_api_route')) {
       return AccessResult::neutral();
     }
 

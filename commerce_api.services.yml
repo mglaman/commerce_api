@@ -2,11 +2,6 @@ services:
   commerce_api.jsonapi_controller_shim:
     parent: jsonapi.entity_resource
     class: Drupal\commerce_api\EntityResourceShim
-  access_check.cart_api:
-    class: Drupal\commerce_api\Access\CartApiAccessCheck
-    arguments: ['@commerce_cart.cart_provider']
-    tags:
-      - { name: access_check, applies_to: _cart_api }
 
   commerce_api.field_access:
     class: Drupal\commerce_api\FieldAccess

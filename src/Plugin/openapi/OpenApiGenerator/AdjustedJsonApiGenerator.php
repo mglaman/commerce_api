@@ -11,9 +11,9 @@ final class AdjustedJsonApiGenerator extends JsonApiGenerator {
    * {@inheritdoc}}
    */
   protected function getJsonApiRoutes() {
-    // Remove Cart API routes since the resource types are incorrect.
+    // Remove Commerce API routes since the resource types are incorrect.
     $jsonapi_routes = array_filter(parent::getJsonApiRoutes(), static function (Route $route) {
-      return !$route->hasRequirement('_cart_api');
+      return !$route->hasRequirement('_commerce_api_route');
     });
     return $jsonapi_routes;
   }
