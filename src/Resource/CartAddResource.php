@@ -17,6 +17,7 @@ use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\jsonapi\Entity\EntityValidationTrait;
 use Drupal\jsonapi\JsonApiResource\ResourceIdentifier;
 use Drupal\jsonapi\JsonApiResource\ResourceIdentifierInterface;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
@@ -27,6 +28,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class CartAddResource extends CartResourceBase {
+
+  use EntityValidationTrait;
 
   /**
    * The JSON:API controller.
@@ -140,6 +143,11 @@ final class CartAddResource extends CartResourceBase {
         $purchased_entity = $this->getPurchasableEntityFromResourceIdentifier($resource_identifier);
         $store = $this->selectStore($purchased_entity);
         $order_item = $order_item_storage->createFromPurchasableEntity($purchased_entity, ['quantity' => $meta['quantity'] ?? 1]);
+        // @todo if processing multiple items, this could fail halfway through.
+        //       determine if we should collect a grouping of errors and return them.
+        // @todo https://www.drupal.org/project/commerce/issues/3101651
+        static::validate($order_item, ['quantity', 'purchased_entity']);
+
         $cart = $this->getCartForOrderItem($order_item, $store);
         $order_item = $this->cartManager->addOrderItem($cart, $order_item, $meta['combine'] ?? TRUE);
         // Reload the order item as the cart has refreshed.
