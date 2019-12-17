@@ -143,12 +143,13 @@ final class CartAddResource extends CartResourceBase {
         $purchased_entity = $this->getPurchasableEntityFromResourceIdentifier($resource_identifier);
         $store = $this->selectStore($purchased_entity);
         $order_item = $order_item_storage->createFromPurchasableEntity($purchased_entity, ['quantity' => $meta['quantity'] ?? 1]);
-        // @todo if processing multiple items, this could fail halfway through.
-        //       determine if we should collect a grouping of errors and return them.
+        // @todo If processing multiple items, this could fail halfway through.
+        // Determine if we should collect a grouping of errors and return them.
+        // We set the order_id to the cart object for any constraint validators.
         // @todo https://www.drupal.org/project/commerce/issues/3101651
-        static::validate($order_item, ['quantity', 'purchased_entity']);
-
         $cart = $this->getCartForOrderItem($order_item, $store);
+        $order_item->set('order_id', $cart);
+        static::validate($order_item, ['quantity', 'purchased_entity']);
         $order_item = $this->cartManager->addOrderItem($cart, $order_item, $meta['combine'] ?? TRUE);
         // Reload the order item as the cart has refreshed.
         // @todo remove after https://www.drupal.org/node/3038342
