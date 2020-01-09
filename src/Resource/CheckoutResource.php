@@ -5,6 +5,7 @@ namespace Drupal\commerce_api\Resource;
 use Drupal\commerce_api\Events\CheckoutResourceEvents;
 use Drupal\commerce_api\Events\CheckoutResourceMetaEvent;
 use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\commerce_order\Event\OrderEvent;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\commerce_shipping\ShippingOrderManagerInterface;
 use Drupal\commerce_shipping\ShippingRate;
@@ -178,6 +179,16 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       // with the references.
       $order = $this->entityTypeManager->getStorage('commerce_order')->load($order->id());
       assert($order instanceof OrderInterface);
+    }
+    else {
+      if (!$order->getData('checkout_init_event_dispatched', FALSE)) {
+        $event = new OrderEvent($order);
+        // @todo: replace the event name by the right one once
+        // https://www.drupal.org/project/commerce/issues/3104564 is resolved.
+        $this->eventDispatcher->dispatch('commerce_checkout.init', $event);
+        $order->setData('checkout_init_event_dispatched', TRUE);
+        $order->save();
+      }
     }
 
     $resource_object = $this->getResourceObjectFromOrder($order, $resource_type);
