@@ -99,7 +99,9 @@ final class CartTokenSubscriber implements EventSubscriberInterface {
     $request = $event->getRequest();
     if ($request->headers->has(CartTokenSession::HEADER_NAME)) {
       $response = $event->getResponse();
-      $response->setVary(CartTokenSession::HEADER_NAME, FALSE);
+      if ($response->isCacheable()) {
+        $response->setVary(CartTokenSession::HEADER_NAME, FALSE);
+      }
     }
   }
 
