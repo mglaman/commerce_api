@@ -10,3 +10,11 @@ commerce_api.current_store:
     no_cache: 'TRUE'
   requirements:
     _access: 'TRUE'
+
+# Prevent JSON:API Schema from crashing on the checkout resource
+jsonapi_schema.checkout_order--checkout_order.type:
+  path: '/jsonapi/cart/checkout/schema'
+  defaults:
+    _controller: Drupal\commerce_api\Controller\StubJsonApiSchemaController::noop
+  requirements:
+    _access: 'TRUE'
