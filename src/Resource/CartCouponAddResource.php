@@ -6,15 +6,12 @@ use Drupal\commerce_api\EntityResourceShim;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_promotion\CouponStorageInterface;
 use Drupal\commerce_promotion\Entity\CouponInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\jsonapi\Access\EntityAccessChecker;
 use Drupal\jsonapi\Entity\EntityValidationTrait;
 use Drupal\jsonapi\JsonApiResource\ResourceIdentifier;
-use Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface;
 use Drupal\jsonapi_resources\Resource\EntityResourceBase;
-use Drupal\jsonapi_resources\ResourceResponseFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -22,7 +19,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 /**
  * Cart add coupon resource.
  */
-final class CartCouponAddResource extends EntityResourceBase {
+final class CartCouponAddResource extends EntityResourceBase implements ContainerInjectionInterface {
 
   use EntityValidationTrait;
 
