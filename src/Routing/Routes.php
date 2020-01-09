@@ -8,6 +8,7 @@ use Drupal\commerce_api\Resource\CartCanonicalResource;
 use Drupal\commerce_api\Resource\CartClearResource;
 use Drupal\commerce_api\Resource\CartCollectionResource;
 use Drupal\commerce_api\Resource\CartCouponAddResource;
+use Drupal\commerce_api\Resource\CartCouponRemoveResource;
 use Drupal\commerce_api\Resource\CartRemoveItemResource;
 use Drupal\commerce_api\Resource\CartUpdateItemResource;
 use Drupal\commerce_api\Resource\CheckoutResource;
@@ -98,6 +99,8 @@ class Routes implements ContainerInjectionInterface {
 
     if ($this->entityTypeManager->hasDefinition('commerce_promotion_coupon')) {
       $routes->add('commerce_api.jsonapi.cart_coupon_add', $this->cartCouponAdd());
+      $routes->add('commerce_api.jsonapi.cart_coupon_remove', $this->cartCouponRemove());
+
     }
 
     $routes->add('commerce_api.jsonapi.cart_checkout', $this->cartCheckout());
@@ -292,6 +295,33 @@ class Routes implements ContainerInjectionInterface {
     $route->setMethods(['PATCH']);
     $route->addDefaults([
       '_jsonapi_resource' => CartCouponAddResource::class,
+      '_jsonapi_resource_types' => $coupon_resource_types,
+    ]);
+    $parameters = $route->getOption('parameters') ?: [];
+    $parameters['commerce_order']['type'] = 'entity:commerce_order';
+    $route->setOption('parameters', $parameters);
+    $route->setRequirement('_entity_access', 'commerce_order.update');
+    return $route;
+  }
+
+  /**
+   * The cart coupon remove resource route.
+   *
+   * @return \Symfony\Component\Routing\Route
+   *   The route.
+   */
+  protected function cartCouponRemove() {
+    $coupon_resource_types = array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) {
+      return $resource_type->getEntityTypeId() === 'commerce_promotion_coupon';
+    });
+    $coupon_resource_types = array_map(static function (ResourceType $resource_type) {
+      return $resource_type->getTypeName();
+    }, $coupon_resource_types);
+
+    $route = new Route('/cart/{commerce_order}/coupons');
+    $route->setMethods(['DELETE']);
+    $route->addDefaults([
+      '_jsonapi_resource' => CartCouponRemoveResource::class,
       '_jsonapi_resource_types' => $coupon_resource_types,
     ]);
     $parameters = $route->getOption('parameters') ?: [];
