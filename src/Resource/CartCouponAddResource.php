@@ -7,9 +7,11 @@ use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_promotion\CouponStorageInterface;
 use Drupal\commerce_promotion\Entity\CouponInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\jsonapi\Entity\EntityValidationTrait;
+use Drupal\jsonapi\Exception\UnprocessableHttpEntityException;
 use Drupal\jsonapi\JsonApiResource\ResourceIdentifier;
 use Drupal\jsonapi_resources\Resource\EntityResourceBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -96,10 +98,22 @@ final class CartCouponAddResource extends EntityResourceBase implements Containe
       return $coupons;
     });
 
-    /* @var \Drupal\Core\Field\EntityReferenceFieldItemListInterface $field_list */
     $field_list = $commerce_order->{$internal_relationship_field_name};
+    assert($field_list instanceof EntityReferenceFieldItemListInterface);
     $field_list->setValue($coupons);
-    self::validate($commerce_order, ['coupons']);
+    // We cannot use EntityValidationTrait::validate as the end user does not
+    // have access to edit the `coupons` field, so violations are filtered out
+    // by filterByFieldAccess.
+    $violations = $commerce_order->validate();
+    $violations->filterByFields(
+      array_diff(array_keys($commerce_order->getFieldDefinitions()), ['coupons'])
+    );
+    if (count($violations) > 0) {
+      $exception = new UnprocessableHttpEntityException();
+      $exception->setViolations($violations);
+      throw $exception;
+    }
+
     $commerce_order->save();
 
     return $this->inner->getRelationship(
