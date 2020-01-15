@@ -4,8 +4,8 @@ namespace Drupal\commerce_api\Resource;
 
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
-use Drupal\commerce_shipping\ShippingRateOption;
-use Drupal\commerce_shipping\ShippingRateOptionsBuilderInterface;
+use Drupal\commerce_shipping\ShipmentManagerInterface;
+use Drupal\commerce_shipping\ShippingRate;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
@@ -24,17 +24,19 @@ use Symfony\Component\Routing\Route;
 final class ShippingMethodsResource extends ResourceBase implements ContainerInjectionInterface {
 
   /**
-   * @var \Drupal\commerce_shipping\ShippingRateOptionsBuilderInterface
+   * The shipment manager.
+   *
+   * @var \Drupal\commerce_shipping\ShipmentManagerInterface
    */
-  private $shippingRateOptionsBuilder;
+  private $shipmentManager;
 
-  public function __construct(ShippingRateOptionsBuilderInterface $shipping_rate_options_builder) {
-    $this->shippingRateOptionsBuilder = $shipping_rate_options_builder;
+  public function __construct(ShipmentManagerInterface $shipment_manager) {
+    $this->shipmentManager = $shipment_manager;
   }
 
   public static function create(ContainerInterface $container) {
     return new self(
-      $container->get('commerce_shipping.rate_options_builder')
+      $container->get('commerce_shipping.shipment_manager')
     );
   }
 
@@ -49,19 +51,18 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
     $options = [];
     foreach ($shipments as $shipment) {
       assert($shipment instanceof ShipmentInterface);
-      $options[] = array_map(static function (ShippingRateOption $option) use ($resource_type) {
-        // @todo make this easier.
-        $rate = $option->getShippingRate();
+      $options[] = array_map(static function (ShippingRate $rate) use ($resource_type) {
+        list($shipping_method_id, $shipping_rate_id) = explode('--', $rate->getId());
         $delivery_date = $rate->getDeliveryDate();
         $service = $rate->getService();
         return new ResourceObject(
           new CacheableMetadata(),
           $resource_type,
-          $option->getId(),
+          $rate->getId(),
           NULL,
           [
             'label' => $service->getLabel(),
-            'methodId' => $option->getShippingMethodId(),
+            'methodId' => $shipping_method_id,
             'serviceId' => $service->getId(),
             'amount' => $rate->getAmount()->toArray(),
             'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
@@ -70,7 +71,7 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
           // @todo link template to provide PATCH data :?
           new LinkCollection([])
         );
-      }, $this->shippingRateOptionsBuilder->buildOptions($shipment));
+      }, $this->shipmentManager->calculateRates($shipment));
     }
     $options = array_merge([], ...$options);
     $response = $this->createJsonapiResponse(new ResourceObjectData($options), $request);

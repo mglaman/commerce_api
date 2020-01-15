@@ -39,7 +39,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
     $this->processRequest($request, $checkoutResourceController);
 
     $checkoutShippingMethodsController = new ShippingMethodsResource(
-      $this->container->get('commerce_shipping.rate_options_builder')
+      $this->container->get('commerce_shipping.shipment_manager')
     );
     $checkoutShippingMethodsController->setResourceResponseFactory($this->container->get('jsonapi_resources.resource_response_factory'));
     $checkoutShippingMethodsController->setResourceTypeRepository($this->container->get('jsonapi.resource_type.repository'));

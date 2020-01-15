@@ -7,6 +7,7 @@ use Drupal\commerce_api\Events\CheckoutResourceMetaEvent;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Event\OrderEvent;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
+use Drupal\commerce_shipping\ShipmentManagerInterface;
 use Drupal\commerce_shipping\ShippingOrderManagerInterface;
 use Drupal\commerce_shipping\ShippingRate;
 use Drupal\commerce_shipping\ShippingRateOption;
@@ -54,9 +55,18 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
   private $entityTypeManager;
 
   /**
+   * The shipping order manager.
+   *
    * @var \Drupal\commerce_shipping\ShippingOrderManagerInterface
    */
   private $shippingOrderManager;
+
+  /**
+   * The shipment manager.
+   *
+   * @var \Drupal\commerce_shipping\ShipmentManagerInterface
+   */
+  private $shipmentManager;
 
   /**
    * The event dispatcher.
@@ -71,10 +81,16 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\commerce_shipping\ShippingOrderManagerInterface $shipping_order_manager
+   *   The shipping order manager.
+   * @param \Drupal\commerce_shipping\ShipmentManagerInterface $shipment_manager
+   *   The shipment manager.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
+   *   The event dispatcher.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ShippingOrderManagerInterface $shipping_order_manager, EventDispatcherInterface $event_dispatcher) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ShippingOrderManagerInterface $shipping_order_manager, ShipmentManagerInterface $shipment_manager, EventDispatcherInterface $event_dispatcher) {
     $this->entityTypeManager = $entity_type_manager;
     $this->shippingOrderManager = $shipping_order_manager;
+    $this->shipmentManager = $shipment_manager;
     $this->eventDispatcher = $event_dispatcher;
   }
 
@@ -85,6 +101,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     return new self(
       $container->get('entity_type.manager'),
       $container->get('commerce_shipping.order_manager'),
+      $container->get('commerce_shipping.shipment_manager'),
       $container->get('event_dispatcher')
     );
   }
@@ -285,23 +302,23 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $options = [];
     foreach ($shipments->referencedEntities() as $shipment) {
       assert($shipment instanceof ShipmentInterface);
-      $options[] = array_map(static function (ShippingRateOption $option) use ($resource_type) {
-        $rate = $option->getShippingRate();
+      $options[] = array_map(static function (ShippingRate $rate) use ($resource_type) {
+        list($shipping_method_id, $shipping_rate_id) = explode('--', $rate->getId());
         $delivery_date = $rate->getDeliveryDate();
         $service = $rate->getService();
         return [
           'type' => 'shipping--service',
-          'id' => $option->getId(),
+          'id' => $rate->getId(),
           'meta' => [
             'label' => $service->getLabel(),
-            'methodId' => $option->getShippingMethodId(),
+            'methodId' => $shipping_method_id,
             'serviceId' => $service->getId(),
             'amount' => $rate->getAmount()->toArray(),
             'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
             'terms' => $rate->getDeliveryTerms(),
           ]
         ];
-      }, \Drupal::service('commerce_shipping.rate_options_builder')->buildOptions($shipment));
+      }, $this->shipmentManager->calculateRates($shipment));
     }
     $options = array_merge([], ...$options);
     if (count($options) > 0 ) {
