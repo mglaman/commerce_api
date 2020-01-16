@@ -2,6 +2,9 @@
 
 namespace Drupal\commerce_api\Events;
 
+/**
+ * @todo remove after https://www.drupal.org/project/drupal/issues/3100732
+ */
 final class JsonapiEvents {
 
   const COLLECT_RESOURCE_OBJECT_META = 'jsonapi.collect_resource_object_meta';

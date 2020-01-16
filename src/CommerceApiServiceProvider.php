@@ -20,6 +20,7 @@ final class CommerceApiServiceProvider extends ServiceProviderBase {
     // within the \Drupal\jsonapi\Normalizer namespace in order to circumvent
     // the encapsulation enforced by
     // \Drupal\jsonapi\Serializer\Serializer::__construct().
+    // @todo remove after https://www.drupal.org/project/drupal/issues/3100732
     $container_namespaces = $container->getParameter('container.namespaces');
     $container_modules = $container->getParameter('container.modules');
     $impostor_path = dirname($container_modules['commerce_api']['pathname']) . '/src/Normalizer/CommerceApiImposter';

@@ -13,6 +13,8 @@ use Symfony\Component\Validator\Constraint;
  *   id = "CouponValid",
  *   label = @Translation("Coupon valid reference", context = "Validation")
  * )
+ *
+ * @todo remove after https://www.drupal.org/project/commerce/issues/3041856
  */
 class CouponValidConstraint extends Constraint {
 

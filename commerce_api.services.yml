@@ -23,7 +23,7 @@ services:
     tags:
       - { name: event_subscriber }
 
-  # @see https://www.drupal.org/project/commerce/issues/3088598
+  # @todo remove and add as a patch to https://www.drupal.org/project/commerce/issues/3088598
   commerce_api.published_availability_checker:
     class: Drupal\commerce_api\AvailabilityChecker\PublishedAvailabilityChecker
     tags:
@@ -41,6 +41,7 @@ services:
     tags:
       - { name: event_subscriber }
 
+  # @todo remove after https://www.drupal.org/project/drupal/issues/3100732
   commerce_api.normalizer.resource_object.jsonapi:
     class: Drupal\jsonapi\Normalizer\CommerceApiImposter\MetaResourceObjectNormalizer
     decorates: 'serializer.normalizer.resource_object.jsonapi'

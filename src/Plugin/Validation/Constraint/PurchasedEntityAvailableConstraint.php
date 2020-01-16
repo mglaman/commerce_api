@@ -13,6 +13,8 @@ use Symfony\Component\Validator\Constraint;
  *   id = "PurchasedEntityAvailable",
  *   label = @Translation("Purchasable entity available", context = "Validation")
  * )
+ *
+ * @todo remove after https://www.drupal.org/node/3088597
  */
 class PurchasedEntityAvailableConstraint extends Constraint {
 

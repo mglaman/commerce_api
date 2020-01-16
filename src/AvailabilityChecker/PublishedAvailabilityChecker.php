@@ -7,6 +7,9 @@ use Drupal\commerce\Context;
 use Drupal\commerce\PurchasableEntityInterface;
 use Drupal\Core\Entity\EntityPublishedInterface;
 
+/**
+ * @todo remove and add as a patch to https://www.drupal.org/project/commerce/issues/3088598
+ */
 final class PublishedAvailabilityChecker implements AvailabilityCheckerInterface {
 
   /**

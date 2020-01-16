@@ -10,6 +10,9 @@ use Drupal\jsonapi\Normalizer\ResourceObjectNormalizer;
 use Drupal\jsonapi\Normalizer\Value\CacheableNormalization;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
+/**
+ * @todo remove after https://www.drupal.org/project/drupal/issues/3100732
+ */
 final class MetaResourceObjectNormalizer extends ResourceObjectNormalizer {
 
   private $eventDispatcher;

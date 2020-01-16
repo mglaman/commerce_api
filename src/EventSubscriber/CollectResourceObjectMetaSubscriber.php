@@ -11,6 +11,9 @@ use Drupal\profile\Entity\ProfileInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Validator\ConstraintViolation;
 
+/**
+ * @todo document.
+ */
 final class CollectResourceObjectMetaSubscriber implements EventSubscriberInterface {
 
   private $entityRepository;

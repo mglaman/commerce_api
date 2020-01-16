@@ -10,6 +10,9 @@ use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
+/**
+ * @todo remove after https://www.drupal.org/node/3088597
+ */
 class PurchasedEntityAvailableConstraintValidator extends ConstraintValidator {
 
   /**

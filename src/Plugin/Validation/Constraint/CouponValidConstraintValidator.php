@@ -8,6 +8,9 @@ use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
+/**
+ * @todo remove after https://www.drupal.org/project/commerce/issues/3041856
+ */
 class CouponValidConstraintValidator extends ConstraintValidator {
 
   /**

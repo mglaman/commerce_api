@@ -5,6 +5,10 @@ namespace Drupal\commerce_api\Events;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Symfony\Component\EventDispatcher\Event;
 
+/**
+ * @todo document.
+ * @todo remove after https://www.drupal.org/project/drupal/issues/3100732
+ */
 final class CollectResourceObjectMetaEvent extends Event {
 
   private $resourceObject;
