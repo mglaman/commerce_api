@@ -144,10 +144,13 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       }
 
       if ($resource_object->hasField('billing_information')) {
-        // @todo cannot validate entity reference, due to access.
+        // @todo cannot validate entity reference, due to entity access.
         // @see 'billing_profile.0.target_id: This entity (profile: 1) cannot be referenced.
         // $field_names[] = 'billing_profile';
         $billing_information = $resource_object->getField('billing_information');
+        // @todo On `commerce_checkout.init` event, set an empty billing profile.
+        // Although we need to handle the event people may not call
+        // GET /checkout to initialize the order.
         $billing_profile = $order->getBillingProfile() ?: $this->entityTypeManager->getStorage('profile')->create([
           'type' => 'customer',
           'uid' => 0,
@@ -160,8 +163,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       }
 
       // If shipping information was provided, do Shipping stuff.
-      // @todo this is 😱😭.
-      // @todo https://www.drupal.org/project/commerce_shipping/issues/3096130
       if ($resource_object->hasField('shipping_information')) {
         $field_names[] = 'shipments';
         $shipping_information = $resource_object->getField('shipping_information');
@@ -197,15 +198,13 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $order = $this->entityTypeManager->getStorage('commerce_order')->load($order->id());
       assert($order instanceof OrderInterface);
     }
-    else {
-      if (!$order->getData('checkout_init_event_dispatched', FALSE)) {
-        $event = new OrderEvent($order);
-        // @todo: replace the event name by the right one once
-        // https://www.drupal.org/project/commerce/issues/3104564 is resolved.
-        $this->eventDispatcher->dispatch('commerce_checkout.init', $event);
-        $order->setData('checkout_init_event_dispatched', TRUE);
-        $order->save();
-      }
+    elseif (!$order->getData('checkout_init_event_dispatched', FALSE)) {
+      $event = new OrderEvent($order);
+      // @todo: replace the event name by the right one once
+      // https://www.drupal.org/project/commerce/issues/3104564 is resolved.
+      $this->eventDispatcher->dispatch('commerce_checkout.init', $event);
+      $order->setData('checkout_init_event_dispatched', TRUE);
+      $order->save();
     }
 
     $resource_object = $this->getResourceObjectFromOrder($order, $resource_type);
@@ -215,6 +214,8 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     assert($renderer instanceof RendererInterface);
     $context = new RenderContext();
 
+    // Add links to the root level.
+    // @todo is this needed?
     $hypermedia_links_manager = \Drupal::service('jsonapi_hypermedia_provider.manager');
     assert($hypermedia_links_manager instanceof LinkProviderManagerInterface);
     $link_collection = $renderer->executeInRenderContext($context, function () use ($hypermedia_links_manager, $resource_object) {
