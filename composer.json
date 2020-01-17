@@ -22,9 +22,10 @@
     "extra": {
         "patches": {
             "drupal/commerce": {
-                "Add an availability checker which checks if the entity is published or not": "https://www.drupal.org/files/issues/2020-01-17/3088598-2.patch",
-                "Provide a constraint on the Coupons field to verify referenced coupons are available": "https://www.drupal.org/files/issues/2019-10-29/3041856-19.patch",
-                "Add a constraint to purchased_entity which checks the availability manager": "https://www.drupal.org/files/issues/2020-01-17/3088597-2.patch"
+                "Add an availability checker which checks if the entity is published or not": "https://www.drupal.org/files/issues/2020-01-17/3088598-3.patch",
+                "Provide a constraint on the Coupons field to verify referenced coupons are available": "https://www.drupal.org/files/issues/2020-01-17/3041856-22.patch",
+                "Add a constraint to purchased_entity which checks the availability manager": "https://www.drupal.org/files/issues/2020-01-17/3088597-7.patch",
+                "Introduce a checkout init event": "https://www.drupal.org/files/issues/2020-01-17/3104564-9.patch"
             }
         }
     }
