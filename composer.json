@@ -22,7 +22,8 @@
     "extra": {
         "patches": {
             "drupal/commerce": {
-                "Add an availability checker which checks if the entity is published or not": "https://www.drupal.org/files/issues/2020-01-17/3088598-2.patch"
+                "Add an availability checker which checks if the entity is published or not": "https://www.drupal.org/files/issues/2020-01-17/3088598-2.patch",
+                "Provide a constraint on the Coupons field to verify referenced coupons are available": "https://www.drupal.org/files/issues/2019-10-29/3041856-19.patch"
             }
         }
     }
