@@ -54,3 +54,8 @@ services:
     class: Drupal\commerce_api\EventSubscriber\ResponseVarySubscriber
     tags:
       - { name: event_subscriber }
+
+  commerce_api.resource_type_build_subscriber:
+    class: Drupal\commerce_api\EventSubscriber\ResourceTypeBuildSubscriber
+    tags:
+      - { name: event_subscriber }

@@ -21,6 +21,9 @@
     },
     "extra": {
         "patches": {
+            "drupal/core": {
+                "Add a public API for aliasing resource type names": "https://www.drupal.org/files/issues/2020-01-22/3105318-11.patch"
+            }
         }
     }
 }
