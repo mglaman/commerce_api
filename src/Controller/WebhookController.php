@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace Drupal\checkout_api\Controller;
+namespace Drupal\commerce_api\Controller;
 
 use Drupal\commerce_api\Events\OrderWebhookEvent;
 use Drupal\commerce_order\Entity\OrderInterface;

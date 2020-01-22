@@ -14,7 +14,7 @@ commerce_api.current_store:
 commerce_api.webhook_order_fulfillment:
   path: '/webhooks/fulfillment/{commerce_order}'
   defaults:
-    _controller: Drupal\checkout_api\Controller\WebhookController::orderFulfillment
+    _controller: Drupal\commerce_api\Controller\WebhookController::orderFulfillment
   options:
     no_cache: 'TRUE'
   requirements:
