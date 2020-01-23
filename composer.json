@@ -18,12 +18,5 @@
         "drupal/jsonapi_hypermedia": "^1.0",
         "drupal/jsonapi_resources": "^1.0@beta",
         "drupal/core": "^8.8@alpha"
-    },
-    "extra": {
-        "patches": {
-            "drupal/core": {
-                "Add a public API for aliasing resource type names": "https://www.drupal.org/files/issues/2020-01-22/3105318-11.patch"
-            }
-        }
     }
 }

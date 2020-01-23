@@ -59,3 +59,10 @@ services:
     class: Drupal\commerce_api\EventSubscriber\ResourceTypeBuildSubscriber
     tags:
       - { name: event_subscriber }
+
+  # @todo remove after https://www.drupal.org/project/drupal/issues/3105318
+  commerce_api.resource_type.repository:
+    public: false
+    class: Drupal\commerce_api\ResourceType\RenamableResourceTypeRepository
+    decorates: jsonapi.resource_type.repository
+    parent: jsonapi.resource_type.repository

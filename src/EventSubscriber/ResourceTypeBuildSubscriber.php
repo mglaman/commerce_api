@@ -2,7 +2,8 @@
 
 namespace Drupal\commerce_api\EventSubscriber;
 
-use Drupal\jsonapi\ResourceType\ResourceTypeBuildEvent;
+use Doctrine\Common\Inflector\Inflector;
+use Drupal\commerce_api\Events\RenamableResourceTypeBuildEvent;
 use Drupal\jsonapi\ResourceType\ResourceTypeBuildEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -14,10 +15,14 @@ final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
     ];
   }
 
-  public function onResourceTypeBuild(ResourceTypeBuildEvent $event) {
+  public function onResourceTypeBuild(RenamableResourceTypeBuildEvent $event) {
     if (strpos($event->getResourceTypeName(), 'commerce_') === 0) {
-      $new_resource_type_name = str_replace('commerce_', '', $event->getResourceTypeName());
-      $event->setResourceTypeName($new_resource_type_name);
+      // Remove commerce_ prefix and pluralize.
+      list($entity_type_id, $bundle) = explode('--', $event->getResourceTypeName());
+      $entity_type_id = str_replace('commerce_', '', $entity_type_id);
+      $resource_type_name_base = Inflector::pluralize($entity_type_id);
+      $event->setResourceTypeName("$resource_type_name_base--$bundle");
+
       foreach ($event->getFields() as $field) {
         // Disable the internal Drupal identifiers.
         if (strpos($field->getPublicName(), 'drupal_internal__') === 0) {
