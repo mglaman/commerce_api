@@ -67,32 +67,12 @@ function commerce_api_entity_access(EntityInterface $entity, $operation, Account
 function commerce_api_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
   /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
   if ($entity_type->id() === 'commerce_order') {
-    // @todo remove after https://www.drupal.org/project/commerce/issues/3041856
-    if (isset($fields['coupons'])) {
-      $fields['coupons']->addConstraint('CouponValid');
-    }
     $fields['order_number']->setRequired(FALSE);
     $fields['billing_profile']->setRequired(TRUE);
 
     if (isset($fields['payment_gateway'])) {
       // @todo add a constraint which marks it required if order total > 0;
     }
-  }
-  elseif ($entity_type->id() === 'commerce_order_item') {
-    // @todo remove after https://www.drupal.org/node/3088597
-    $fields['purchased_entity']->addConstraint('PurchasedEntityAvailable');
-
-    // Drupal core doesn't properly add `min` constraints when the minimum value
-    // is zero.
-    // @todo remove after https://www.drupal.org/project/drupal/issues/3090629.
-    $fields['quantity']->getItemDefinition()->addConstraint('ComplexData', [
-      'value' => [
-        'Range' => [
-          'min' => 0,
-          'minMessage' => t('%name: the value may be no less than %min.', ['%name' => $fields['quantity']->getLabel(), '%min' => 0]),
-        ],
-      ],
-    ]);
   }
 }
 
