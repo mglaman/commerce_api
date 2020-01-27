@@ -35,6 +35,7 @@ install:
 before_script:
   - composer --no-interaction create-project drupal/recommended-project:^8.8@alpha $TRAVIS_BUILD_DIR/../drupal
   - cd $TRAVIS_BUILD_DIR/../drupal
+  - composer require --dev drupal/core-dev:^8.8
   - |
     composer config repositories.0 path $TRAVIS_BUILD_DIR
     composer config repositories.1 composer https://packages.drupal.org/8
