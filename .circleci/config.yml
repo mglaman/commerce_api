@@ -24,6 +24,7 @@ commands:
     steps:
       - run: |
           cd $DRUPAL_PROJECT_PATH
+          composer require --dev drupal/core-dev:^8.8
           composer config repositories.0 path ${CIRCLE_WORKING_DIRECTORY}
           composer config repositories.1 composer https://packages.drupal.org/8
           composer require drupal/commerce_api *@dev
