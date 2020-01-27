@@ -53,7 +53,6 @@ final class CartAddResourceTest extends CartResourceTestBase {
             'self' => ['href' => Url::fromRoute('jsonapi.commerce_order_item--default.individual', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
           ],
           'attributes' => [
-            'drupal_internal__order_item_id' => (int) $order_item->id(),
             'title' => $order_item->label(),
             'quantity' => $order_item->getQuantity(),
             'unit_price' => [

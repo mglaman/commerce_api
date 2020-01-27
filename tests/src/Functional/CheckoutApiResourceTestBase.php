@@ -6,6 +6,8 @@ use Drupal\commerce_order\Entity\OrderType;
 use Drupal\commerce_product\Entity\ProductVariationType;
 use Drupal\commerce_shipping\Entity\ShippingMethod;
 use Drupal\commerce_store\StoreCreationTrait;
+use Drupal\Component\Serialization\Json;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\jsonapi\Functional\JsonApiRequestTestTrait;
 use Psr\Http\Message\ResponseInterface;
@@ -15,6 +17,9 @@ abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
   use StoreCreationTrait;
   use JsonApiRequestTestTrait;
 
+  /**
+   * {@inheritdoc}
+   */
   protected $defaultTheme = 'stark';
 
   /**
@@ -45,13 +50,16 @@ abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
    */
   protected $account;
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'basic_auth',
     'jsonapi_resources',
     'commerce_api',
   ];
 
-    /**
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -159,8 +167,12 @@ abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
    *
    * @return \Drupal\Core\Entity\EntityInterface
    *   A new entity.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function createEntity($entity_type, array $values) {
+  protected function createEntity($entity_type, array $values): EntityInterface {
     /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
     $storage = $this->container->get('entity_type.manager')->getStorage($entity_type);
     $entity = $storage->create($values);
@@ -180,7 +192,7 @@ abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
    *
    * @see \GuzzleHttp\ClientInterface::request()
    */
-  protected function getAuthenticationRequestOptions() {
+  protected function getAuthenticationRequestOptions(): array {
     return [
       'headers' => [
         'Authorization' => 'Basic ' . base64_encode($this->account->name->value . ':' . $this->account->passRaw),
@@ -196,7 +208,7 @@ abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
    * @param \Psr\Http\Message\ResponseInterface $response
    *   The response.
    */
-  protected function assertResponseCode($expected_status_code, ResponseInterface $response) {
+  protected function assertResponseCode($expected_status_code, ResponseInterface $response): void {
     $this->assertSame($expected_status_code, $response->getStatusCode(), var_export(Json::decode((string) $response->getBody()), TRUE));
   }
 

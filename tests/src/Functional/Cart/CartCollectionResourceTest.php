@@ -59,12 +59,24 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
             'self' => ['href' => Url::fromRoute('jsonapi.commerce_order--default.individual', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
           ],
           'attributes' => [
-            'drupal_internal__order_id' => (int) $cart->id(),
             'order_number' => NULL,
             'total_price' => [
               'number' => '5000.0',
               'currency_code' => 'USD',
               'formatted' => '$5,000.00',
+            ],
+            'order_total' => [
+              'subtotal' => [
+                'number' => '5000.0',
+                'currency_code' => 'USD',
+                'formatted' => '$5,000.00',
+              ],
+              'adjustments' => [],
+              'total' => [
+                'number' => '5000.0',
+                'currency_code' => 'USD',
+                'formatted' => '$5,000.00',
+              ],
             ],
           ],
           'relationships' => [
@@ -114,7 +126,7 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
           'attributes' => [
             'drupal_internal__order_item_id' => (int) $order_item->id(),
             'title' => $order_item->label(),
-            'quantity' => (int) $order_item->getQuantity(),
+            'quantity' => $order_item->getQuantity(),
             'unit_price' => [
               'number' => '1000.0',
               'currency_code' => 'USD',

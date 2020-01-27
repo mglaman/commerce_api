@@ -92,7 +92,6 @@ class TranslationCartAddResourceTest extends CartResourceTestBase {
     $this->assertResponseCode(200, $response);
     $response_body = Json::decode((string) $response->getBody());
     $this->assertEquals(count($response_body['data']), 1);
-    $this->assertEquals(1, $response_body['data'][0]['attributes']['drupal_internal__order_item_id']);
     $this->assertEquals($this->variation->uuid(), $response_body['data'][0]['relationships']['purchased_entity']['data']['id']);
     $this->assertEquals('My Super Product', $response_body['data'][0]['attributes']['title']);
     $this->assertEquals(1, $response_body['data'][0]['attributes']['quantity']);
@@ -129,7 +128,6 @@ class TranslationCartAddResourceTest extends CartResourceTestBase {
 
     $response_body = Json::decode((string) $response->getBody());
     $this->assertEquals(count($response_body['data']), 1);
-    $this->assertEquals(1, $response_body['data'][0]['attributes']['drupal_internal__order_item_id']);
     $this->assertEquals($this->variation->uuid(), $response_body['data'][0]['relationships']['purchased_entity']['data']['id']);
     $this->assertEquals('Mon super produit', $response_body['data'][0]['attributes']['title']);
     $this->assertEquals(1, $response_body['data'][0]['attributes']['quantity']);

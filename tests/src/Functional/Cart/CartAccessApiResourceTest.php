@@ -55,7 +55,7 @@ class CartAccessApiResourceTest extends CartResourceTestBase {
     $this->assertInstanceOf(OrderInterface::class, $cart);
     $transition = $cart->getState()->getWorkflow()->getTransition('place');
     $cart->getState()->applyTransition($transition);
-    $this->assertEquals($cart->getState()->getLabel(), 'Completed');
+    $this->assertEquals($cart->getState()->getId(), 'completed');
     $cart->save();
     $cart = Order::load($cart->id());
 
@@ -131,22 +131,6 @@ class CartAccessApiResourceTest extends CartResourceTestBase {
     ]);
     $response = $this->request('PATCH', $url, $request_options);
     $this->assertResponseCode(403, $response);
-  }
-
-  /**
-   * Returns Guzzle request options for authentication.
-   *
-   * @return array
-   *   Guzzle request options to use for authentication.
-   *
-   * @see \GuzzleHttp\ClientInterface::request()
-   */
-  protected function getAuthenticationRequestOptions() {
-    return [
-      'headers' => [
-        'Authorization' => 'Basic ' . base64_encode($this->account->name->value . ':' . $this->account->passRaw),
-      ],
-    ];
   }
 
 }
