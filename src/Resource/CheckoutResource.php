@@ -171,6 +171,9 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
         $shipping_profile->set('address', $shipping_information);
         $shipping_profile->save();
         $shipments = $this->shippingOrderManager->pack($order, $shipping_profile);
+        foreach ($shipments as $shipment) {
+          $shipment->save();
+        }
         $order->set('shipments', $shipments);
       }
 

@@ -74,11 +74,13 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           'subtotal' => [
             'number' => '4.0',
             'currency_code' => 'USD',
+            'formatted' => '$4.00',
           ],
           'adjustments' => [],
           'total' => [
             'number' => '4.0',
             'currency_code' => 'USD',
+            'formatted' => '$4.00',
           ],
         ],
         'total_price' => [
@@ -156,11 +158,13 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           'subtotal' => [
             'number' => '4.0',
             'currency_code' => 'USD',
+            'formatted' => '$4.00',
           ],
           'adjustments' => [],
           'total' => [
             'number' => '4.0',
             'currency_code' => 'USD',
+            'formatted' => '$4.00',
           ],
         ],
         'total_price' => [
@@ -246,11 +250,13 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           'subtotal' => [
             'number' => '4.0',
             'currency_code' => 'USD',
+            'formatted' => '$4.00',
           ],
           'adjustments' => [],
           'total' => [
             'number' => '4.0',
             'currency_code' => 'USD',
+            'formatted' => '$4.00',
           ],
         ],
         'total_price' => [
@@ -335,6 +341,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           'subtotal' => [
             'number' => '4.0',
             'currency_code' => 'USD',
+            'formatted' => '$4.00',
           ],
           'adjustments' => [
             [
@@ -343,6 +350,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
               'amount' => [
                 'number' => '20.00',
                 'currency_code' => 'USD',
+                'formatted' => '$20.00',
               ],
               'percentage' => NULL,
               'source_id' => 1,
@@ -351,12 +359,14 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
               'total' => [
                 'number' => '20.00',
                 'currency_code' => 'USD',
+                'formatted' => '$20.00',
               ],
             ],
           ],
           'total' => [
             'number' => '24.0',
             'currency_code' => 'USD',
+            'formatted' => '$24.00',
           ],
         ],
         'total_price' => [
@@ -457,6 +467,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           'subtotal' => [
             'number' => '4.0',
             'currency_code' => 'USD',
+            'formatted' => '$4.00',
           ],
           'adjustments' => [
             [
@@ -465,6 +476,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
               'amount' => [
                 'number' => '20.00',
                 'currency_code' => 'USD',
+                'formatted' => '$20.00',
               ],
               'percentage' => NULL,
               'source_id' => 1,
@@ -473,12 +485,14 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
               'total' => [
                 'number' => '20.00',
                 'currency_code' => 'USD',
+                'formatted' => '$20.00',
               ],
             ],
           ],
           'total' => [
             'number' => '24.0',
             'currency_code' => 'USD',
+            'formatted' => '$24.00',
           ],
         ],
         'total_price' => [
@@ -535,7 +549,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       [
         'attributes' => [
           'email' => 'tester@example.com',
-          'payment_gateway' => 'invalid'
+          'payment_gateway' => 'invalid',
         ],
       ],
       [
@@ -563,7 +577,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       [
         'attributes' => [
           'email' => 'tester@example.com',
-          'payment_gateway' => 'onsite'
+          'payment_gateway' => 'onsite',
         ],
       ],
       $this->buildResponseJsonApiDocument([
@@ -574,11 +588,13 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           'subtotal' => [
             'number' => '4.0',
             'currency_code' => 'USD',
+            'formatted' => '$4.00',
           ],
           'adjustments' => [],
           'total' => [
             'number' => '4.0',
             'currency_code' => 'USD',
+            'formatted' => '$4.00',
           ],
         ],
         'total_price' => [

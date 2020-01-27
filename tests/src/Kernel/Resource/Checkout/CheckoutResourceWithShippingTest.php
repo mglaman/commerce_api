@@ -150,6 +150,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
           'subtotal' => [
             'number' => '4.0',
             'currency_code' => 'USD',
+            'formatted' => '$4.00',
           ],
           'adjustments' => [
             [
@@ -158,6 +159,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
               'amount' => [
                 'number' => '20.00',
                 'currency_code' => 'USD',
+                'formatted' => '$20.00',
               ],
               'percentage' => NULL,
               'source_id' => 1,
@@ -166,16 +168,59 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
               'total' => [
                 'number' => '20.00',
                 'currency_code' => 'USD',
+                'formatted' => '$20.00',
               ],
             ],
           ],
           'total' => [
             'number' => '24.0',
             'currency_code' => 'USD',
+            'formatted' => '$24.00',
           ],
+        ],
+        'total_price' => [
+          'number' => '24.0',
+          'currency_code' => 'USD',
+          'formatted' => '$24.00',
         ],
       ],
         [$constraints],
+        [
+          'shipping_methods' => [
+            'data' => [
+              [
+                'type' => 'shipping--service',
+                'id' => '2--default',
+                'meta' => [
+                  'label' => 'Flat rate',
+                  'methodId' => '2',
+                  'serviceId' => 'default',
+                  'amount' => [
+                    'number' => '20',
+                    'currency_code' => 'USD',
+                  ],
+                  'deliveryDate' => NULL,
+                  'terms' => NULL,
+                ],
+              ],
+              [
+                'type' => 'shipping--service',
+                'id' => '1--default',
+                'meta' => [
+                  'label' => 'Flat rate',
+                  'methodId' => '1',
+                  'serviceId' => 'default',
+                  'amount' => [
+                    'number' => '5',
+                    'currency_code' => 'USD',
+                  ],
+                  'deliveryDate' => NULL,
+                  'terms' => NULL,
+                ],
+              ],
+            ],
+          ],
+        ],
         $links
       ),
     ];

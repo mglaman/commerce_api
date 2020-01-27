@@ -20,8 +20,8 @@ final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
       // Remove commerce_ prefix and pluralize.
       list($entity_type_id, $bundle) = explode('--', $event->getResourceTypeName());
       $entity_type_id = str_replace('commerce_', '', $entity_type_id);
-      $resource_type_name_base = Inflector::pluralize($entity_type_id);
-      $event->setResourceTypeName("$resource_type_name_base--$bundle");
+      $entity_type_id = Inflector::pluralize($entity_type_id);
+      $event->setResourcePath("/$entity_type_id/$bundle");
 
       foreach ($event->getFields() as $field) {
         // Disable the internal Drupal identifiers.

@@ -69,7 +69,7 @@ abstract class CartResourceBase extends EntityResourceBase implements ContainerI
    * @todo `default` may not exist. Order items are not a based field, yet.
    */
   protected function getGeneralizedOrderResourceType(array $relatable_resource_types) {
-    $resource_type = new ResourceType('commerce_order', 'default', EntityInterface::class, FALSE, TRUE, FALSE, FALSE,
+    $resource_type = new ResourceType('commerce_order', 'virtual', EntityInterface::class, FALSE, TRUE, FALSE, FALSE,
       [
         'order_items' => new ResourceTypeRelationship('order_items', 'order_items', TRUE, FALSE),
       ]
@@ -77,7 +77,11 @@ abstract class CartResourceBase extends EntityResourceBase implements ContainerI
     assert($resource_type->getInternalName('order_items') === 'order_items');
     $resource_type->setRelatableResourceTypes([
       'order_items' => array_map(function ($resource_type_name) {
-        return $this->resourceTypeRepository->getByTypeName($resource_type_name);
+        $resource_type = $this->resourceTypeRepository->getByTypeName($resource_type_name);
+        if ($resource_type === NULL) {
+          throw new \RuntimeException("$resource_type_name is not a valid resource type");
+        }
+        return $resource_type;
       }, $relatable_resource_types),
     ]);
     return $resource_type;

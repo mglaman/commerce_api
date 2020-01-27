@@ -42,7 +42,7 @@ final class MetaResourceObjectNormalizer extends ResourceObjectNormalizer {
     if (!$render_context->isEmpty()) {
       $parent_normalization->withCacheableDependency($render_context->pop());
     }
-    return new CacheableNormalization($parent_normalization, $altered_normalization);
+    return new CacheableNormalization($parent_normalization, array_filter($altered_normalization));
   }
 
 }

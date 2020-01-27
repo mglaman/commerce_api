@@ -53,6 +53,8 @@ class Routes implements ContainerInjectionInterface {
    */
   protected $jsonApiBasePath;
 
+  private $entityTypeResourceTypes = [];
+
   /**
    * Instantiates a Routes object.
    *
@@ -100,7 +102,6 @@ class Routes implements ContainerInjectionInterface {
     if ($this->entityTypeManager->hasDefinition('commerce_promotion_coupon')) {
       $routes->add('commerce_api.jsonapi.cart_coupon_add', $this->cartCouponAdd());
       $routes->add('commerce_api.jsonapi.cart_coupon_remove', $this->cartCouponRemove());
-
     }
 
     $routes->add('commerce_api.jsonapi.cart_checkout', $this->cartCheckout());
@@ -116,7 +117,7 @@ class Routes implements ContainerInjectionInterface {
     ]);
 
     // Set a resource type so entity UUID parameter conversion works.
-    // This also will upcast the resource type and allow for OpenAPI documentation.
+    // This also will upcast the resource type and allow for OpenAPI support.
     $routes->addDefaults([JsonapiRoutes::RESOURCE_TYPE_KEY => 'commerce_order--virtual']);
 
     return $routes;
@@ -129,17 +130,12 @@ class Routes implements ContainerInjectionInterface {
    *   The route.
    */
   protected function cartsCollection() {
-    $order_resource_types = array_filter($this->resourceTypeRepository->all(), static function (ResourceType $resource_type) {
-      return $resource_type->getEntityTypeId() === 'commerce_order';
-    });
-    $order_resource_types = array_map(static function (ResourceType $resource_type) {
-      return $resource_type->getTypeName();
-    }, $order_resource_types);
+    $order_resource_types = $this->getResourceTypesForEntityType('commerce_order');
 
     $route = new Route('/cart');
     $route->addDefaults([
       '_jsonapi_resource' => CartCollectionResource::class,
-      '_jsonapi_resource_types' => $order_resource_types,
+      '_jsonapi_resource_types' => $this->getResourceTypeNames($order_resource_types),
     ]);
     return $route;
   }
@@ -151,17 +147,12 @@ class Routes implements ContainerInjectionInterface {
    *   The route.
    */
   protected function cartCanonical() {
-    $order_resource_types = array_filter($this->resourceTypeRepository->all(), static function (ResourceType $resource_type) {
-      return $resource_type->getEntityTypeId() === 'commerce_order';
-    });
-    $order_resource_types = array_map(static function (ResourceType $resource_type) {
-      return $resource_type->getTypeName();
-    }, $order_resource_types);
+    $order_resource_types = $this->getResourceTypesForEntityType('commerce_order');
 
     $route = new Route('/cart/{commerce_order}');
     $route->addDefaults([
       '_jsonapi_resource' => CartCanonicalResource::class,
-      '_jsonapi_resource_types' => $order_resource_types,
+      '_jsonapi_resource_types' => $this->getResourceTypeNames($order_resource_types),
     ]);
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['commerce_order']['type'] = 'entity:commerce_order';
@@ -200,22 +191,13 @@ class Routes implements ContainerInjectionInterface {
       $entity_type = $this->entityTypeManager->getDefinition($resource_type->getEntityTypeId());
       return $entity_type->entityClassImplements(PurchasableEntityInterface::class);
     });
-    $purchasable_entity_resource_types = array_map(static function (ResourceType $resource_type) {
-      return $resource_type->getTypeName();
-    }, $purchasable_entity_resource_types);
-
-    $order_item_resource_types = array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) {
-      return $resource_type->getEntityTypeId() === 'commerce_order_item';
-    });
-    $order_item_resource_types = array_map(static function (ResourceType $resource_type) {
-      return $resource_type->getTypeName();
-    }, $order_item_resource_types);
+    $order_item_resource_types = $this->getResourceTypesForEntityType('commerce_order_item');
 
     $route = new Route('/cart/add');
     $route->addDefaults([
       '_jsonapi_resource' => CartAddResource::class,
-      '_purchasable_entity_resource_types' => $purchasable_entity_resource_types,
-      '_jsonapi_resource_types' => $order_item_resource_types,
+      '_purchasable_entity_resource_types' => $this->getResourceTypeNames($purchasable_entity_resource_types),
+      '_jsonapi_resource_types' => $this->getResourceTypeNames($order_item_resource_types),
     ]);
     $route->setMethods(['POST']);
     return $route;
@@ -228,17 +210,12 @@ class Routes implements ContainerInjectionInterface {
    *   The route.
    */
   protected function cartRemoveItem() {
-    $order_item_resource_types = array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) {
-      return $resource_type->getEntityTypeId() === 'commerce_order_item';
-    });
-    $order_item_resource_types = array_map(static function (ResourceType $resource_type) {
-      return $resource_type->getTypeName();
-    }, $order_item_resource_types);
+    $order_item_resource_types = $this->getResourceTypesForEntityType('commerce_order_item');
 
     $route = new Route('/cart/{commerce_order}/items');
     $route->addDefaults([
       '_jsonapi_resource' => CartRemoveItemResource::class,
-      '_order_item_resource_types' => $order_item_resource_types,
+      '_order_item_resource_types' => $this->getResourceTypeNames($order_item_resource_types),
     ]);
     $route->setMethods(['DELETE']);
     $parameters = $route->getOption('parameters') ?: [];
@@ -255,17 +232,12 @@ class Routes implements ContainerInjectionInterface {
    *   The route.
    */
   protected function cartUpdateItem() {
-    $order_item_resource_types = array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) {
-      return $resource_type->getEntityTypeId() === 'commerce_order_item';
-    });
-    $order_item_resource_types = array_map(static function (ResourceType $resource_type) {
-      return $resource_type->getTypeName();
-    }, $order_item_resource_types);
+    $order_item_resource_types = $this->getResourceTypesForEntityType('commerce_order_item');
 
     $route = new Route('/cart/{commerce_order}/items/{commerce_order_item}');
     $route->addDefaults([
       '_jsonapi_resource' => CartUpdateItemResource::class,
-      '_jsonapi_resource_types' => $order_item_resource_types,
+      '_jsonapi_resource_types' => $this->getResourceTypeNames($order_item_resource_types),
     ]);
     $route->setMethods(['PATCH']);
     $parameters = $route->getOption('parameters') ?: [];
@@ -284,18 +256,12 @@ class Routes implements ContainerInjectionInterface {
    *   The route.
    */
   protected function cartCouponAdd() {
-    $coupon_resource_types = array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) {
-      return $resource_type->getEntityTypeId() === 'commerce_promotion_coupon';
-    });
-    $coupon_resource_types = array_map(static function (ResourceType $resource_type) {
-      return $resource_type->getTypeName();
-    }, $coupon_resource_types);
-
+    $coupon_resource_types = $this->getResourceTypesForEntityType('commerce_promotion_coupon');
     $route = new Route('/cart/{commerce_order}/coupons');
     $route->setMethods(['PATCH']);
     $route->addDefaults([
       '_jsonapi_resource' => CartCouponAddResource::class,
-      '_jsonapi_resource_types' => $coupon_resource_types,
+      '_jsonapi_resource_types' => $this->getResourceTypeNames($coupon_resource_types),
     ]);
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['commerce_order']['type'] = 'entity:commerce_order';
@@ -311,18 +277,13 @@ class Routes implements ContainerInjectionInterface {
    *   The route.
    */
   protected function cartCouponRemove() {
-    $coupon_resource_types = array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) {
-      return $resource_type->getEntityTypeId() === 'commerce_promotion_coupon';
-    });
-    $coupon_resource_types = array_map(static function (ResourceType $resource_type) {
-      return $resource_type->getTypeName();
-    }, $coupon_resource_types);
+    $coupon_resource_types = $this->getResourceTypesForEntityType('commerce_promotion_coupon');
 
     $route = new Route('/cart/{commerce_order}/coupons');
     $route->setMethods(['DELETE']);
     $route->addDefaults([
       '_jsonapi_resource' => CartCouponRemoveResource::class,
-      '_jsonapi_resource_types' => $coupon_resource_types,
+      '_jsonapi_resource_types' => $this->getResourceTypeNames($coupon_resource_types),
     ]);
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['commerce_order']['type'] = 'entity:commerce_order';
@@ -349,6 +310,7 @@ class Routes implements ContainerInjectionInterface {
     $route->setRequirement('_entity_access', 'order.update');
     return $route;
   }
+
   /**
    * The cart checkout resource route.
    *
@@ -369,24 +331,52 @@ class Routes implements ContainerInjectionInterface {
   }
 
   protected function checkoutPaymentGatewayReturn() {
-    $order_resource_types = array_filter($this->resourceTypeRepository->all(), static function (ResourceType $resource_type) {
-      return $resource_type->getEntityTypeId() === 'commerce_order';
-    });
-    $order_resource_types = array_map(static function (ResourceType $resource_type) {
-      return $resource_type->getTypeName();
-    }, $order_resource_types);
+    $order_resource_types = $this->getResourceTypesForEntityType('commerce_order');
 
     $route = new Route('/checkout/{commerce_order}/payment/return');
     $route->setMethods(['GET']);
     $route->addDefaults([
       '_jsonapi_resource' => OnReturnResource::class,
-      '_jsonapi_resource_types' => $order_resource_types,
+      '_jsonapi_resource_types' => $this->getResourceTypeNames($order_resource_types),
     ]);
     $parameters = $route->getOption('parameters') ?: [];
     $parameters['commerce_order']['type'] = 'entity:commerce_order';
     $route->setOption('parameters', $parameters);
     $route->setRequirement('_entity_access', 'commerce_order.view');
     return $route;
+  }
+
+  /**
+   * Get resource types for an entity type.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID.
+   *
+   * @return \Drupal\jsonapi\ResourceType\ResourceType[]
+   *   The resource types.
+   */
+  private function getResourceTypesForEntityType(string $entity_type_id): array {
+    if (!isset($this->entityTypeResourceTypes[$entity_type_id])) {
+      $this->entityTypeResourceTypes[$entity_type_id] = array_filter($this->resourceTypeRepository->all(), static function (ResourceType $resource_type) use ($entity_type_id) {
+        return $resource_type->getEntityTypeId() === $entity_type_id;
+      });
+    }
+    return $this->entityTypeResourceTypes[$entity_type_id];
+  }
+
+  /**
+   * Get the resource type names from an array of resource types.
+   *
+   * @param array $resource_types
+   *   The resource types.
+   *
+   * @return string[]
+   *   The resource type names.
+   */
+  private function getResourceTypeNames(array $resource_types): array {
+    return array_map(static function (ResourceType $resource_type) {
+      return $resource_type->getTypeName();
+    }, $resource_types);
   }
 
 }

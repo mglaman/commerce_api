@@ -6,6 +6,7 @@ use Drupal\commerce_order\Adjustment;
 use Drupal\commerce_order\AdjustmentTypeManager;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderItem;
+use Drupal\commerce_price\CurrencyFormatter;
 use Drupal\commerce_price\Price;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Tests\commerce_api\Kernel\KernelTestBase;
@@ -39,11 +40,11 @@ final class ComputedOrderTotalTest extends KernelTestBase {
    *
    * @dataProvider dataProviderComputedData
    */
-  public function testComputedOrderTotal(string $sku, Price $price, array $expected_adjustments, Price $expected_total_price) {
+  public function testComputedOrderTotal(string $sku, array $price, array $expected_adjustments, array $expected_total_price) {
     $product_variation = $this->createTestProductVariation([], [
       'sku' => $sku,
       'status' => 1,
-      'price' => $price,
+      'price' => Price::fromArray($price),
     ]);
     $order_item = OrderItem::create([
       'type' => 'default',
@@ -64,16 +65,21 @@ final class ComputedOrderTotalTest extends KernelTestBase {
     $order = $this->reloadEntity($order);
     assert($order instanceof Order);
 
+    $currency_formatter = $this->container->get('commerce_price.currency_formatter');
     $computed_order_total = $order->get('order_total')->first();
     $this->assertEquals([
-      'subtotal' => $price->toArray(),
-      'adjustments' => array_map(function (Adjustment $adjustment) {
+      'subtotal' => $price,
+      'adjustments' => array_map(static function (Adjustment $adjustment) use ($currency_formatter) {
+        $adjustment_amount = $adjustment->getAmount();
         $data = $adjustment->toArray();
         $data['amount'] = $data['amount']->toArray();
+        $data['amount']['formatted'] = $currency_formatter->format(
+          $adjustment_amount->getNumber(), $adjustment_amount->getCurrencyCode()
+        );
         $data['total'] = $data['amount'];
         return $data;
       }, $expected_adjustments),
-      'total' => $expected_total_price->toArray(),
+      'total' => $expected_total_price,
     ], $computed_order_total->getValue());
   }
 
@@ -94,13 +100,13 @@ final class ComputedOrderTotalTest extends KernelTestBase {
 
     yield [
       'JSONAPI_SKU',
-      new Price('10.0', 'USD'),
+      ['number' => '10.0', 'currency_code' => 'USD', 'formatted' => '$10.00'],
       [],
-      new Price('10.0', 'USD'),
+      ['number' => '10.0', 'currency_code' => 'USD', 'formatted' => '$10.00'],
     ];
     yield [
       'JSONAPI_SKU',
-      new Price('10.0', 'USD'),
+      ['number' => '10.0', 'currency_code' => 'USD', 'formatted' => '$10.00'],
       [
         new Adjustment([
           'type' => 'custom',
@@ -108,7 +114,7 @@ final class ComputedOrderTotalTest extends KernelTestBase {
           'amount' => new Price('-3.00', 'USD'),
         ]),
       ],
-      new Price('7.0', 'USD'),
+      ['number' => '7.0', 'currency_code' => 'USD', 'formatted' => '$7.00'],
     ];
   }
 

@@ -4,6 +4,7 @@ namespace Drupal\commerce_api\Plugin\jsonapi_hypermedia\LinkProvider;
 
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_payment\Entity\PaymentGatewayInterface;
+use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\OffsitePaymentGatewayInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityRepositoryInterface;
@@ -77,6 +78,11 @@ final class PaymentGatewayOnReturnLinkprovider extends LinkProviderBase implemen
     $payment_gateway = $entity->get('payment_gateway')->entity;
     assert($payment_gateway instanceof PaymentGatewayInterface);
     $cache_metadata->addCacheableDependency($payment_gateway);
+
+    $plugin = $payment_gateway->getPlugin();
+    if (!$plugin instanceof OffsitePaymentGatewayInterface) {
+      return AccessRestrictedLink::createInaccessibleLink($cache_metadata);
+    }
 
     return AccessRestrictedLink::createLink(
       AccessResult::allowed(),

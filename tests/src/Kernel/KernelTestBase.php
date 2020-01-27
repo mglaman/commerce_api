@@ -16,6 +16,7 @@ abstract class KernelTestBase extends CommerceKernelTestBase {
     'serialization',
     'jsonapi',
     'jsonapi_resources',
+    'jsonapi_hypermedia',
     'entity_reference_revisions',
     'profile',
     'state_machine',

@@ -41,8 +41,6 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
   protected const TEST_ORDER_UUID = 'd59cd06e-c674-490d-aad9-541a1625e47f';
   protected const TEST_ORDER_ITEM_UUID = 'e8daecd7-6444-4d9a-9bd1-84dc5466dba7';
 
-//    protected $runTestInSeparateProcess = FALSE;
-
   /**
    * The test order.
    *
@@ -175,6 +173,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
     $controller = new CheckoutResource(
       $this->container->get('entity_type.manager'),
       $this->container->get('commerce_shipping.order_manager'),
+      $this->container->get('commerce_shipping.shipment_manager'),
       $this->container->get('event_dispatcher')
     );
     $controller->setResourceResponseFactory($this->container->get('jsonapi_resources.resource_response_factory'));
@@ -298,13 +297,13 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
               [
                 'id' => self::TEST_ORDER_ITEM_UUID,
                 'type' => 'commerce_order_item--default',
-              ]
+              ],
             ],
           ],
-          ] +$relationships,
-      ],
-      'meta' => [
-        'constraints' => $constraints,
+        ] + $relationships,
+        'meta' => [
+          'constraints' => $constraints,
+        ],
       ],
       'links' => [
         'self' => [
@@ -313,10 +312,13 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
       ] + $links,
     ];
     if ($constraints === NULL) {
-      unset($document['meta']);
+      unset($document['data']['meta']);
     }
     if ($relationships === NULL) {
-      unset ($document['data']['relationships']);
+      unset($document['data']['relationships']);
+    }
+    if ($links !== []) {
+      $document['data']['links'] = $links;
     }
     return $document;
   }
