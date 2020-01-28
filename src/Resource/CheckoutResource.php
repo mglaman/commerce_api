@@ -2,26 +2,21 @@
 
 namespace Drupal\commerce_api\Resource;
 
-use Drupal\commerce_api\Events\CheckoutResourceEvents;
-use Drupal\commerce_api\Events\CheckoutResourceMetaEvent;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Event\OrderEvent;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\commerce_shipping\ShipmentManagerInterface;
 use Drupal\commerce_shipping\ShippingOrderManagerInterface;
 use Drupal\commerce_shipping\ShippingRate;
-use Drupal\commerce_shipping\ShippingRateOption;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\Core\Url;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\jsonapi\Entity\EntityValidationTrait;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
-use Drupal\jsonapi\JsonApiResource\Link;
 use Drupal\jsonapi\JsonApiResource\LinkCollection;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Drupal\jsonapi\JsonApiResource\ResourceObjectData;
@@ -37,7 +32,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Route;
-use Symfony\Component\Validator\ConstraintViolation;
 
 /**
  * @todo :/ this means we have a custom resource that isn't the normal order.
@@ -125,7 +119,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   public function process(Request $request, array $resource_types, OrderInterface $order, ?JsonApiDocumentTopLevel $document = NULL): ResourceResponse {
-    // Must use this due to strict checking in JsonapiResourceController;
+    // Must use this due to strict checking in JsonapiResourceController;.
     // @todo fix in https://www.drupal.org/project/jsonapi_resources/issues/3096949
     $resource_type = reset($resource_types);
     if ($document) {
@@ -231,6 +225,9 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     return $response;
   }
 
+  /**
+   *
+   */
   private function applyShippingRateToShipments(OrderInterface $order, string $shipping_rate_option_id) {
     [$shipping_method_id, $shipping_service_id] = explode('--', $shipping_rate_option_id);
     $shipments_field = $order->get('shipments');
@@ -320,12 +317,12 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
             'amount' => $rate->getAmount()->toArray(),
             'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
             'terms' => $rate->getDeliveryTerms(),
-          ]
+          ],
         ];
       }, $this->shipmentManager->calculateRates($shipment));
     }
     $options = array_merge([], ...$options);
-    if (count($options) > 0 ) {
+    if (count($options) > 0) {
       $fields['shipping_methods'] = ['data' => array_values($options)];
     }
     $fields['state'] = $order->getState()->getId();
@@ -359,7 +356,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     // @todo need to add more of the same fields from orders.
     // @todo the main point is to _not_ require additional endpoints for setting billing information and shipping information.
     // the real "fix" would be allowing updating a relationship value as if it was embedded in the entity - which is the billing profile.
-
     $fields = [];
     $fields['state'] = new ResourceTypeAttribute('state');
     $fields['email'] = new ResourceTypeAttribute('email');
@@ -417,6 +413,9 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     return $this->shippingOrderManager->getProfile($order) ?: $this->shippingOrderManager->createProfile($order);
   }
 
+  /**
+   *
+   */
   private function getShippingRateOptionResourceType(): ResourceType {
     $resource_type = new ResourceType(
       'shipping_rate_option',

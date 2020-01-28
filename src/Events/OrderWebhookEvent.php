@@ -13,6 +13,9 @@ final class OrderWebhookEvent extends Event {
   private $request;
   private $routeMatch;
 
+  /**
+   *
+   */
   public function __construct(OrderInterface $order, Request $request, RouteMatchInterface $route_match) {
     $this->order = $order;
     $this->request = $request;

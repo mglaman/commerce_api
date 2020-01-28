@@ -141,7 +141,7 @@ final class CartUpdateItemResourceTest extends KernelTestBase {
    *   The controller.
    */
   protected function getController() {
-    $controller =  new CartUpdateItemResource(
+    $controller = new CartUpdateItemResource(
       $this->container->get('commerce_cart.cart_provider'),
       $this->container->get('commerce_cart.cart_manager'),
       $this->container->get('commerce_api.jsonapi_controller_shim')

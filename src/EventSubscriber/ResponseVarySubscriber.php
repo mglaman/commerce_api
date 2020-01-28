@@ -2,7 +2,6 @@
 
 namespace Drupal\commerce_api\EventSubscriber;
 
-use Drupal\commerce_api\CartTokenSession;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;

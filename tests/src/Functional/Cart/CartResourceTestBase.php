@@ -20,7 +20,6 @@ abstract class CartResourceTestBase extends CheckoutApiResourceTestBase {
    */
   protected $cartProvider;
 
-
   /**
    * {@inheritdoc}
    */

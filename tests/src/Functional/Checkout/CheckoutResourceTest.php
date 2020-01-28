@@ -2,17 +2,17 @@
 
 namespace Drupal\Tests\commerce_api\Functional\Checkout;
 
-use Drupal\commerce_order\Entity\Order;
-use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Url;
 use Drupal\Tests\commerce_api\Functional\CheckoutApiResourceTestBase;
 use GuzzleHttp\RequestOptions;
-use Prophecy\Argument;
 
 final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
 
+  /**
+   *
+   */
   public function testCheckout() {
     $url = Url::fromRoute('commerce_api.jsonapi.cart_add');
     $response = $this->performRequest('POST', $url, [
@@ -35,7 +35,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     $checkout_body = Json::decode((string) $response->getBody());
     $this->assertSame(200, $response->getStatusCode(), var_export($checkout_body, TRUE));
 
-    $order_item_id = $checkout_body['data']['relationships']['order_items']['data'][0]['id'] ?? null;
+    $order_item_id = $checkout_body['data']['relationships']['order_items']['data'][0]['id'] ?? NULL;
     $this->assertEquals([
       'id' => $test_cart_id,
       'type' => 'checkout_order--checkout_order',
@@ -109,7 +109,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     $response = $this->performRequest('GET', $url);
     $shipping_methods_body = Json::decode((string) $response->getBody());
     $this->assertSame(200, $response->getStatusCode(), var_export($shipping_methods_body, TRUE));
-    $this->assertEquals(      [
+    $this->assertEquals([
       [
         'id' => '2--default',
         'type' => 'shipping_rate_option--shipping_rate_option',
@@ -269,6 +269,9 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
 
   }
 
+  /**
+   *
+   */
   protected function performRequest(string $method, Url $url, ?array $body = NULL) {
     $request_options = [];
     $request_options[RequestOptions::HEADERS]['Accept'] = 'application/vnd.api+json';

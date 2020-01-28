@@ -116,7 +116,7 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
                   'detail' => 'This value should not be null.',
                   'source' => ['pointer' => 'shipping_information'],
                 ],
-              ]
+              ],
             ],
           ],
         ],

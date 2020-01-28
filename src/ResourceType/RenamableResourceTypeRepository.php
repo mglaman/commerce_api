@@ -2,7 +2,6 @@
 
 namespace Drupal\commerce_api\ResourceType;
 
-use Doctrine\Common\Inflector\Inflector;
 use Drupal\commerce_api\Events\RenamableResourceTypeBuildEvent;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\jsonapi\ResourceType\ResourceTypeBuildEvents;

@@ -277,7 +277,10 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
     return $resolved_document;
   }
 
-  protected function buildResponseJsonApiDocument(array $attributes, ?array $constraints = null, array $relationships = [], array $links = []) {
+  /**
+   *
+   */
+  protected function buildResponseJsonApiDocument(array $attributes, ?array $constraints = NULL, array $relationships = [], array $links = []) {
     $document = [
       'jsonapi' => [
         'meta' => [

@@ -16,15 +16,24 @@ final class CollectResourceObjectMetaEvent extends Event {
 
   private $meta = [];
 
+  /**
+   *
+   */
   public function __construct(ResourceObject $resource_object, array $context) {
     $this->resourceObject = $resource_object;
     $this->context = $context;
   }
 
+  /**
+   *
+   */
   public function getResourceObject(): ResourceObject {
     return $this->resourceObject;
   }
 
+  /**
+   *
+   */
   public function getContext(): array {
     return $this->context;
   }

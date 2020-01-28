@@ -7,7 +7,6 @@ use Drupal\commerce_price\Price;
 use Drupal\commerce_product\Entity\Product;
 use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\Component\Serialization\Json;
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;

@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Handles onReturn calls for payment gateways.
  *
- * @see Drupal\commerce_payment\Controller\PaymentCheckoutController.
+ * @see \Drupal\commerce_payment\Controller\PaymentCheckoutController.
  */
 final class OnReturnResource extends EntityResourceBase implements ContainerInjectionInterface {
 
@@ -25,14 +25,23 @@ final class OnReturnResource extends EntityResourceBase implements ContainerInje
 
   private $logger;
 
+  /**
+   *
+   */
   public function __construct(LoggerInterface $logger) {
     $this->logger = $logger;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public static function create(ContainerInterface $container) {
     return new self($container->get('logger.channel.commerce_payment'));
   }
 
+  /**
+   *
+   */
   public function process(Request $request, OrderInterface $commerce_order) {
     // @todo should this actually be a "not allowed" exception?
     // instead be kind and just return the order object to be reentrant.

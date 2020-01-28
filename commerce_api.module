@@ -8,8 +8,6 @@
 use Drupal\commerce_api\Plugin\Field\ComputedOrderTotal;
 use Drupal\commerce_api\Plugin\Field\ComputedResolvedPrice;
 use Drupal\commerce_api\Plugin\openapi\OpenApiGenerator\AdjustedJsonApiGenerator;
-use Drupal\commerce_cart\CartProviderInterface;
-use Drupal\commerce_cart\CartSession;
 use Drupal\commerce_cart\CartSessionInterface;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Entity\OrderItemInterface;
@@ -130,4 +128,3 @@ function commerce_api_openapi_generator_alter(array &$definitions) {
     $definitions['jsonapi']['class'] = AdjustedJsonApiGenerator::class;
   }
 }
-

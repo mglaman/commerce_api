@@ -9,16 +9,25 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
 
+  /**
+   * {@inheritdoc}
+   */
   public static function getSubscribedEvents() {
     return [
       ResourceTypeBuildEvents::BUILD => 'onResourceTypeBuild',
     ];
   }
 
-  public function onResourceTypeBuild(RenamableResourceTypeBuildEvent $event) {
+  /**
+   * Customizes commerce resource types.
+   *
+   * @param \Drupal\commerce_api\Events\RenamableResourceTypeBuildEvent $event
+   *   The event.
+   */
+  public function onResourceTypeBuild(RenamableResourceTypeBuildEvent $event): void {
     if (strpos($event->getResourceTypeName(), 'commerce_') === 0) {
       // Remove commerce_ prefix and pluralize.
-      list($entity_type_id, $bundle) = explode('--', $event->getResourceTypeName());
+      [$entity_type_id, $bundle] = explode('--', $event->getResourceTypeName());
       $entity_type_id = str_replace('commerce_', '', $entity_type_id);
       $entity_type_id = Inflector::pluralize($entity_type_id);
       $event->setResourcePath("/$entity_type_id/$bundle");

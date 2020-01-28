@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Route;
 final class AdjustedJsonApiGenerator extends JsonApiGenerator {
 
   /**
-   * {@inheritdoc}}
+   * {@inheritdoc}}.
    */
   protected function getJsonApiRoutes() {
     // Remove Commerce API routes since the resource types are incorrect.

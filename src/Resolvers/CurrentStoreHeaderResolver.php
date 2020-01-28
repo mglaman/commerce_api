@@ -13,11 +13,17 @@ final class CurrentStoreHeaderResolver implements StoreResolverInterface {
 
   private $entityRepository;
 
+  /**
+   *
+   */
   public function __construct(RequestStack $request_stack, EntityRepositoryInterface $entity_repository) {
     $this->requestStack = $request_stack;
     $this->entityRepository = $entity_repository;
   }
 
+  /**
+   *
+   */
   public function resolve(): ?StoreInterface {
     $request = $this->requestStack->getCurrentRequest();
     if ($request && $request->headers->has('Commerce-Current-Store')) {

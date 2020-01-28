@@ -30,16 +30,25 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
    */
   private $shipmentManager;
 
+  /**
+   *
+   */
   public function __construct(ShipmentManagerInterface $shipment_manager) {
     $this->shipmentManager = $shipment_manager;
   }
 
+  /**
+   *
+   */
   public static function create(ContainerInterface $container) {
     return new self(
       $container->get('commerce_shipping.shipment_manager')
     );
   }
 
+  /**
+   *
+   */
   public function process(Request $request, array $resource_types, OrderInterface $order): ResourceResponse {
     $shipments = $order->get('shipments')->referencedEntities();
     if (empty($shipments)) {
@@ -79,10 +88,16 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
     return $response;
   }
 
+  /**
+   *
+   */
   public function getRouteResourceTypes(Route $route, string $route_name): array {
     return [$this->getShippingRateOptionResourceType()];
   }
 
+  /**
+   *
+   */
   private function getShippingRateOptionResourceType(): ResourceType {
     $resource_type = new ResourceType(
       'shipping_rate_option',

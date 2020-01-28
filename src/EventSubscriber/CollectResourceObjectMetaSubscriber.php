@@ -16,27 +16,50 @@ use Symfony\Component\Validator\ConstraintViolation;
  */
 final class CollectResourceObjectMetaSubscriber implements EventSubscriberInterface {
 
+  /**
+   * The entity repository.
+   *
+   * @var \Drupal\Core\Entity\EntityRepositoryInterface
+   */
   private $entityRepository;
 
-    /**
+  /**
+   * The shipping order manager.
+   *
    * @var \Drupal\commerce_shipping\ShippingOrderManagerInterface
    */
   private $shippingOrderManager;
 
   /**
    * Constructs a new CollectResourceObjectMetaSubscriber object.
+   *
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *   The entity repository.
+   * @param \Drupal\commerce_shipping\ShippingOrderManagerInterface $shipping_order_manager
+   *   The shipping order manager.
    */
   public function __construct(EntityRepositoryInterface $entity_repository, ShippingOrderManagerInterface $shipping_order_manager) {
     $this->entityRepository = $entity_repository;
     $this->shippingOrderManager = $shipping_order_manager;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public static function getSubscribedEvents() {
     return [
       JsonapiEvents::COLLECT_RESOURCE_OBJECT_META => 'collectMeta',
     ];
   }
 
+  /**
+   * Collects meta information for checkout and order resources.
+   *
+   * @param \Drupal\commerce_api\Events\CollectResourceObjectMetaEvent $event
+   *   The event.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
   public function collectMeta(CollectResourceObjectMetaEvent $event) {
     $resource_object = $event->getResourceObject();
     if ($resource_object->getTypeName() !== 'checkout_order--checkout_order' && $resource_object->getResourceType()->getEntityTypeId() !== 'commerce_order') {
@@ -73,7 +96,7 @@ final class CollectResourceObjectMetaSubscriber implements EventSubscriberInterf
     $event->setMeta($meta);
   }
 
-    /**
+  /**
    * Get the order's shipping profile.
    *
    * @param \Drupal\commerce_order\Entity\OrderInterface $order

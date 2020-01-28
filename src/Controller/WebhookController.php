@@ -9,7 +9,6 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 use Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface;
 use Drupal\jsonapi\Routing\Routes;
-use Drupal\state_machine\WorkflowManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -35,6 +34,9 @@ final class WebhookController implements ContainerInjectionInterface {
     $this->resourceTypeRepository = $resource_type_repository;
   }
 
+  /**
+   *
+   */
   public static function create(ContainerInterface $container) {
     return new self(
       $container->get('event_dispatcher'),
@@ -42,6 +44,9 @@ final class WebhookController implements ContainerInjectionInterface {
     );
   }
 
+  /**
+   *
+   */
   public function orderFulfillment(OrderInterface $commerce_order, Request $request, RouteMatchInterface $route_match) {
     $transitions = $commerce_order->getState()->getTransitions();
 

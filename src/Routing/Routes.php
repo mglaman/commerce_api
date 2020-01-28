@@ -330,6 +330,9 @@ class Routes implements ContainerInjectionInterface {
     return $route;
   }
 
+  /**
+   *
+   */
   protected function checkoutPaymentGatewayReturn() {
     $order_resource_types = $this->getResourceTypesForEntityType('commerce_order');
 

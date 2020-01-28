@@ -6,7 +6,6 @@ use Drupal\commerce_order\Adjustment;
 use Drupal\commerce_order\AdjustmentTypeManager;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderItem;
-use Drupal\commerce_price\CurrencyFormatter;
 use Drupal\commerce_price\Price;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Tests\commerce_api\Kernel\KernelTestBase;

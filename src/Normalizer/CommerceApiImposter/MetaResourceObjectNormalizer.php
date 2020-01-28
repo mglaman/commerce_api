@@ -18,10 +18,16 @@ final class MetaResourceObjectNormalizer extends ResourceObjectNormalizer {
   private $eventDispatcher;
   private $renderer;
 
+  /**
+   *
+   */
   public function setEventDispatcher(EventDispatcherInterface $event_dispatcher) {
     $this->eventDispatcher = $event_dispatcher;
   }
 
+  /**
+   *
+   */
   public function setRenderer(RendererInterface $renderer) {
     $this->renderer = $renderer;
   }
