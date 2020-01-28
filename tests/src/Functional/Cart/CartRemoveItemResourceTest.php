@@ -88,7 +88,7 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
         [
           'title' => 'Forbidden',
           'status' => '403',
-          'detail' => 'Order does not belong to the current user.',
+          'detail' => "The following permissions are required: 'update commerce_order' OR 'update default commerce_order'.",
           'links' => [
             'info' => ['href' => HttpExceptionNormalizer::getInfoUrl(403)],
             'via' => ['href' => $url->setAbsolute()->toString()],

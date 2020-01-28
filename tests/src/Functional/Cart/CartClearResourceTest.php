@@ -43,7 +43,6 @@ final class CartClearResourceTest extends CartResourceTestBase {
             'self' => ['href' => Url::fromRoute('jsonapi.commerce_order--default.individual', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
           ],
           'attributes' => [
-            'drupal_internal__order_id' => (int) $cart->id(),
             'order_number' => NULL,
             'total_price' => NULL,
           ],
@@ -109,9 +108,13 @@ final class CartClearResourceTest extends CartResourceTestBase {
             'self' => ['href' => Url::fromRoute('jsonapi.commerce_order--default.individual', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
           ],
           'attributes' => [
-            'drupal_internal__order_id' => $cart->id(),
             'order_number' => NULL,
             'total_price' => NULL,
+            'order_total' => [
+              'subtotal' => NULL,
+              'adjustments' => [],
+              'total' => NULL,
+            ],
           ],
           'relationships' => [
             'store_id' => [
@@ -129,6 +132,28 @@ final class CartClearResourceTest extends CartResourceTestBase {
               'links' => [
                 'self' => ['href' => Url::fromRoute('jsonapi.commerce_order--default.order_items.relationship.get', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
                 'related' => ['href' => Url::fromRoute('jsonapi.commerce_order--default.order_items.related', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
+              ],
+            ],
+          ],
+          'meta' => [
+            'constraints' => [
+              [
+                'required' => [
+                  'detail' => 'This value should not be null.',
+                  'source' => ['pointer' => 'billing_profile'],
+                ],
+              ],
+              [
+                'required' => [
+                  'detail' => 'This value should not be null.',
+                  'source' => ['pointer' => 'order_items'],
+                ],
+              ],
+              [
+                'required' => [
+                  'detail' => 'This value should not be null.',
+                  'source' => ['pointer' => 'shipping_information'],
+                ],
               ],
             ],
           ],

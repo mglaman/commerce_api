@@ -103,6 +103,22 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
               ],
             ],
           ],
+          'meta' => [
+            'constraints' => [
+              [
+                'required' => [
+                  'detail' => 'This value should not be null.',
+                  'source' => ['pointer' => 'billing_profile'],
+                ],
+              ],
+              [
+                'required' => [
+                  'detail' => 'This value should not be null.',
+                  'source' => ['pointer' => 'shipping_information'],
+                ],
+              ]
+            ],
+          ],
         ],
       ],
       'jsonapi' => [
@@ -124,7 +140,6 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
             'self' => ['href' => Url::fromRoute('jsonapi.commerce_order_item--default.individual', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
           ],
           'attributes' => [
-            'drupal_internal__order_item_id' => (int) $order_item->id(),
             'title' => $order_item->label(),
             'quantity' => $order_item->getQuantity(),
             'unit_price' => [
@@ -168,11 +183,12 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
             'self' => ['href' => Url::fromRoute('jsonapi.commerce_product_variation--default.individual', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
           ],
           'attributes' => [
-            'drupal_internal__variation_id' => (int) $this->variation->id(),
             'sku' => $this->variation->getSku(),
             'title' => $this->variation->label(),
             'list_price' => NULL,
             'price' => $this->variation->get('price')->first()->getValue() + ['formatted' => '$1,000.00'],
+            'resolved_price' => $this->variation->get('resolved_price')->first()->getValue() + ['formatted' => '$1,000.00'],
+            'weight' => NULL,
           ],
           'relationships' => [
             'commerce_product_variation_type' => [

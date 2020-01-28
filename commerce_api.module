@@ -8,6 +8,8 @@
 use Drupal\commerce_api\Plugin\Field\ComputedOrderTotal;
 use Drupal\commerce_api\Plugin\Field\ComputedResolvedPrice;
 use Drupal\commerce_api\Plugin\openapi\OpenApiGenerator\AdjustedJsonApiGenerator;
+use Drupal\commerce_cart\CartProviderInterface;
+use Drupal\commerce_cart\CartSession;
 use Drupal\commerce_cart\CartSessionInterface;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Entity\OrderItemInterface;
@@ -30,34 +32,47 @@ function commerce_api_entity_field_access($operation, FieldDefinitionInterface $
 /**
  * Implements hook_entity_access().
  *
- * Allows anonymous users to view their own orders without
- * granting the `view own commerce_order` permission.
- *
- * @todo decide about UPDATE and DELETE.
- *       ideally UPDATE would be handled on field level.
+ * Allows customers to view their own carts without granting the
+ * `view own commerce_order` permission.
  */
 function commerce_api_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-  if ($entity instanceof OrderInterface || $entity instanceof OrderItemInterface) {
-    if ($entity instanceof OrderItemInterface) {
-      $order_id = $entity->getOrderId();
-    }
-    else {
-      $order_id = $entity->id();
-    }
+  if ($entity instanceof OrderInterface) {
+    $order = $entity;
+  }
+  elseif ($entity instanceof OrderItemInterface) {
+    $order = $entity->getOrder();
+  }
+  else {
+    return AccessResult::neutral();
+  }
+  if ($order->getState()->getId() === 'canceled') {
+    return AccessResult::forbidden();
+  }
+  if ($order->get('cart')->isEmpty() || !$order->get('cart')->first()->value) {
+    return AccessResult::neutral();
+  }
 
+  $customer_id = (int) $order->getCustomerId();
+  $order_id = $order->id();
+
+  if ($account->isAuthenticated()) {
+    $customer_check = (int) $account->id() === $customer_id;
+  }
+  else {
     $cart_session = \Drupal::getContainer()->get('commerce_cart.cart_session');
     assert($cart_session instanceof CartSessionInterface);
-
-    // Active carts may be modified.
     $active_cart = $cart_session->hasCartId($order_id, CartSessionInterface::ACTIVE);
     $completed_cart = $cart_session->hasCartId($order_id, CartSessionInterface::COMPLETED);
-    if ($operation === 'view') {
-     return AccessResult::allowedIf($active_cart || $completed_cart);
-    }
-    elseif ($operation === 'update') {
-      return AccessResult::allowedIf($active_cart);
-    }
+    $customer_check = $active_cart || $completed_cart;
   }
+
+  if ($operation === 'view') {
+    return AccessResult::allowedIf($customer_check);
+  }
+  if ($operation === 'update') {
+    return AccessResult::allowedIf($customer_check && $order->getState()->getId() === 'draft');
+  }
+
   return AccessResult::neutral();
 }
 

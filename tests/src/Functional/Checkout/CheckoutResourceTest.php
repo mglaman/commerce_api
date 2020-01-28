@@ -43,9 +43,22 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
         'state' => 'draft',
         'email' => $this->account->getEmail(),
         'order_total' => [
-          'subtotal' => ['number' => '1000.0', 'currency_code' => 'USD'],
+          'subtotal' => [
+            'number' => '1000.0',
+            'currency_code' => 'USD',
+            'formatted' => '$1,000.00',
+          ],
           'adjustments' => [],
-          'total' => ['number' => '1000.0', 'currency_code' => 'USD'],
+          'total' => [
+            'number' => '1000.0',
+            'currency_code' => 'USD',
+            'formatted' => '$1,000.00',
+          ],
+        ],
+        'total_price' => [
+          'number' => '1000.0',
+          'currency_code' => 'USD',
+          'formatted' => '$1,000.00',
         ],
       ],
       'relationships' => [
@@ -54,27 +67,27 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
             [
               'type' => 'commerce_order_item--default',
               'id' => $order_item_id,
-            ]
-          ]
+            ],
+          ],
+        ],
+      ],
+      'meta' => [
+        'constraints' => [
+          [
+            'required' => [
+              'detail' => 'This value should not be null.',
+              'source' => ['pointer' => 'billing_profile'],
+            ],
+          ],
+          [
+            'required' => [
+              'detail' => 'This value should not be null.',
+              'source' => ['pointer' => 'shipping_information'],
+            ],
+          ],
         ],
       ],
     ], $checkout_body['data']);
-    $this->assertEquals([
-      'constraints' => [
-        [
-          'required' => [
-            'detail' => 'This value should not be null.',
-            'source' => ['pointer' => 'billing_profile'],
-          ],
-        ],
-        [
-          'required' => [
-            'detail' => 'This value should not be null.',
-            'source' => ['pointer' => 'shipping_information'],
-          ],
-        ]
-      ],
-    ], $checkout_body['meta']);
 
     $url = Url::fromRoute('commerce_api.jsonapi.cart_checkout', ['order' => $test_cart_id]);
     $response = $this->performRequest('PATCH', $url, [
@@ -87,7 +100,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
             'postal_code' => '94043',
           ],
         ],
-      ]
+      ],
     ]);
     $checkout_body = Json::decode((string) $response->getBody());
     $this->assertSame(200, $response->getStatusCode(), var_export($checkout_body, TRUE));
@@ -137,7 +150,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
         'attributes' => [
           'shipping_method' => '1--default',
         ],
-      ]
+      ],
     ]);
     $checkout_body = Json::decode((string) $response->getBody());
     $this->assertSame(200, $response->getStatusCode(), var_export($checkout_body, TRUE));
@@ -153,7 +166,11 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
           'postal_code' => '94043',
         ],
         'order_total' => [
-          'subtotal' => ['number' => '1000.0', 'currency_code' => 'USD'],
+          'subtotal' => [
+            'number' => '1000.0',
+            'currency_code' => 'USD',
+            'formatted' => '$1,000.00',
+          ],
           'adjustments' => [
             [
               'type' => 'shipping',
@@ -161,6 +178,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
               'amount' => [
                 'number' => '5.00',
                 'currency_code' => 'USD',
+                'formatted' => '$5.00',
               ],
               'percentage' => NULL,
               'source_id' => 1,
@@ -169,10 +187,20 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
               'total' => [
                 'number' => '5.00',
                 'currency_code' => 'USD',
+                'formatted' => '$5.00',
               ],
             ],
           ],
-          'total' => ['number' => '1005.0', 'currency_code' => 'USD'],
+          'total' => [
+            'number' => '1005.0',
+            'currency_code' => 'USD',
+            'formatted' => '$1,005.00',
+          ],
+        ],
+        'total_price' => [
+          'number' => '1005.0',
+          'currency_code' => 'USD',
+          'formatted' => '$1,005.00',
         ],
       ],
       'relationships' => [
@@ -181,21 +209,63 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
             [
               'type' => 'commerce_order_item--default',
               'id' => $order_item_id,
-            ]
-          ]
+            ],
+          ],
         ],
-      ],
-    ], $checkout_body['data']);
-    $this->assertEquals([
-      'constraints' => [
-        [
-          'required' => [
-            'detail' => 'This value should not be null.',
-            'source' => ['pointer' => 'billing_profile'],
+        'shipping_methods' => [
+          'data' => [
+            [
+              'type' => 'shipping--service',
+              'id' => '2--default',
+              'meta' => [
+                'label' => 'Flat rate',
+                'methodId' => '2',
+                'serviceId' => 'default',
+                'amount' => [
+                  'number' => '20',
+                  'currency_code' => 'USD',
+                ],
+                'deliveryDate' => NULL,
+                'terms' => NULL,
+              ],
+            ],
+            [
+              'type' => 'shipping--service',
+              'id' => '1--default',
+              'meta' => [
+                'label' => 'Flat rate',
+                'methodId' => '1',
+                'serviceId' => 'default',
+                'amount' => [
+                  'number' => '5',
+                  'currency_code' => 'USD',
+                ],
+                'deliveryDate' => NULL,
+                'terms' => NULL,
+              ],
+            ],
           ],
         ],
       ],
-    ], $checkout_body['meta']);
+      'meta' => [
+        'constraints' => [
+          [
+            'required' => [
+              'detail' => 'This value should not be null.',
+              'source' => ['pointer' => 'billing_profile'],
+            ],
+          ],
+        ],
+      ],
+      'links' => [
+        'shipping-methods' => [
+          'href' => Url::fromRoute(
+            'commerce_api.jsonapi.cart_shipping_methods',
+            ['order' => $test_cart_id]
+          )->setAbsolute()->toString(),
+        ],
+      ],
+    ], $checkout_body['data']);
 
   }
 

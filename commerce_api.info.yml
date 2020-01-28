@@ -10,3 +10,4 @@ dependencies:
   - drupal:jsonapi
   - drupal:serialization
   - jsonapi_resources:jsonapi_resources
+  - jsonapi_hypermedia:jsonapi_hypermedia

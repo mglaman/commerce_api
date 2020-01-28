@@ -95,7 +95,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
         [
           'title' => 'Forbidden',
           'status' => '403',
-          'detail' => 'Order item does not belong to this order.',
+          'detail' => "The 'manage default commerce_order_item' permission is required.",
           'links' => [
             'info' => ['href' => HttpExceptionNormalizer::getInfoUrl(403)],
             'via' => ['href' => $url->setAbsolute()->toString()],
@@ -295,7 +295,6 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
           ],
         ],
         'attributes' => [
-          'drupal_internal__order_item_id' => (string) $order_item_2->id(),
           'title' => $order_item_2->label(),
           'unit_price' => [
             'number' => '500.0',

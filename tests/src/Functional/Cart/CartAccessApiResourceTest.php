@@ -11,6 +11,7 @@ use GuzzleHttp\RequestOptions;
 /**
  * Tests cart api access check.
  *
+ * @todo this tests with authenticated users not anonymous.
  * @group commerce_api
  */
 class CartAccessApiResourceTest extends CartResourceTestBase {
@@ -50,7 +51,7 @@ class CartAccessApiResourceTest extends CartResourceTestBase {
   public function testInvalidCart() {
     $request_options = $this->getAuthenticationRequestOptions();
 
-    // Create non-draft cart.
+    // Create a placed cart, ensure it is accessible.
     $cart = $this->cartProvider->createCart('default', $this->store, $this->account);
     $this->assertInstanceOf(OrderInterface::class, $cart);
     $transition = $cart->getState()->getWorkflow()->getTransition('place');
@@ -63,9 +64,11 @@ class CartAccessApiResourceTest extends CartResourceTestBase {
       'commerce_order' => $cart->uuid(),
     ]);
     $response = $this->request('GET', $url, $request_options);
-    $this->assertResponseCode(403, $response);
+    $this->assertResponseCode(200, $response);
 
-    // Create non-cart order.
+    // Create non-cart order. This should not be accessible.
+    // Authenticated users have the `view own commerce_order` permission, so
+    // it is.
     $order = $this->createEntity('commerce_order', [
       'type' => 'default',
       'mail' => $this->account->getEmail(),
@@ -80,7 +83,7 @@ class CartAccessApiResourceTest extends CartResourceTestBase {
     ]);
 
     $response = $this->request('GET', $url, $request_options);
-    $this->assertResponseCode(403, $response);
+    $this->assertResponseCode(200, $response);
   }
 
   /**

@@ -40,8 +40,8 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
       'errors' => [
         [
           'title' => 'Forbidden',
-          'status' => 403,
-          'detail' => 'Order does not belong to the current user.',
+          'status' => '403',
+          'detail' => "The following permissions are required: 'view commerce_order' OR 'view default commerce_order'.",
           'links' => [
             'via' => ['href' => $url->setAbsolute()->toString()],
             'info' => ['href' => HttpExceptionNormalizer::getInfoUrl(403)],
@@ -69,12 +69,24 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
           'self' => ['href' => Url::fromRoute('jsonapi.commerce_order--default.individual', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
         ],
         'attributes' => [
-          'drupal_internal__order_id' => (int) $cart->id(),
           'order_number' => NULL,
           'total_price' => [
             'number' => '5000.0',
             'currency_code' => 'USD',
             'formatted' => '$5,000.00',
+          ],
+          'order_total' => [
+            'subtotal' => [
+              'number' => '5000.0',
+              'currency_code' => 'USD',
+              'formatted' => '$5,000.00',
+            ],
+            'adjustments' => [],
+            'total' => [
+              'number' => '5000.0',
+              'currency_code' => 'USD',
+              'formatted' => '$5,000.00',
+            ],
           ],
         ],
         'relationships' => [
@@ -101,6 +113,22 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
             ],
           ],
         ],
+        'meta' => [
+          'constraints' => [
+            [
+              'required' => [
+                'detail' => 'This value should not be null.',
+                'source' => ['pointer' => 'billing_profile'],
+              ],
+            ],
+            [
+              'required' => [
+                'detail' => 'This value should not be null.',
+                'source' => ['pointer' => 'shipping_information'],
+              ],
+            ],
+          ],
+        ],
       ],
       'jsonapi' => [
         'version' => '1.0',
@@ -121,7 +149,6 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
             'self' => ['href' => Url::fromRoute('jsonapi.commerce_order_item--default.individual', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
           ],
           'attributes' => [
-            'drupal_internal__order_item_id' => $order_item->id(),
             'title' => $order_item->label(),
             'quantity' => (int) $order_item->getQuantity(),
             'unit_price' => $order_item->get('unit_price')->first()->getValue() + ['formatted' => '$1,000.00'],
@@ -161,11 +188,12 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
             'self' => ['href' => Url::fromRoute('jsonapi.commerce_product_variation--default.individual', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
           ],
           'attributes' => [
-            'drupal_internal__variation_id' => (int) $this->variation->id(),
             'sku' => $this->variation->getSku(),
             'title' => $this->variation->label(),
             'list_price' => NULL,
             'price' => $this->variation->get('price')->first()->getValue() + ['formatted' => '$1,000.00'],
+            'resolved_price' => $this->variation->get('resolved_price')->first()->getValue() + ['formatted' => '$1,000.00'],
+            'weight' => NULL,
           ],
           'relationships' => [
             'commerce_product_variation_type' => [

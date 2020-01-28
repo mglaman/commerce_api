@@ -55,6 +55,8 @@ abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
    */
   protected static $modules = [
     'basic_auth',
+    'commerce_payment',
+    'commerce_shipping',
     'jsonapi_resources',
     'commerce_api',
   ];

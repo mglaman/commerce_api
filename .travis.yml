@@ -42,6 +42,8 @@ before_script:
   - composer require drupal/commerce_api *@dev
 script:
   - cd $TRAVIS_BUILD_DIR
+  - echo "Run php in-built server - background process"
+  - nohup bash -c "php -S 127.0.0.1:8080 2>&1 -t web &" && sleep 1; cat nohup.out
   - phpcs --standard=phpcs.xml src -s
   - phpcs --standard=phpcs.xml tests -s
   - phpcs --standard=phpcs.xml commerce_api.module
