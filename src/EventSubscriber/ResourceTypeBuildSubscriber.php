@@ -4,6 +4,7 @@ namespace Drupal\commerce_api\EventSubscriber;
 
 use Doctrine\Common\Inflector\Inflector;
 use Drupal\commerce_api\Events\RenamableResourceTypeBuildEvent;
+use Drupal\jsonapi\ResourceType\ResourceTypeBuildEvent;
 use Drupal\jsonapi\ResourceType\ResourceTypeBuildEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -21,10 +22,14 @@ final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
   /**
    * Customizes commerce resource types.
    *
-   * @param \Drupal\commerce_api\Events\RenamableResourceTypeBuildEvent $event
+   * @param \Drupal\jsonapi\ResourceType\ResourceTypeBuildEvent $event
    *   The event.
    */
-  public function onResourceTypeBuild(RenamableResourceTypeBuildEvent $event): void {
+  public function onResourceTypeBuild(ResourceTypeBuildEvent $event): void {
+    // Prevent crashes during container rebuilds before decoration is set.
+    if (!$event instanceof RenamableResourceTypeBuildEvent) {
+      return;
+    }
     if (strpos($event->getResourceTypeName(), 'commerce_') === 0) {
       // Remove commerce_ prefix and pluralize.
       list($entity_type_id, $bundle) = explode('--', $event->getResourceTypeName());

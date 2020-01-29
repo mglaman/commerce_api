@@ -4,10 +4,17 @@ commerce_api.current_store:
   path: '/%jsonapi%/current-store'
   defaults:
     _jsonapi_resource: Drupal\commerce_api\Resource\CurrentStoreResource
-    _jsonapi_resource_types: ['commerce_store--online']
+    # @todo this may have a different bundle.
+    _jsonapi_resource_types: ['stores--online']
+    # @todo defined for openapi definition.
+    resource_type: 'stores--online'
   options:
     # @todo add a response policy based on this route alone, so dynamic page cache is allowed but not page_cache
     no_cache: 'TRUE'
+    # @todo defined for openapi definition.
+    parameters:
+      resource_type:
+        type: jsonapi_resource_type
   requirements:
     _access: 'TRUE'
 

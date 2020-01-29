@@ -65,4 +65,5 @@ services:
     public: false
     class: Drupal\commerce_api\ResourceType\RenamableResourceTypeRepository
     decorates: jsonapi.resource_type.repository
+    decoration_priority: 5
     parent: jsonapi.resource_type.repository

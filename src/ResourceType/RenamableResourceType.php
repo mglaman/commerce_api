@@ -40,4 +40,13 @@ final class RenamableResourceType extends ResourceType {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   *
+   * @todo add a test for resource type paths
+   */
+  public function getPath() {
+    return '/' . implode('/', explode('--', $this->typeName));
+  }
+
 }
