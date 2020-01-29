@@ -81,7 +81,7 @@ final class CartCouponAddResourceTest extends KernelTestBase {
     $request = Request::create("https://localhost/cart/{$order->uuid()}/coupons", 'PATCH', [], [], [], [], Json::encode([
       'data' => [
         [
-          'type' => 'commerce_promotion_coupon--commerce_promotion_coupon',
+          'type' => 'promotion_coupons--commerce_promotion_coupon',
           'id' => $coupon->getCode(),
         ],
       ],
@@ -106,7 +106,7 @@ final class CartCouponAddResourceTest extends KernelTestBase {
     $request = Request::create("https://localhost/cart/{$order->uuid()}/coupons", 'PATCH', [], [], [], [], Json::encode([
       'data' => [
         [
-          'type' => 'commerce_promotion_coupon--commerce_promotion_coupon',
+          'type' => 'promotion_coupons--commerce_promotion_coupon',
           'id' => $coupon->getCode(),
         ],
       ],

@@ -123,7 +123,7 @@ final class CartUpdateItemResourceTest extends KernelTestBase {
         'relationships' => [
           'purchased_entity' => [
             'data' => [
-              'type' => 'commerce_product_variation--default',
+              'type' => 'product_variations--default',
               'id' => '9dc0ce8a-1d62-40a2-bbf9-7b6041fd08d1',
             ],
           ],

@@ -79,7 +79,7 @@ class TranslationCartAddResourceTest extends CartResourceTestBase {
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
         [
-          'type' => 'commerce_product_variation--default',
+          'type' => 'product_variations--default',
           'id' => $this->variation->uuid(),
           'meta' => [
             'quantity' => 1,
@@ -114,7 +114,7 @@ class TranslationCartAddResourceTest extends CartResourceTestBase {
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
         [
-          'type' => 'commerce_product_variation--default',
+          'type' => 'product_variations--default',
           'id' => $this->variation->uuid(),
           'meta' => [
             'quantity' => 1,

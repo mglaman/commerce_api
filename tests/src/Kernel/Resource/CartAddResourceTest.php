@@ -38,10 +38,10 @@ final class CartAddResourceTest extends KernelTestBase {
     ]));
 
     $this->expectException(BadRequestHttpException::class);
-    $this->expectExceptionMessage('The provided type (entity_test--entity_test) does not mach the destination resource types (commerce_product_variation--default).');
+    $this->expectExceptionMessage('The provided type (entity_test--entity_test) does not mach the destination resource types (product_variations--default).');
 
     $controller = $this->getController();
-    $controller->process($request->reveal(), ['commerce_product_variation--default']);
+    $controller->process($request->reveal(), ['product_variations--default']);
   }
 
   /**
@@ -61,7 +61,7 @@ final class CartAddResourceTest extends KernelTestBase {
     $this->expectExceptionMessage('The given entity is not assigned to any store.');
 
     $controller = $this->getController();
-    $controller->process($request->reveal(), ['commerce_product_variation--default']);
+    $controller->process($request->reveal(), ['product_variations--default']);
   }
 
   /**
@@ -86,7 +86,7 @@ final class CartAddResourceTest extends KernelTestBase {
     $this->expectExceptionMessage("The given entity can't be purchased from the current store.");
 
     $controller = $this->getController();
-    $controller->process($request->reveal(), ['commerce_product_variation--default']);
+    $controller->process($request->reveal(), ['product_variations--default']);
   }
 
   /**
@@ -116,12 +116,12 @@ final class CartAddResourceTest extends KernelTestBase {
     ]));
 
     $controller = $this->getController();
-    $response = $controller->process($request, ['commerce_product_variation--default']);
+    $response = $controller->process($request, ['product_variations--default']);
     $this->assertInstanceOf(JsonApiDocumentTopLevel::class, $response->getResponseData());
     $this->assertCount(1, $response->getResponseData()->getData()->getIterator());
     $resource_object = $response->getResponseData()->getData()->getIterator()->offsetGet(0);
     assert($resource_object instanceof ResourceObject);
-    $this->assertEquals('commerce_order_item--default', $resource_object->getTypeName());
+    $this->assertEquals('order_items--default', $resource_object->getTypeName());
     $purchased_entity = $resource_object->getField('purchased_entity');
     $this->assertEquals($product_variation->id(), $purchased_entity->target_id);
     $this->assertEquals(1, $resource_object->getField('quantity')->value);
@@ -131,7 +131,7 @@ final class CartAddResourceTest extends KernelTestBase {
         $this->createJsonapiData($product_variation, 1),
       ],
     ]));
-    $response = $controller->process($request, ['commerce_product_variation--default']);
+    $response = $controller->process($request, ['product_variations--default']);
     $this->assertCount(1, $response->getResponseData()->getData()->getIterator());
     $resource_object = $response->getResponseData()->getData()->getIterator()->offsetGet(0);
     $this->assertEquals(2, $resource_object->getField('quantity')->value);
@@ -170,7 +170,7 @@ final class CartAddResourceTest extends KernelTestBase {
         $arity1,
       ],
     ]));
-    $response = $controller->process($request, ['commerce_product_variation--default']);
+    $response = $controller->process($request, ['product_variations--default']);
     $this->assertCount(2, $response->getResponseData()->getData()->getIterator());
     $resource_object = $response->getResponseData()->getData()->getIterator()->offsetGet(0);
     $this->assertEquals(2, $resource_object->getField('quantity')->value);
@@ -198,11 +198,11 @@ final class CartAddResourceTest extends KernelTestBase {
     ]));
 
     $controller = $this->getController();
-    $response = $controller->process($request, ['commerce_product_variation--default']);
+    $response = $controller->process($request, ['product_variations--default']);
 
     $resource_object = $response->getResponseData()->getData()->getIterator()->offsetGet(0);
     assert($resource_object instanceof ResourceObject);
-    $this->assertEquals('commerce_order_item--default', $resource_object->getTypeName());
+    $this->assertEquals('order_items--default', $resource_object->getTypeName());
     $purchased_entity = $resource_object->getField('purchased_entity');
     $this->assertEquals($product_variation->id(), $purchased_entity->target_id);
     $this->assertEquals(1, $resource_object->getField('quantity')->value);
@@ -222,8 +222,13 @@ final class CartAddResourceTest extends KernelTestBase {
    *   The data array.
    */
   private function createJsonapiData(EntityInterface $entity, $quantity) {
+    $resource_type = $this->container->get('jsonapi.resource_type.repository')->get(
+      $entity->getEntityTypeId(),
+      $entity->bundle()
+    );
+    assert($resource_type !== NULL);
     return [
-      'type' => $entity->getEntityTypeId() . '--' . $entity->bundle(),
+      'type' => $resource_type->getTypeName(),
       'id' => $entity->uuid(),
       'meta' => [
         'quantity' => $quantity,

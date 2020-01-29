@@ -12,30 +12,13 @@ use Drupal\jsonapi\ResourceType\ResourceTypeBuildEvent;
 final class RenamableResourceTypeBuildEvent extends ResourceTypeBuildEvent {
 
   /**
-   * The resource path.
-   *
-   * @var string
-   */
-  private $resourcePath;
-
-  /**
    * Sets the name of the resource type to be built.
    *
-   * @param string $resource_path
-   *   The resource path.
+   * @param string $resource_type_name
+   *   The resource type name.
    */
-  public function setResourcePath(string $resource_path) {
-    $this->resourcePath = $resource_path;
-  }
-
-  /**
-   * Get the resource path.
-   *
-   * @return string|null
-   *   The resource path.
-   */
-  public function getResourcePath(): ?string {
-    return $this->resourcePath;
+  public function setResourceTypeName(string $resource_type_name) {
+    $this->resourceTypeName = $resource_type_name;
   }
 
 }
