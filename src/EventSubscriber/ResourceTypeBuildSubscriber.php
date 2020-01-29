@@ -33,9 +33,14 @@ final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
     if (strpos($event->getResourceTypeName(), 'commerce_') === 0) {
       // Remove commerce_ prefix and pluralize.
       list($entity_type_id, $bundle) = explode('--', $event->getResourceTypeName());
-      $entity_type_id = str_replace('commerce_', '', $entity_type_id);
-      $resource_type_name_base = Inflector::pluralize($entity_type_id);
-      $event->setResourceTypeName("$resource_type_name_base--$bundle");
+      $resource_type_name_base = Inflector::pluralize(str_replace('commerce_', '', $entity_type_id));
+      if ($entity_type_id !== $bundle) {
+        $resource_type_name = "$resource_type_name_base--$bundle";
+      }
+      else {
+        $resource_type_name = $resource_type_name_base;
+      }
+      $event->setResourceTypeName(str_replace('_', '-', $resource_type_name));
 
       foreach ($event->getFields() as $field) {
         // Disable the internal Drupal identifiers.
