@@ -33,23 +33,27 @@ final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
     if (!$event instanceof RenamableResourceTypeBuildEvent) {
       return;
     }
-    if (strpos($event->getResourceTypeName(), 'commerce_') === 0) {
-      // Remove commerce_ prefix and pluralize.
-      list($entity_type_id, $bundle) = explode('--', $event->getResourceTypeName());
-      $resource_type_name_base = Inflector::pluralize(str_replace('commerce_', '', $entity_type_id));
-      if ($entity_type_id !== $bundle) {
-        $resource_type_name = "$resource_type_name_base--$bundle";
-      }
-      else {
-        $resource_type_name = $resource_type_name_base;
-      }
-      $event->setResourceTypeName(str_replace('_', '-', $resource_type_name));
+    if (strpos($event->getResourceTypeName(), 'commerce_') !== 0) {
+      return;
+    }
+    // Remove commerce_ prefix and pluralize.
+    list($entity_type_id, $bundle) = explode('--', $event->getResourceTypeName());
+    $resource_type_name_base = Inflector::pluralize(str_replace('commerce_', '', $entity_type_id));
+    if ($entity_type_id !== $bundle) {
+      $resource_type_name = "$resource_type_name_base--$bundle";
+    }
+    else {
+      $resource_type_name = $resource_type_name_base;
+    }
+    $event->setResourceTypeName(str_replace('_', '-', $resource_type_name));
 
-      foreach ($event->getFields() as $field) {
-        // Disable the internal Drupal identifiers.
-        if (strpos($field->getPublicName(), 'drupal_internal__') === 0) {
-          $event->disableField($field);
-        }
+    foreach ($event->getFields() as $field) {
+      // Disable the internal Drupal identifiers.
+      if (strpos($field->getPublicName(), 'drupal_internal__') === 0) {
+        $event->disableField($field);
+      }
+      if (strpos($field->getPublicName(), 'field_') === 0) {
+        $event->setPublicFieldName($field, str_replace('field_', '', $field->getPublicName()));
       }
     }
   }
