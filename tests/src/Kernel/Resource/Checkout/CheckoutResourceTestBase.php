@@ -282,7 +282,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
    *
    * @param array $attributes
    *   The resource object's attributes.
-   * @param array|null
+   * @param array|null $constraints
    *   The meta constraints.
    * @param array $relationships
    *   The relationships.
