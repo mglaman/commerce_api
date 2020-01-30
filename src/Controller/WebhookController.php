@@ -18,7 +18,18 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 final class WebhookController implements ContainerInjectionInterface {
 
+  /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
   private $eventDispatcher;
+
+  /**
+   * The resource type repository.
+   *
+   * @var \Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface
+   */
   private $resourceTypeRepository;
 
   /**
@@ -35,7 +46,7 @@ final class WebhookController implements ContainerInjectionInterface {
   }
 
   /**
-   *
+   * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
     return new self(
@@ -45,7 +56,14 @@ final class WebhookController implements ContainerInjectionInterface {
   }
 
   /**
+   * Handle the order fulfillment webhook.
    *
+   * @param \Drupal\commerce_order\Entity\OrderInterface $commerce_order
+   *   The order.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match.
    */
   public function orderFulfillment(OrderInterface $commerce_order, Request $request, RouteMatchInterface $route_match) {
     $transitions = $commerce_order->getState()->getTransitions();

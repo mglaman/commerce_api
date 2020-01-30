@@ -103,7 +103,7 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
           'order_items' => [
             'data' => [
               [
-                'type' => 'order_items--default',
+                'type' => 'order-items--default',
                 'id' => $order_item->uuid(),
               ],
             ],
@@ -143,7 +143,7 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
       ],
       'included' => [
         [
-          'type' => 'order_items--default',
+          'type' => 'order-items--default',
           'id' => $order_item->uuid(),
           'links' => [
             'self' => ['href' => Url::fromRoute('jsonapi.order_items--default.individual', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
@@ -171,7 +171,7 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
             ],
             'purchased_entity' => [
               'data' => [
-                'type' => 'product_variations--default',
+                'type' => 'product-variations--default',
                 'id' => $this->variation->uuid(),
               ],
               'links' => [
@@ -182,7 +182,7 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
           ],
         ],
         [
-          'type' => 'product_variations--default',
+          'type' => 'product-variations--default',
           'id' => $this->variation->uuid(),
           'links' => [
             'self' => ['href' => Url::fromRoute('jsonapi.product_variations--default.individual', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
@@ -198,7 +198,7 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
           'relationships' => [
             'commerce_product_variation_type' => [
               'data' => [
-                'type' => 'product_variation_types--commerce_product_variation_type',
+                'type' => 'product-variation-types',
                 'id' => $product_variation_type->uuid(),
               ],
               'links' => [

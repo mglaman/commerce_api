@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace Drupal\commerce_api\EventSubscriber;
 
@@ -8,6 +8,9 @@ use Drupal\jsonapi\ResourceType\ResourceTypeBuildEvent;
 use Drupal\jsonapi\ResourceType\ResourceTypeBuildEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ * Modifies the Commerce resource types to be less Drupaly.
+ */
 final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
 
   /**

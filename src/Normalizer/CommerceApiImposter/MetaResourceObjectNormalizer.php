@@ -15,18 +15,35 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 final class MetaResourceObjectNormalizer extends ResourceObjectNormalizer {
 
+  /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
   private $eventDispatcher;
+
+  /**
+   * The renderer.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
   private $renderer;
 
   /**
+   * Set the event dispatcher.
    *
+   * @param Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
+   *   The event dispatcher.
    */
   public function setEventDispatcher(EventDispatcherInterface $event_dispatcher) {
     $this->eventDispatcher = $event_dispatcher;
   }
 
   /**
+   * Set the renderer.
    *
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer.
    */
   public function setRenderer(RendererInterface $renderer) {
     $this->renderer = $renderer;

@@ -63,6 +63,7 @@ abstract class CartResourceBase extends EntityResourceBase implements ContainerI
    *
    * @return \Drupal\jsonapi\ResourceType\ResourceType
    *   The resource type.
+   *
    * @see https://www.drupal.org/project/commerce/issues/3002939
    *
    * @todo once `items` is a base field, change to "virtual".

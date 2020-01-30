@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace Drupal\commerce_api\Resolvers;
 
@@ -9,12 +9,27 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 final class CurrentStoreHeaderResolver implements StoreResolverInterface {
 
+  /**
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
   private $requestStack;
 
+  /**
+   * The entity repository.
+   *
+   * @var \Drupal\Core\Entity\EntityRepositoryInterface
+   */
   private $entityRepository;
 
   /**
+   * Constructs a new CurrentStoreHeaderResolver object.
    *
+   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
+   *   The request stack.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *   The entity repository.
    */
   public function __construct(RequestStack $request_stack, EntityRepositoryInterface $entity_repository) {
     $this->requestStack = $request_stack;
@@ -22,7 +37,7 @@ final class CurrentStoreHeaderResolver implements StoreResolverInterface {
   }
 
   /**
-   *
+   * {@inheritdoc}
    */
   public function resolve(): ?StoreInterface {
     $request = $this->requestStack->getCurrentRequest();

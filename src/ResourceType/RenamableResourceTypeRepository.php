@@ -70,6 +70,9 @@ final class RenamableResourceTypeRepository extends ResourceTypeRepository {
     return NULL;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function getRelatableResourceTypesFromFieldDefinition(FieldDefinitionInterface $field_definition, array $resource_types) {
     $item_definition = $field_definition->getItemDefinition();
 

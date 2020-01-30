@@ -9,12 +9,36 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class OrderWebhookEvent extends Event {
 
+  /**
+   * The order.
+   *
+   * @var \Drupal\commerce_order\Entity\OrderInterface
+   */
   private $order;
+
+  /**
+   * The request.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
   private $request;
+
+  /**
+   * The route match.
+   *
+   * @var \Drupal\Core\Routing\RouteMatchInterface
+   */
   private $routeMatch;
 
   /**
+   * Constructs a new OrderWebhookEvent.
    *
+   * @param \Drupal\commerce_order\Entity\OrderInterface $order
+   *   The order.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match.
    */
   public function __construct(OrderInterface $order, Request $request, RouteMatchInterface $route_match) {
     $this->order = $order;

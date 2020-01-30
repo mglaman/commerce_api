@@ -30,7 +30,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
     ]);
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
-        'type' => 'commerce_order_item--default',
+        'type' => 'order-items--default',
         'id' => $uuid_generator->generate(),
         'attributes' => [
           'quantity' => 5,
@@ -60,7 +60,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
     ]);
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
-        'type' => $order_item->getEntityTypeId() . '--' . $order_item->bundle(),
+        'type' => 'order-items--default',
         'id' => $non_existent_order_item_uuid,
         'attributes' => [
           'quantity' => 5,
@@ -127,7 +127,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
 
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
-        'type' => $order_item->getEntityTypeId() . '--' . $order_item->bundle(),
+        'type' => 'order-items--default',
         'id' => $order_item->uuid(),
         'attributes' => [
           'quantity' => 5,
@@ -159,7 +159,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
 
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
-        'type' => $order_item->getEntityTypeId() . '--' . $order_item->bundle(),
+        'type' => 'order-items--default',
         'id' => $order_item->uuid(),
         'attributes' => [
           'quantity' => 5,
@@ -196,7 +196,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
 
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
-        'type' => $order_item->getEntityTypeId() . '--' . $order_item->bundle(),
+        'type' => 'order-items--default',
         'id' => $order_item->uuid(),
         'attributes' => [
           'quantity' => -1,
@@ -250,7 +250,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
     ]);
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
-        'type' => 'order_items--' . $order_item_2->bundle(),
+        'type' => 'order-items--' . $order_item_2->bundle(),
         'id' => $order_item_2->uuid(),
         'attributes' => [
           'quantity' => 1,
@@ -287,7 +287,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
         ],
       ],
       'data' => [
-        'type' => 'order_items--default',
+        'type' => 'order-items--default',
         'id' => $order_item_2->uuid(),
         'links' => [
           'self' => [
@@ -325,7 +325,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
           ],
           'purchased_entity' => [
             'data' => [
-              'type' => 'product_variations--default',
+              'type' => 'product-variations--default',
               'id' => $this->variation2->uuid(),
             ],
             'links' => [

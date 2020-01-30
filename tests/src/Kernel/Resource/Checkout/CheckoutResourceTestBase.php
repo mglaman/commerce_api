@@ -299,7 +299,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
             'data' => [
               [
                 'id' => self::TEST_ORDER_ITEM_UUID,
-                'type' => 'order_items--default',
+                'type' => 'order-items--default',
               ],
             ],
           ],

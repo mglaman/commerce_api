@@ -125,7 +125,7 @@ class CartAccessApiResourceTest extends CartResourceTestBase {
     $request_options[RequestOptions::HEADERS]['Content-Type'] = 'application/vnd.api+json';
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
-        'type' => 'commerce_order_item--default',
+        'type' => 'order-items--default',
         'id' => $other_order_item->uuid(),
         'attributes' => [
           'quantity' => 10,

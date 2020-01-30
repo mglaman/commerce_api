@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace Drupal\commerce_api\EventSubscriber;
 
@@ -12,7 +12,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Validator\ConstraintViolation;
 
 /**
- * @todo document.
+ * Adds metadata to resource objects.
  */
 final class CollectResourceObjectMetaSubscriber implements EventSubscriberInterface {
 

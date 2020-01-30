@@ -23,10 +23,18 @@ final class OnReturnResource extends EntityResourceBase implements ContainerInje
 
   use FixIncludeTrait;
 
+  /**
+   * The logger.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
   private $logger;
 
   /**
+   * Constructs a new OnReturnResource object.
    *
+   * @param \Psr\Log\LoggerInterface $logger
+   *   The logger.
    */
   public function __construct(LoggerInterface $logger) {
     $this->logger = $logger;
@@ -40,7 +48,12 @@ final class OnReturnResource extends EntityResourceBase implements ContainerInje
   }
 
   /**
+   * Process the request.
    *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   * @param Drupal\commerce_order\Entity\OrderInterface $commerce_order
+   *   The order.
    */
   public function process(Request $request, OrderInterface $commerce_order) {
     // @todo should this actually be a "not allowed" exception?

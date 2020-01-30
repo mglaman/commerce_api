@@ -18,7 +18,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     $response = $this->performRequest('POST', $url, [
       'data' => [
         [
-          'type' => 'product_variations--' . $this->variation->bundle(),
+          'type' => 'product-variations--' . $this->variation->bundle(),
           'id' => $this->variation->uuid(),
           'meta' => [
             'quantity' => 1,
@@ -207,7 +207,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
         'order_items' => [
           'data' => [
             [
-              'type' => 'order_items--default',
+              'type' => 'order-items--default',
               'id' => $order_item_id,
             ],
           ],

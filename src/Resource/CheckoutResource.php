@@ -105,6 +105,8 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request.
+   * @param array $resource_types
+   *   The resource tpyes for this resource.
    * @param \Drupal\commerce_order\Entity\OrderInterface $order
    *   The order.
    * @param \Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel $document
@@ -118,7 +120,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
-  public function process(Request $request, array $resource_types, OrderInterface $order, ?JsonApiDocumentTopLevel $document = NULL): ResourceResponse {
+  public function process(Request $request, array $resource_types, OrderInterface $order, JsonApiDocumentTopLevel $document = NULL): ResourceResponse {
     // Must use this due to strict checking in JsonapiResourceController;.
     // @todo fix in https://www.drupal.org/project/jsonapi_resources/issues/3096949
     $resource_type = reset($resource_types);
@@ -226,7 +228,12 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
   }
 
   /**
+   * Apply a shipping rate to an order's shipments.
    *
+   * @param \Drupal\commerce_order\Entity\OrderInterface $order
+   *   The order.
+   * @param string $shipping_rate_option_id
+   *   The shipping rate option ID.
    */
   private function applyShippingRateToShipments(OrderInterface $order, string $shipping_rate_option_id) {
     [$shipping_method_id, $shipping_service_id] = explode('--', $shipping_rate_option_id);
@@ -266,6 +273,8 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    *
    * @param \Drupal\commerce_order\Entity\OrderInterface $order
    *   The order.
+   * @param \Drupal\jsonapi\ResourceType\ResourceType $resource_type
+   *   The resource type.
    *
    * @return \Drupal\jsonapi\JsonApiResource\ResourceObject
    *   The resource object.
@@ -414,7 +423,10 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
   }
 
   /**
+   * Get the shipping rate option resource type.
    *
+   * @return \Drupal\jsonapi\ResourceType\ResourceType
+   *   The resource type.
    */
   private function getShippingRateOptionResourceType(): ResourceType {
     $resource_type = new ResourceType(

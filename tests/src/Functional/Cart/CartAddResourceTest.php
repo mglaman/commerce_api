@@ -25,7 +25,7 @@ final class CartAddResourceTest extends CartResourceTestBase {
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
         [
-          'type' => 'product_variations--' . $this->variation->bundle(),
+          'type' => 'product-variations--' . $this->variation->bundle(),
           'id' => $this->variation->uuid(),
           'meta' => [
             'quantity' => 1,
@@ -49,7 +49,7 @@ final class CartAddResourceTest extends CartResourceTestBase {
     $this->assertEquals([
       'data' => [
         [
-          'type' => 'order_items--default',
+          'type' => 'order-items--default',
           'id' => $order_item->uuid(),
           'links' => [
             'self' => ['href' => Url::fromRoute('jsonapi.order_items--default.individual', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
@@ -81,7 +81,7 @@ final class CartAddResourceTest extends CartResourceTestBase {
             ],
             'purchased_entity' => [
               'data' => [
-                'type' => 'product_variations--default',
+                'type' => 'product-variations--default',
                 'id' => $this->variation->uuid(),
               ],
               'links' => [

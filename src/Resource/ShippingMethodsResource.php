@@ -31,14 +31,17 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
   private $shipmentManager;
 
   /**
+   * Constructs a new ShippingMethodsResource object.
    *
+   * @param \Drupal\commerce_shipping\ShipmentManagerInterface $shipment_manager
+   *   The shipment manager.
    */
   public function __construct(ShipmentManagerInterface $shipment_manager) {
     $this->shipmentManager = $shipment_manager;
   }
 
   /**
-   *
+   * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
     return new self(
@@ -47,7 +50,17 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
   }
 
   /**
+   * Process the resource request.
    *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   * @param array $resource_types
+   *   The resource tpyes for this resource.
+   * @param \Drupal\commerce_order\Entity\OrderInterface $order
+   *   The order.
+   *
+   * @return \Drupal\jsonapi\ResourceResponse
+   *   The response.
    */
   public function process(Request $request, array $resource_types, OrderInterface $order): ResourceResponse {
     $shipments = $order->get('shipments')->referencedEntities();
@@ -89,14 +102,17 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
   }
 
   /**
-   *
+   * {@inheritdoc}
    */
   public function getRouteResourceTypes(Route $route, string $route_name): array {
     return [$this->getShippingRateOptionResourceType()];
   }
 
   /**
+   * Get the shipping rate option resource type.
    *
+   * @return \Drupal\jsonapi\ResourceType\ResourceType
+   *   The resource type.
    */
   private function getShippingRateOptionResourceType(): ResourceType {
     $resource_type = new ResourceType(

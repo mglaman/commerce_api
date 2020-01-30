@@ -331,7 +331,10 @@ class Routes implements ContainerInjectionInterface {
   }
 
   /**
+   * Payment onReturn resource.
    *
+   * @return \Symfony\Component\Routing\Route
+   *   The route.
    */
   protected function checkoutPaymentGatewayReturn() {
     $order_resource_types = $this->getResourceTypesForEntityType('commerce_order');
