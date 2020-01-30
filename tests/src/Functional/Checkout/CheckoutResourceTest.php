@@ -11,7 +11,7 @@ use GuzzleHttp\RequestOptions;
 final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
 
   /**
-   *
+   * Test the checkout response.
    */
   public function testCheckout() {
     $url = Url::fromRoute('commerce_api.jsonapi.cart_add');
@@ -65,7 +65,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
         'order_items' => [
           'data' => [
             [
-              'type' => 'order_items--default',
+              'type' => 'order-items--default',
               'id' => $order_item_id,
             ],
           ],
@@ -270,7 +270,14 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
   }
 
   /**
+   * Perform a request.
    *
+   * @param string $method
+   *   The HTTP Method.
+   * @param \Drupal\Core\Url $url
+   *   The URL.
+   * @param array|null $body
+   *   The body.
    */
   protected function performRequest(string $method, Url $url, ?array $body = NULL) {
     $request_options = [];

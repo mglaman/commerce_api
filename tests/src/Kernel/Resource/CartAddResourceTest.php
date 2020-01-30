@@ -121,7 +121,7 @@ final class CartAddResourceTest extends KernelTestBase {
     $this->assertCount(1, $response->getResponseData()->getData()->getIterator());
     $resource_object = $response->getResponseData()->getData()->getIterator()->offsetGet(0);
     assert($resource_object instanceof ResourceObject);
-    $this->assertEquals('order_items--default', $resource_object->getTypeName());
+    $this->assertEquals('order-items--default', $resource_object->getTypeName());
     $purchased_entity = $resource_object->getField('purchased_entity');
     $this->assertEquals($product_variation->id(), $purchased_entity->target_id);
     $this->assertEquals(1, $resource_object->getField('quantity')->value);
@@ -202,7 +202,7 @@ final class CartAddResourceTest extends KernelTestBase {
 
     $resource_object = $response->getResponseData()->getData()->getIterator()->offsetGet(0);
     assert($resource_object instanceof ResourceObject);
-    $this->assertEquals('order_items--default', $resource_object->getTypeName());
+    $this->assertEquals('order-items--default', $resource_object->getTypeName());
     $purchased_entity = $resource_object->getField('purchased_entity');
     $this->assertEquals($product_variation->id(), $purchased_entity->target_id);
     $this->assertEquals(1, $resource_object->getField('quantity')->value);

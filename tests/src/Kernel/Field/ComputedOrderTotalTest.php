@@ -27,12 +27,12 @@ final class ComputedOrderTotalTest extends KernelTestBase {
    *
    * @param string $sku
    *   The SKU.
-   * @param \Drupal\commerce_price\Price $price
-   *   The price.
+   * @param array $price
+   *   The price, as an array.
    * @param \Drupal\commerce_order\Adjustment[] $expected_adjustments
    *   The expected adjustments.
-   * @param \Drupal\commerce_price\Price $expected_total_price
-   *   The expected total price.
+   * @param array $expected_total_price
+   *   The expected total price, as an array.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Drupal\Core\TypedData\Exception\MissingDataException
