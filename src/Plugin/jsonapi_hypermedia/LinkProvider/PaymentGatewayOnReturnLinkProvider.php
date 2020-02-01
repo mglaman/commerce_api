@@ -60,7 +60,7 @@ final class PaymentGatewayOnReturnLinkprovider extends LinkProviderBase implemen
    */
   public function getLink($resource_object) {
     assert($resource_object instanceof ResourceObject);
-    if ($resource_object->getTypeName() !== 'checkout_order--checkout_order' && $resource_object->getResourceType()->getEntityTypeId() !== 'commerce_order') {
+    if ($resource_object->getTypeName() !== 'checkout' && $resource_object->getResourceType()->getEntityTypeId() !== 'commerce_order') {
       return AccessRestrictedLink::createInaccessibleLink(new CacheableMetadata());
     }
     $entity = $this->entityRepository->loadEntityByUuid(

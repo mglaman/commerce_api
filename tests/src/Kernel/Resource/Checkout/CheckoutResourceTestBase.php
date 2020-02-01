@@ -301,7 +301,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
       ],
       'data' => [
         'id' => self::TEST_ORDER_UUID,
-        'type' => 'checkout_order--checkout_order',
+        'type' => 'checkout',
         'attributes' => $attributes,
         'relationships' => [
           'order_items' => [
@@ -319,7 +319,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
       ],
       'links' => [
         'self' => [
-          'href' => 'https://localhost/cart/' . self::TEST_ORDER_UUID . '/checkout',
+          'href' => 'https://localhost/checkout/' . self::TEST_ORDER_UUID,
         ],
       ] + $links,
     ];

@@ -22,7 +22,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
   public function testShipping(array $test_document, array $expected_shipping_methods, string $shipping_method, array $expected_order_document) {
     $checkoutResourceController = $this->getCheckoutResource();
     $document['data'] = [
-      'type' => 'checkout_order--checkout_order',
+      'type' => 'checkout',
       'id' => self::TEST_ORDER_UUID,
       'attributes' => $test_document['attributes'] ?? [],
       'relationships' => $test_document['relationships'] ?? [],
@@ -55,7 +55,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
     $this->assertEquals($expected_shipping_methods, $decoded_document['data'], var_export($decoded_document['data'], TRUE));
 
     $document['data'] = [
-      'type' => 'checkout_order--checkout_order',
+      'type' => 'checkout',
       'id' => self::TEST_ORDER_UUID,
       'attributes' => [
         'shipping_method' => $shipping_method,

@@ -62,7 +62,7 @@ final class CollectResourceObjectMetaSubscriber implements EventSubscriberInterf
    */
   public function collectMeta(CollectResourceObjectMetaEvent $event) {
     $resource_object = $event->getResourceObject();
-    if ($resource_object->getTypeName() !== 'checkout_order--checkout_order' && $resource_object->getResourceType()->getEntityTypeId() !== 'commerce_order') {
+    if ($resource_object->getTypeName() !== 'checkout' && $resource_object->getResourceType()->getEntityTypeId() !== 'commerce_order') {
       return;
     }
     $meta = $event->getMeta();

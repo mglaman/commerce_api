@@ -156,7 +156,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     $this->assertSame(200, $response->getStatusCode(), var_export($checkout_body, TRUE));
     $this->assertEquals([
       'id' => $test_cart_id,
-      'type' => 'checkout_order--checkout_order',
+      'type' => 'checkout',
       'attributes' => [
         'state' => 'draft',
         'email' => $this->account->getEmail(),
