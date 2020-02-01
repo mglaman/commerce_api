@@ -35,7 +35,7 @@ final class CartAddResourceTest extends CartResourceTestBase {
     ]);
     $request_options = NestedArray::mergeDeep($request_options, $this->getAuthenticationRequestOptions());
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_add');
+    $url = Url::fromRoute('commerce_api.carts.add');
     $response = $this->request('POST', $url, $request_options);
     $this->assertSame(200, $response->getStatusCode(), (string) $response->getBody());
     $this->assertSame(['application/vnd.api+json'], $response->getHeader('Content-Type'));
@@ -52,7 +52,7 @@ final class CartAddResourceTest extends CartResourceTestBase {
           'type' => 'order-items--default',
           'id' => $order_item->uuid(),
           'links' => [
-            'self' => ['href' => Url::fromRoute('jsonapi.order_items--default.individual', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
+            'self' => ['href' => Url::fromRoute('jsonapi.order-items--default.individual', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
           ],
           'attributes' => [
             'title' => $order_item->label(),

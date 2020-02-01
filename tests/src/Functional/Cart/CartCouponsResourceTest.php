@@ -59,7 +59,7 @@ class CartCouponsResourceTest extends CartResourceTestBase {
     $this->cartManager->addEntity($cart, $this->variation, 2);
     $this->assertEquals(count($cart->getItems()), 1);
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_coupon_add', [
+    $url = Url::fromRoute('commerce_api.carts.coupon_add', [
       'commerce_order' => $cart->uuid(),
     ]);
     $request_options = $this->getAuthenticationRequestOptions();
@@ -117,7 +117,7 @@ class CartCouponsResourceTest extends CartResourceTestBase {
     $this->assertEquals(count($cart->getItems()), 1);
 
     // Test an invalid coupon.
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_coupon_add', [
+    $url = Url::fromRoute('commerce_api.carts.coupon_add', [
       'commerce_order' => $cart->uuid(),
     ]);
     $request_options = $this->getAuthenticationRequestOptions();

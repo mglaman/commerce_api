@@ -70,7 +70,7 @@ class TranslationCartAddResourceTest extends CartResourceTestBase {
    * Asserts the proper translation was used when langcode path prefix missing.
    */
   public function testPurchasedEntityAdded() {
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_add');
+    $url = Url::fromRoute('commerce_api.carts.add');
     $request_options = $this->getAuthenticationRequestOptions();
     $request_options[RequestOptions::HEADERS]['Accept'] = 'application/vnd.api+json';
     $request_options[RequestOptions::HEADERS]['Content-Type'] = 'application/vnd.api+json';

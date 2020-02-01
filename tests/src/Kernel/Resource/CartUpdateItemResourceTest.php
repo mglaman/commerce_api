@@ -79,7 +79,7 @@ final class CartUpdateItemResourceTest extends KernelTestBase {
     $document['data'] += ['attributes' => [], 'relationships' => []];
     $request = Request::create("https://localhost/cart/{$order->uuid()}/items/{$order_item->uuid()}", 'POST', [], [], [], [], Json::encode($document));
 
-    $route = $this->container->get('router')->getRouteCollection()->get('commerce_api.jsonapi.cart_update_item');
+    $route = $this->container->get('router')->getRouteCollection()->get('commerce_api.carts.update_item');
     $request->attributes->set(RouteObjectInterface::ROUTE_OBJECT, $route);
     $this->container->get('request_stack')->push($request);
 

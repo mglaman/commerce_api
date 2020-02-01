@@ -18,7 +18,7 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
    * Test request to delete item from non-existent cart.
    */
   public function testNoCartRemoveItem() {
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_remove_item', [
+    $url = Url::fromRoute('commerce_api.carts.remove_item', [
       'commerce_order' => '209c27eb-e5e4-47b3-b3fe-c7aa76dce92f',
     ]);
     $response = $this->request('DELETE', $url, $this->getAuthenticationRequestOptions());
@@ -36,7 +36,7 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
         [
           'title' => 'Not Found',
           'status' => '404',
-          'detail' => 'The "commerce_order" parameter was not converted for the path "/jsonapi/cart/{commerce_order}/items" (route name: "commerce_api.jsonapi.cart_remove_item")',
+          'detail' => 'The "commerce_order" parameter was not converted for the path "/jsonapi/cart/{commerce_order}/items" (route name: "commerce_api.carts.remove_item")',
           'links' => [
             'info' => ['href' => HttpExceptionNormalizer::getInfoUrl(404)],
             'via' => ['href' => $url->setAbsolute()->toString()],
@@ -62,7 +62,7 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
     $items = $not_my_cart->getItems();
     $not_my_order_item = $items[0];
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_remove_item', [
+    $url = Url::fromRoute('commerce_api.carts.remove_item', [
       'commerce_order' => $not_my_cart->uuid(),
     ]);
     $request_options[RequestOptions::BODY] = Json::encode([
@@ -106,7 +106,7 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
     list($order_item, $order_item2) = $cart->getItems();
 
     // Request for order item that does not exist in the cart should fail.
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_remove_item', [
+    $url = Url::fromRoute('commerce_api.carts.remove_item', [
       'commerce_order' => $cart->uuid(),
     ]);
     $request_options[RequestOptions::BODY] = Json::encode([
@@ -148,7 +148,7 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
     $this->assertEquals(count($cart->getItems()), 2);
 
     // Delete second order item from the cart.
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_remove_item', [
+    $url = Url::fromRoute('commerce_api.carts.remove_item', [
       'commerce_order' => $cart->uuid(),
     ]);
     $request_options[RequestOptions::BODY] = Json::encode([
@@ -171,7 +171,7 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
     $this->assertEquals($order_item->id(), $remaining_order_item->id());
 
     // Delete remaining order item from the cart.
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_remove_item', [
+    $url = Url::fromRoute('commerce_api.carts.remove_item', [
       'commerce_order' => $cart->uuid(),
     ]);
     $request_options[RequestOptions::BODY] = Json::encode([

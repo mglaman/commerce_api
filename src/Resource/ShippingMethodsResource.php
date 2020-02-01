@@ -2,6 +2,7 @@
 
 namespace Drupal\commerce_api\Resource;
 
+use Drupal\commerce_api\ResourceType\RenamableResourceType;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\commerce_shipping\ShipmentManagerInterface;
@@ -56,19 +57,19 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
    *   The request.
    * @param array $resource_types
    *   The resource tpyes for this resource.
-   * @param \Drupal\commerce_order\Entity\OrderInterface $order
+   * @param \Drupal\commerce_order\Entity\OrderInterface $commerce_order
    *   The order.
    *
    * @return \Drupal\jsonapi\ResourceResponse
    *   The response.
    */
-  public function process(Request $request, array $resource_types, OrderInterface $order): ResourceResponse {
-    $shipments = $order->get('shipments')->referencedEntities();
+  public function process(Request $request, array $resource_types, OrderInterface $commerce_order): ResourceResponse {
+    $shipments = $commerce_order->get('shipments')->referencedEntities();
     if (empty($shipments)) {
       throw new UnprocessableHttpEntityException();
     }
     $cacheability = new CacheableMetadata();
-    $cacheability->addCacheableDependency($order);
+    $cacheability->addCacheableDependency($commerce_order);
     $resource_type = reset($resource_types);
     $options = [];
     foreach ($shipments as $shipment) {
@@ -97,7 +98,7 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
     }
     $options = array_merge([], ...$options);
     $response = $this->createJsonapiResponse(new ResourceObjectData($options), $request);
-    $response->addCacheableDependency($order);
+    $response->addCacheableDependency($commerce_order);
     return $response;
   }
 
@@ -115,10 +116,11 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
    *   The resource type.
    */
   private function getShippingRateOptionResourceType(): ResourceType {
-    $resource_type = new ResourceType(
+    $resource_type = new RenamableResourceType(
       'shipping_rate_option',
       'shipping_rate_option',
       NULL,
+      'shipping-rate-option',
       FALSE,
       FALSE,
       FALSE,

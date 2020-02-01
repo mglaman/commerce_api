@@ -2,6 +2,7 @@
 
 namespace Drupal\commerce_api\Resource;
 
+use Drupal\commerce_api\ResourceType\RenamableResourceType;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Event\OrderEvent;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
@@ -107,7 +108,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    *   The request.
    * @param array $resource_types
    *   The resource tpyes for this resource.
-   * @param \Drupal\commerce_order\Entity\OrderInterface $order
+   * @param \Drupal\commerce_order\Entity\OrderInterface $commerce_order
    *   The order.
    * @param \Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel $document
    *   The deserialized request document.
@@ -120,7 +121,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
-  public function process(Request $request, array $resource_types, OrderInterface $order, JsonApiDocumentTopLevel $document = NULL): ResourceResponse {
+  public function process(Request $request, array $resource_types, OrderInterface $commerce_order, JsonApiDocumentTopLevel $document = NULL): ResourceResponse {
     // Must use this due to strict checking in JsonapiResourceController;.
     // @todo fix in https://www.drupal.org/project/jsonapi_resources/issues/3096949
     $resource_type = reset($resource_types);
@@ -136,7 +137,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       // If the `email` field was provided, set it on the order.
       if ($resource_object->hasField('email')) {
         $field_names[] = 'mail';
-        $order->setEmail($resource_object->getField('email'));
+        $commerce_order->setEmail($resource_object->getField('email'));
       }
 
       if ($resource_object->hasField('billing_information')) {
@@ -147,7 +148,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
         // @todo On `commerce_checkout.init` event, set an empty billing profile.
         // Although we need to handle the event people may not call
         // GET /checkout to initialize the order.
-        $billing_profile = $order->getBillingProfile() ?: $this->entityTypeManager->getStorage('profile')->create([
+        $billing_profile = $commerce_order->getBillingProfile() ?: $this->entityTypeManager->getStorage('profile')->create([
           'type' => 'customer',
           'uid' => 0,
         ]);
@@ -155,32 +156,32 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
         // @todo allow partial constraint validation?
         $billing_profile->set('address', $billing_information);
         $billing_profile->save();
-        $order->setBillingProfile($billing_profile);
+        $commerce_order->setBillingProfile($billing_profile);
       }
 
       // If shipping information was provided, do Shipping stuff.
       if ($resource_object->hasField('shipping_information')) {
         $field_names[] = 'shipments';
         $shipping_information = $resource_object->getField('shipping_information');
-        $shipping_profile = $this->getOrderShippingProfile($order);
+        $shipping_profile = $this->getOrderShippingProfile($commerce_order);
         // @todo allow partial constraint validation?
         $shipping_profile->set('address', $shipping_information);
         $shipping_profile->save();
-        $shipments = $this->shippingOrderManager->pack($order, $shipping_profile);
+        $shipments = $this->shippingOrderManager->pack($commerce_order, $shipping_profile);
         foreach ($shipments as $shipment) {
           $shipment->save();
         }
-        $order->set('shipments', $shipments);
+        $commerce_order->set('shipments', $shipments);
       }
 
       // Again this is 😱.
       if ($resource_object->hasField('shipping_method')) {
-        $this->applyShippingRateToShipments($order, $resource_object->getField('shipping_method'));
+        $this->applyShippingRateToShipments($commerce_order, $resource_object->getField('shipping_method'));
       }
 
       if ($resource_object->hasField('payment_gateway')) {
         $field_names[] = 'payment_gateway';
-        $order->set('payment_gateway', $resource_object->getField('payment_gateway'));
+        $commerce_order->set('payment_gateway', $resource_object->getField('payment_gateway'));
       }
 
       // Validate the provided fields, which will throw 422 if invalid.
@@ -189,24 +190,24 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       // it will only validate shipping_profile is a valid reference, but not its
       // address.
       // @todo investigate recursive/nested validation? 🤔
-      static::validate($order, $field_names);
-      $order->save();
+      static::validate($commerce_order, $field_names);
+      $commerce_order->save();
       // For some reason adjustments after refresh are not available unless
       // we reload here. same with saved shipment data. Something is screwing
       // with the references.
-      $order = $this->entityTypeManager->getStorage('commerce_order')->load($order->id());
-      assert($order instanceof OrderInterface);
+      $commerce_order = $this->entityTypeManager->getStorage('commerce_order')->load($commerce_order->id());
+      assert($commerce_order instanceof OrderInterface);
     }
-    elseif (!$order->getData('checkout_init_event_dispatched', FALSE)) {
-      $event = new OrderEvent($order);
+    elseif (!$commerce_order->getData('checkout_init_event_dispatched', FALSE)) {
+      $event = new OrderEvent($commerce_order);
       // @todo: replace the event name by the right one once
       // https://www.drupal.org/project/commerce/issues/3104564 is resolved.
       $this->eventDispatcher->dispatch('commerce_checkout.init', $event);
-      $order->setData('checkout_init_event_dispatched', TRUE);
-      $order->save();
+      $commerce_order->setData('checkout_init_event_dispatched', TRUE);
+      $commerce_order->save();
     }
 
-    $resource_object = $this->getResourceObjectFromOrder($order, $resource_type);
+    $resource_object = $this->getResourceObjectFromOrder($commerce_order, $resource_type);
     $primary_data = new ResourceObjectData([$resource_object], 1);
 
     $renderer = \Drupal::getContainer()->get('renderer');
@@ -386,10 +387,11 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $fields['order_items'] = $order_item_field->withRelatableResourceTypes($order_item_resource_types);
 
     // @todo custom resource object so ID does not contain `--`
-    $resource_type = new ResourceType(
+    $resource_type = new RenamableResourceType(
       'checkout_order',
       'checkout_order',
       NULL,
+      'checkout',
       FALSE,
       FALSE,
       TRUE,
@@ -429,10 +431,11 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    *   The resource type.
    */
   private function getShippingRateOptionResourceType(): ResourceType {
-    $resource_type = new ResourceType(
+    $resource_type = new RenamableResourceType(
       'shipping_rate_option',
       'shipping_rate_option',
       NULL,
+      'shipping-rate-option',
       FALSE,
       FALSE,
       FALSE,

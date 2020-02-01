@@ -14,7 +14,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
    * Test the checkout response.
    */
   public function testCheckout() {
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_add');
+    $url = Url::fromRoute('commerce_api.carts.add');
     $response = $this->performRequest('POST', $url, [
       'data' => [
         [

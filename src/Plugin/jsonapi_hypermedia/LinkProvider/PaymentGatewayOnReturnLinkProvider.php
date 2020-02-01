@@ -87,7 +87,7 @@ final class PaymentGatewayOnReturnLinkprovider extends LinkProviderBase implemen
     return AccessRestrictedLink::createLink(
       AccessResult::allowed(),
       $cache_metadata,
-      new Url('commerce_api.jsonapi.checkout_payment_gateway_return', [
+      new Url('commerce_api.checkout.payment_gateway_return', [
         'commerce_order' => $entity->uuid(),
         'payment_gateway' => $payment_gateway->uuid(),
       ]),

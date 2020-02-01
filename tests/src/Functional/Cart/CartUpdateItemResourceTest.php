@@ -24,7 +24,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
     $request_options[RequestOptions::HEADERS]['Content-Type'] = 'application/vnd.api+json';
 
     $uuid_generator = $this->container->get('uuid');
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_update_item', [
+    $url = Url::fromRoute('commerce_api.carts.update_item', [
       'commerce_order' => $uuid_generator->generate(),
       'commerce_order_item' => $uuid_generator->generate(),
     ]);
@@ -54,7 +54,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
     $order_item = $this->cartManager->addEntity($cart, $this->variation, 2);
 
     $non_existent_order_item_uuid = $this->container->get('uuid')->generate();
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_update_item', [
+    $url = Url::fromRoute('commerce_api.carts.update_item', [
       'commerce_order' => $cart->uuid(),
       'commerce_order_item' => $non_existent_order_item_uuid,
     ]);
@@ -76,7 +76,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
     $order_item = $this->cartManager->addEntity($another_cart, $this->variation, 2);
 
     // New order item should still be unavailable for patch.
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_update_item', [
+    $url = Url::fromRoute('commerce_api.carts.update_item', [
       'commerce_order' => $cart->uuid(),
       'commerce_order_item' => $order_item->uuid(),
     ]);
@@ -120,7 +120,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
     $items = $cart->getItems();
     $order_item = $items[0];
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_update_item', [
+    $url = Url::fromRoute('commerce_api.carts.update_item', [
       'commerce_order' => $cart->uuid(),
       'commerce_order_item' => $order_item->uuid(),
     ]);
@@ -152,7 +152,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
     $items = $cart->getItems();
     $order_item = $items[0];
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_update_item', [
+    $url = Url::fromRoute('commerce_api.carts.update_item', [
       'commerce_order' => $cart->uuid(),
       'commerce_order_item' => $order_item->uuid(),
     ]);
@@ -244,7 +244,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
     $this->assertEquals($order_item_2->getQuantity(), 5);
 
     // Patch quantity for second order item.
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_update_item', [
+    $url = Url::fromRoute('commerce_api.carts.update_item', [
       'commerce_order' => $cart->uuid(),
       'commerce_order_item' => $order_item_2->uuid(),
     ]);

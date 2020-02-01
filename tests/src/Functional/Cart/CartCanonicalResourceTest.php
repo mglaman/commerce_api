@@ -20,7 +20,7 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
     // Create a cart for another user.
     $anon_cart = $this->cartProvider->createCart('default', $this->store, User::getAnonymousUser());
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_canonical', ['commerce_order' => $anon_cart->uuid()], [
+    $url = Url::fromRoute('commerce_api.carts.canonical', ['commerce_order' => $anon_cart->uuid()], [
       'query' => ['include' => 'order_items,order_items.purchased_entity'],
     ]);
 
@@ -56,7 +56,7 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
 
     $product_variation_type = ProductVariationType::load('default');
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_canonical', ['commerce_order' => $cart->uuid()]);
+    $url = Url::fromRoute('commerce_api.carts.canonical', ['commerce_order' => $cart->uuid()]);
     $response = $this->request('GET', $url, $this->getAuthenticationRequestOptions());
     $this->assertSame(200, $response->getStatusCode(), (string) $response->getBody());
     $this->assertSame(['application/vnd.api+json'], $response->getHeader('Content-Type'));

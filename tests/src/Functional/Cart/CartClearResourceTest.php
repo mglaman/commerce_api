@@ -18,7 +18,7 @@ final class CartClearResourceTest extends CartResourceTestBase {
     $cart = $this->cartProvider->createCart('default', $this->store, $this->account);
     $this->cartManager->addEntity($cart, $this->variation, 5);
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_collection');
+    $url = Url::fromRoute('commerce_api.carts.collection');
     $response = $this->request('GET', $url, $this->getAuthenticationRequestOptions());
     $this->assertSame(200, $response->getStatusCode());
     $this->assertSame(['application/vnd.api+json'], $response->getHeader('Content-Type'));
@@ -80,7 +80,7 @@ final class CartClearResourceTest extends CartResourceTestBase {
       ],
     ], Json::decode((string) $response->getBody()));
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_clear', ['commerce_order' => $cart->uuid()]);
+    $url = Url::fromRoute('commerce_api.carts.clear', ['commerce_order' => $cart->uuid()]);
     $response = $this->request('DELETE', $url, $this->getAuthenticationRequestOptions());
     $this->assertSame(204, $response->getStatusCode(), (string) $response->getBody());
 
@@ -89,7 +89,7 @@ final class CartClearResourceTest extends CartResourceTestBase {
     $cart = $order_storage->load($cart->id());
     $this->assertEquals(count($cart->getItems()), 0);
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_collection', [], [
+    $url = Url::fromRoute('commerce_api.carts.collection', [], [
       // 'query' => ['include' => 'order_items,order_items.purchased_entity'],
     ]);
     $response = $this->request('GET', $url, $this->getAuthenticationRequestOptions());

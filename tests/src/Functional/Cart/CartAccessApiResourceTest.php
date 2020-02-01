@@ -21,7 +21,7 @@ class CartAccessApiResourceTest extends CartResourceTestBase {
    */
   public function testNoParameters() {
     $request_options = $this->getAuthenticationRequestOptions();
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_collection');
+    $url = Url::fromRoute('commerce_api.carts.collection');
 
     $cart = $this->cartProvider->createCart('default', $this->store, $this->account);
     $this->assertInstanceOf(OrderInterface::class, $cart);
@@ -37,7 +37,7 @@ class CartAccessApiResourceTest extends CartResourceTestBase {
     $request_options = $this->getAuthenticationRequestOptions();
 
     // Request for cart that does not exist.
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_canonical', [
+    $url = Url::fromRoute('commerce_api.carts.canonical', [
       'commerce_order' => 99,
     ]);
 
@@ -60,7 +60,7 @@ class CartAccessApiResourceTest extends CartResourceTestBase {
     $cart->save();
     $cart = Order::load($cart->id());
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_canonical', [
+    $url = Url::fromRoute('commerce_api.carts.canonical', [
       'commerce_order' => $cart->uuid(),
     ]);
     $response = $this->request('GET', $url, $request_options);
@@ -78,7 +78,7 @@ class CartAccessApiResourceTest extends CartResourceTestBase {
     ]);
     $this->assertInstanceOf(OrderInterface::class, $order);
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_canonical', [
+    $url = Url::fromRoute('commerce_api.carts.canonical', [
       'commerce_order' => $order->uuid(),
     ]);
 
@@ -95,7 +95,7 @@ class CartAccessApiResourceTest extends CartResourceTestBase {
     $cart = $this->cartProvider->createCart('default', $this->store, $this->createUser());
     $this->cartManager->addEntity($cart, $this->variation, 2);
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_canonical', [
+    $url = Url::fromRoute('commerce_api.carts.canonical', [
       'commerce_order' => $cart->uuid(),
     ]);
 
@@ -117,7 +117,7 @@ class CartAccessApiResourceTest extends CartResourceTestBase {
     $another_cart = $this->cartProvider->createCart('default', $this->store, $this->createUser());
     $other_order_item = $this->cartManager->addEntity($another_cart, $this->variation, 2);
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_update_item', [
+    $url = Url::fromRoute('commerce_api.carts.update_item', [
       'commerce_order' => $cart->uuid(),
       'commerce_order_item' => $other_order_item->uuid(),
     ]);
