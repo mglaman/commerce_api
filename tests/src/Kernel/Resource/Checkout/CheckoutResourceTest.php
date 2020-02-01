@@ -28,7 +28,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
   public function testRequestAndResponse(array $test_document, array $expected_document) {
     $controller = $this->getCheckoutResource();
     $document['data'] = [
-      'type' => 'checkout_order--checkout_order',
+      'type' => 'checkout',
       'id' => self::TEST_ORDER_UUID,
       'attributes' => $test_document['attributes'] ?? [],
       'relationships' => $test_document['relationships'] ?? [],
@@ -37,8 +37,8 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
 
     $request = $this->performMockedRequest(
       $controller,
-      'commerce_api.jsonapi.cart_checkout',
-      'https://localhost/cart/' . self::TEST_ORDER_UUID . '/checkout',
+      'commerce_api.checkout',
+      'https://localhost/checkout/' . self::TEST_ORDER_UUID,
       'PATCH',
       $document
     );

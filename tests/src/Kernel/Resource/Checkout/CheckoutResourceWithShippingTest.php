@@ -31,8 +31,8 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
 
     $request = $this->performMockedRequest(
       $checkoutResourceController,
-      'commerce_api.jsonapi.cart_checkout',
-      'https://localhost/cart/' . self::TEST_ORDER_UUID . '/checkout',
+      'commerce_api.checkout',
+      'https://localhost/checkout/' . self::TEST_ORDER_UUID,
       'PATCH',
       $document
     );
@@ -46,8 +46,8 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
 
     $request = $this->performMockedRequest(
       $checkoutShippingMethodsController,
-      'commerce_api.jsonapi.cart_shipping_methods',
-      'https://localhost/cart/' . self::TEST_ORDER_UUID . '/shipping-methods',
+      'commerce_api.checkout.shipping_methods',
+      'https://localhost/checkout/' . self::TEST_ORDER_UUID . '/shipping-methods',
       'GET'
     );
     $response = $this->processRequest($request, $checkoutShippingMethodsController);
@@ -64,8 +64,8 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
 
     $request = $this->performMockedRequest(
       $checkoutResourceController,
-      'commerce_api.jsonapi.cart_checkout',
-      'https://localhost/cart/' . self::TEST_ORDER_UUID . '/checkout',
+      'commerce_api.checkout',
+      'https://localhost/checkout/' . self::TEST_ORDER_UUID,
       'PATCH',
       $document
     );
@@ -91,7 +91,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
     ];
     $links = [
       'shipping-methods' => [
-        'href' => 'http://localhost/jsonapi/cart/' . self::TEST_ORDER_UUID . '/shipping-methods',
+        'href' => 'http://localhost/jsonapi/checkout/' . self::TEST_ORDER_UUID . '/shipping-methods',
       ],
     ];
     yield [
@@ -108,7 +108,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
       [
         [
           'id' => '2--default',
-          'type' => 'shipping_rate_option--shipping_rate_option',
+          'type' => 'shipping-rate-option',
           'attributes' => [
             'label' => 'Flat rate',
             'methodId' => '2',
@@ -123,7 +123,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
         ],
         [
           'id' => '1--default',
-          'type' => 'shipping_rate_option--shipping_rate_option',
+          'type' => 'shipping-rate-option',
           'attributes' => [
             'label' => 'Flat rate',
             'methodId' => '1',

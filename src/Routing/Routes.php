@@ -36,7 +36,7 @@ class Routes extends RouteProviderBase {
       $routes->add('commerce_api.carts.coupon_remove', $this->cartCouponRemove());
     }
 
-    $routes->add('commerce_api.jsonapi.checkout', $this->cartCheckout());
+    $routes->add('commerce_api.checkout', $this->cartCheckout());
     if ($this->entityTypeManager->hasDefinition('commerce_shipping_method')) {
       $routes->add('commerce_api.checkout.shipping_methods', $this->checkoutShippingMethods());
     }

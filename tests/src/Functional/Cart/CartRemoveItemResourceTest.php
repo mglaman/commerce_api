@@ -36,7 +36,7 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
         [
           'title' => 'Not Found',
           'status' => '404',
-          'detail' => 'The "commerce_order" parameter was not converted for the path "/jsonapi/cart/{commerce_order}/items" (route name: "commerce_api.carts.remove_item")',
+          'detail' => 'The "commerce_order" parameter was not converted for the path "/jsonapi/carts/{commerce_order}/items" (route name: "commerce_api.carts.remove_item")',
           'links' => [
             'info' => ['href' => HttpExceptionNormalizer::getInfoUrl(404)],
             'via' => ['href' => $url->setAbsolute()->toString()],

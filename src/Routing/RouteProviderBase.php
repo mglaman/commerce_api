@@ -61,7 +61,7 @@ abstract class RouteProviderBase implements ContainerInjectionInterface {
     $this->jsonApiBasePath = $jsonapi_base_path;
   }
 
-    /**
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
@@ -73,7 +73,7 @@ abstract class RouteProviderBase implements ContainerInjectionInterface {
     );
   }
 
-    /**
+  /**
    * {@inheritdoc}
    */
   public function routes() {
@@ -92,6 +92,12 @@ abstract class RouteProviderBase implements ContainerInjectionInterface {
     return $routes;
   }
 
+  /**
+   * Build routes for the route provider.
+   *
+   * @param \Symfony\Component\Routing\RouteCollection $routes
+   *   The route collection.
+   */
   abstract protected function buildRoutes(RouteCollection $routes);
 
   /**
@@ -114,7 +120,7 @@ abstract class RouteProviderBase implements ContainerInjectionInterface {
     $route->setOption('parameters', $parameters);
   }
 
-    /**
+  /**
    * Get resource types for an entity type.
    *
    * @param string $entity_type_id

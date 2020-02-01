@@ -38,7 +38,7 @@ final class CartAddResourceTest extends KernelTestBase {
     ]));
 
     $this->expectException(BadRequestHttpException::class);
-    $this->expectExceptionMessage('The provided type (entity_test--entity_test) does not mach the destination resource types (product_variations--default).');
+    $this->expectExceptionMessage('The provided type (entity_test--entity_test) does not mach the destination resource types (product-variations--default).');
 
     $controller = $this->getController();
     $controller->process($request->reveal(), ['product-variations--default']);

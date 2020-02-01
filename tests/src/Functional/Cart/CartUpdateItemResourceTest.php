@@ -185,7 +185,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
           'detail' => 'The current user is not allowed to PATCH the selected field (title).',
           'links' => [
             'info' => ['href' => HttpExceptionNormalizer::getInfoUrl(403)],
-            'via' => ['href' => Url::fromRoute('jsonapi.order_items--default.individual', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
+            'via' => ['href' => Url::fromRoute('jsonapi.order-items--default.individual', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
           ],
           'source' => [
             'pointer' => '/data/attributes/title',
@@ -291,7 +291,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
         'id' => $order_item_2->uuid(),
         'links' => [
           'self' => [
-            'href' => Url::fromRoute('jsonapi.order_items--default.individual', ['entity' => $order_item_2->uuid()])->setAbsolute()->toString(),
+            'href' => Url::fromRoute('jsonapi.order-items--default.individual', ['entity' => $order_item_2->uuid()])->setAbsolute()->toString(),
           ],
         ],
         'attributes' => [

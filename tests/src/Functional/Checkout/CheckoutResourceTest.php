@@ -30,7 +30,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     $this->assertSame(200, $response->getStatusCode(), var_export($cart_add_body, TRUE));
     $test_cart_id = $cart_add_body['data'][0]['relationships']['order_id']['data']['id'];
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_checkout', ['order' => $test_cart_id]);
+    $url = Url::fromRoute('commerce_api.checkout', ['order' => $test_cart_id]);
     $response = $this->performRequest('GET', $url);
     $checkout_body = Json::decode((string) $response->getBody());
     $this->assertSame(200, $response->getStatusCode(), var_export($checkout_body, TRUE));
@@ -38,7 +38,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     $order_item_id = $checkout_body['data']['relationships']['order_items']['data'][0]['id'] ?? NULL;
     $this->assertEquals([
       'id' => $test_cart_id,
-      'type' => 'checkout_order--checkout_order',
+      'type' => 'checkout',
       'attributes' => [
         'state' => 'draft',
         'email' => $this->account->getEmail(),
@@ -89,10 +89,10 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
       ],
     ], $checkout_body['data']);
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_checkout', ['order' => $test_cart_id]);
+    $url = Url::fromRoute('commerce_api.checkout', ['order' => $test_cart_id]);
     $response = $this->performRequest('PATCH', $url, [
       'data' => [
-        'type' => 'checkout_order--checkout_order',
+        'type' => 'checkout',
         'id' => $test_cart_id,
         'attributes' => [
           'shipping_information' => [
@@ -105,14 +105,14 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     $checkout_body = Json::decode((string) $response->getBody());
     $this->assertSame(200, $response->getStatusCode(), var_export($checkout_body, TRUE));
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_shipping_methods', ['order' => $test_cart_id]);
+    $url = Url::fromRoute('commerce_api.checkout.shipping_methods', ['order' => $test_cart_id]);
     $response = $this->performRequest('GET', $url);
     $shipping_methods_body = Json::decode((string) $response->getBody());
     $this->assertSame(200, $response->getStatusCode(), var_export($shipping_methods_body, TRUE));
     $this->assertEquals([
       [
         'id' => '2--default',
-        'type' => 'shipping_rate_option--shipping_rate_option',
+        'type' => 'shipping-rate-option',
         'attributes' => [
           'label' => 'Flat rate',
           'methodId' => '2',
@@ -127,7 +127,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
       ],
       [
         'id' => '1--default',
-        'type' => 'shipping_rate_option--shipping_rate_option',
+        'type' => 'shipping-rate-option',
         'attributes' => [
           'label' => 'Flat rate',
           'methodId' => '1',
@@ -142,10 +142,10 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
       ],
     ], $shipping_methods_body['data']);
 
-    $url = Url::fromRoute('commerce_api.jsonapi.cart_checkout', ['order' => $test_cart_id]);
+    $url = Url::fromRoute('commerce_api.checkout', ['order' => $test_cart_id]);
     $response = $this->performRequest('PATCH', $url, [
       'data' => [
-        'type' => 'checkout_order--checkout_order',
+        'type' => 'checkout',
         'id' => $test_cart_id,
         'attributes' => [
           'shipping_method' => '1--default',
