@@ -540,7 +540,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         ],
         [
           'shipping-methods' => [
-            'href' => 'http://localhost/jsonapi/cart/' . self::TEST_ORDER_UUID . '/shipping-methods',
+            'href' => 'http://localhost/jsonapi/checkout/' . self::TEST_ORDER_UUID . '/shipping-methods',
           ],
         ]
       ),
