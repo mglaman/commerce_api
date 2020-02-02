@@ -202,8 +202,8 @@ final class CartCanonicalResourceTest extends CartResourceTestBase {
                 'id' => $product_variation_type->uuid(),
               ],
               'links' => [
-                'self' => ['href' => Url::fromRoute('jsonapi.product-variations--default.commerce_product_variation_type.relationship.get', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
-                'related' => ['href' => Url::fromRoute('jsonapi.product-variations--default.commerce_product_variation_type.related', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
+                'self' => ['href' => Url::fromRoute('jsonapi.product-variations--default.product_variation_type.relationship.get', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
+                'related' => ['href' => Url::fromRoute('jsonapi.product-variations--default.product_variation_type.related', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
               ],
             ],
             'product_id' => [
