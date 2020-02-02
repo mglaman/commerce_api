@@ -141,7 +141,7 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
           ],
           'attributes' => [
             'title' => $order_item->label(),
-            'quantity' => $order_item->getQuantity(),
+            'quantity' => (int) $order_item->getQuantity(),
             'unit_price' => [
               'number' => '1000.0',
               'currency_code' => 'USD',
