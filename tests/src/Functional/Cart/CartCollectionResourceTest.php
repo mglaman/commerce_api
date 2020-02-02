@@ -191,7 +191,7 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
             'weight' => NULL,
           ],
           'relationships' => [
-            'commerce_product_variation_type' => [
+            'product_variation_type' => [
               'data' => [
                 'type' => 'product-variation-types',
                 'id' => $product_variation_type->uuid(),

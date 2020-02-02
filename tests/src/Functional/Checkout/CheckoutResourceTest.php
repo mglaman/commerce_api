@@ -30,7 +30,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     $this->assertSame(200, $response->getStatusCode(), var_export($cart_add_body, TRUE));
     $test_cart_id = $cart_add_body['data'][0]['relationships']['order_id']['data']['id'];
 
-    $url = Url::fromRoute('commerce_api.checkout', ['order' => $test_cart_id]);
+    $url = Url::fromRoute('commerce_api.checkout', ['commerce_order' => $test_cart_id]);
     $response = $this->performRequest('GET', $url);
     $checkout_body = Json::decode((string) $response->getBody());
     $this->assertSame(200, $response->getStatusCode(), var_export($checkout_body, TRUE));
@@ -89,7 +89,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
       ],
     ], $checkout_body['data']);
 
-    $url = Url::fromRoute('commerce_api.checkout', ['order' => $test_cart_id]);
+    $url = Url::fromRoute('commerce_api.checkout', ['commerce_order' => $test_cart_id]);
     $response = $this->performRequest('PATCH', $url, [
       'data' => [
         'type' => 'checkout',
@@ -105,7 +105,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     $checkout_body = Json::decode((string) $response->getBody());
     $this->assertSame(200, $response->getStatusCode(), var_export($checkout_body, TRUE));
 
-    $url = Url::fromRoute('commerce_api.checkout.shipping_methods', ['order' => $test_cart_id]);
+    $url = Url::fromRoute('commerce_api.checkout.shipping_methods', ['commerce_order' => $test_cart_id]);
     $response = $this->performRequest('GET', $url);
     $shipping_methods_body = Json::decode((string) $response->getBody());
     $this->assertSame(200, $response->getStatusCode(), var_export($shipping_methods_body, TRUE));
@@ -142,7 +142,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
       ],
     ], $shipping_methods_body['data']);
 
-    $url = Url::fromRoute('commerce_api.checkout', ['order' => $test_cart_id]);
+    $url = Url::fromRoute('commerce_api.checkout', ['commerce_order' => $test_cart_id]);
     $response = $this->performRequest('PATCH', $url, [
       'data' => [
         'type' => 'checkout',
@@ -261,7 +261,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
         'shipping-methods' => [
           'href' => Url::fromRoute(
             'commerce_api.checkout.shipping_methods',
-            ['order' => $test_cart_id]
+            ['commerce_order' => $test_cart_id]
           )->setAbsolute()->toString(),
         ],
       ],
