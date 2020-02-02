@@ -218,7 +218,7 @@ class Routes extends RouteProviderBase {
       '_jsonapi_resource' => CheckoutResource::class,
     ]);
     static::addRouteParameter($route, 'commerce_order', ['type' => 'entity:commerce_order']);
-    $route->setRequirement('_entity_access', 'order.update');
+    $route->setRequirement('_entity_access', 'commerce_order.update');
     return $route;
   }
 
@@ -235,7 +235,7 @@ class Routes extends RouteProviderBase {
       '_jsonapi_resource' => ShippingMethodsResource::class,
     ]);
     static::addRouteParameter($route, 'commerce_order', ['type' => 'entity:commerce_order']);
-    $route->setRequirement('_entity_access', 'order.view');
+    $route->setRequirement('_entity_access', 'commerce_order.view');
     return $route;
   }
 

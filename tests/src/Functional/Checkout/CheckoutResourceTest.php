@@ -260,7 +260,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
       'links' => [
         'shipping-methods' => [
           'href' => Url::fromRoute(
-            'commerce_api.jsonapi.cart_shipping_methods',
+            'commerce_api.checkout.shipping_methods',
             ['order' => $test_cart_id]
           )->setAbsolute()->toString(),
         ],

@@ -78,8 +78,8 @@ final class ShippingMethodsLinkProvider extends LinkProviderBase implements Cont
     return AccessRestrictedLink::createLink(
       AccessResult::allowed(),
       $cache_metadata,
-      new Url('commerce_api.jsonapi.cart_shipping_methods', [
-        'order' => $entity->uuid(),
+      new Url('commerce_api.checkout.shipping_methods', [
+        'commerce_order' => $entity->uuid(),
       ]),
       $this->getLinkRelationType()
     );
