@@ -46,10 +46,6 @@ function commerce_api_entity_access(EntityInterface $entity, $operation, Account
   if ($order->getState()->getId() === 'canceled') {
     return AccessResult::forbidden();
   }
-  /*if ($order->get('cart')->isEmpty() || !$order->get('cart')->first()->value) {
-    return AccessResult::neutral();
-  }*/
-
   $customer_id = (int) $order->getCustomerId();
   $order_id = $order->id();
 
