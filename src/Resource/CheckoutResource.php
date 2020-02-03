@@ -338,6 +338,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $fields['state'] = $order->getState()->getId();
     $fields['email'] = $order->getEmail();
     $fields['order_items'] = $order->get('order_items');
+    $fields['coupons'] = $order->get('coupons');
     $fields['total_price'] = $order->get('total_price');
     $fields['order_total'] = $order->get('order_total');
 
@@ -385,6 +386,12 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
 
     $order_item_field = new ResourceTypeRelationship('order_items', 'order_items', TRUE, FALSE);
     $fields['order_items'] = $order_item_field->withRelatableResourceTypes($order_item_resource_types);
+
+    $coupons_field = new ResourceTypeRelationship('coupons', 'coupons', TRUE, FALSE);
+    $fields['coupons'] = $coupons_field->withRelatableResourceTypes(array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) {
+      return $resource_type->getEntityTypeId() === 'commerce_promotion_coupon';
+    }));
+
 
     // @todo custom resource object so ID does not contain `--`
     $resource_type = new RenamableResourceType(
