@@ -49,6 +49,14 @@ services:
     calls:
       - [setEventDispatcher, ['@event_dispatcher']]
       - [setRenderer, ['@renderer']]
+  # @todo remove after https://www.drupal.org/project/drupal/issues/3100732
+  commerce_api.normalizer.relationship.jsonapi:
+    class: Drupal\jsonapi\Normalizer\CommerceApiImposter\MetaRelationshipNormalizer
+    decorates: 'serializer.normalizer.relationship.jsonapi'
+    parent: 'serializer.normalizer.relationship.jsonapi'
+    calls:
+      - [setEventDispatcher, ['@event_dispatcher']]
+      - [setRenderer, ['@renderer']]
 
   commerce_api.response_vary_subscriber:
     class: Drupal\commerce_api\EventSubscriber\ResponseVarySubscriber

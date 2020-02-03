@@ -2,11 +2,15 @@
 
 namespace Drupal\commerce_api\EventSubscriber;
 
+use Drupal\commerce_api\Events\CollectRelationshipMetaEvent;
 use Drupal\commerce_api\Events\CollectResourceObjectMetaEvent;
 use Drupal\commerce_api\Events\JsonapiEvents;
 use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\commerce_promotion\Entity\CouponInterface;
 use Drupal\commerce_shipping\ShippingOrderManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\jsonapi\JsonApiResource\RelationshipData;
+use Drupal\jsonapi\JsonApiResource\ResourceIdentifierInterface;
 use Drupal\profile\Entity\ProfileInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Validator\ConstraintViolation;
@@ -48,7 +52,8 @@ final class CollectResourceObjectMetaSubscriber implements EventSubscriberInterf
    */
   public static function getSubscribedEvents() {
     return [
-      JsonapiEvents::COLLECT_RESOURCE_OBJECT_META => 'collectMeta',
+      JsonapiEvents::COLLECT_RESOURCE_OBJECT_META => 'collectOrderMeta',
+      JsonapiEvents::COLLECT_RELATIONSHIP_META => 'collectCouponRelationshipMeta',
     ];
   }
 
@@ -60,7 +65,7 @@ final class CollectResourceObjectMetaSubscriber implements EventSubscriberInterf
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function collectMeta(CollectResourceObjectMetaEvent $event) {
+  public function collectOrderMeta(CollectResourceObjectMetaEvent $event) {
     $resource_object = $event->getResourceObject();
     if ($resource_object->getTypeName() !== 'checkout' && $resource_object->getResourceType()->getEntityTypeId() !== 'commerce_order') {
       return;
@@ -93,6 +98,25 @@ final class CollectResourceObjectMetaSubscriber implements EventSubscriberInterf
       }
     }
 
+    $event->setMeta($meta);
+  }
+
+  public function collectCouponRelationshipMeta(CollectRelationshipMetaEvent $event) {
+    $relationship = $event->getRelationship();
+    if ($relationship->getFieldName() !== 'coupons') {
+      return;
+    }
+    $meta = $event->getMeta();
+    foreach ($relationship->getData() as $datum) {
+      assert($datum instanceof ResourceIdentifierInterface);
+      $resource_type = $datum->getResourceType();
+      $coupon = $this->entityRepository->loadEntityByUuid(
+        $resource_type->getEntityTypeId(),
+        $datum->getId()
+      );
+      assert($coupon instanceof CouponInterface);
+      $meta['couponCodes'][$datum->getId()] = $coupon->getCode();
+    }
     $event->setMeta($meta);
   }
 

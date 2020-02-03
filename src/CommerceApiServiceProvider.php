@@ -26,6 +26,7 @@ final class CommerceApiServiceProvider extends ServiceProviderBase {
     $impostor_path = dirname($container_modules['commerce_api']['pathname']) . '/src/Normalizer/CommerceApiImposter';
     $container_namespaces['Drupal\jsonapi\Normalizer\CommerceApiImposter'][] = $impostor_path;
     $container->getDefinition('commerce_api.normalizer.resource_object.jsonapi')->setFile($impostor_path . '/MetaResourceObjectNormalizer.php');
+    $container->getDefinition('commerce_api.normalizer.relationship.jsonapi')->setFile($impostor_path . '/MetaRelationshipNormalizer.php');
     $container->setParameter('container.namespaces', $container_namespaces);
   }
 

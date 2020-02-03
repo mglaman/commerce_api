@@ -1,19 +1,18 @@
-<?php declare(strict_types = 1);
+<?php declare(strict_types=1);
 
 namespace Drupal\jsonapi\Normalizer\CommerceApiImposter;
 
+use Drupal\commerce_api\Events\CollectRelationshipMetaEvent;
 use Drupal\commerce_api\Events\CollectResourceObjectMetaEvent;
 use Drupal\commerce_api\Events\JsonapiEvents;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\jsonapi\Normalizer\ResourceObjectNormalizer;
+use Drupal\jsonapi\JsonApiResource\Relationship;
+use Drupal\jsonapi\Normalizer\RelationshipNormalizer;
 use Drupal\jsonapi\Normalizer\Value\CacheableNormalization;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-/**
- * @todo remove after https://www.drupal.org/project/drupal/issues/3100732
- */
-final class MetaResourceObjectNormalizer extends ResourceObjectNormalizer {
+final class MetaRelationshipNormalizer extends RelationshipNormalizer {
 
   /**
    * The event dispatcher.
@@ -49,17 +48,15 @@ final class MetaResourceObjectNormalizer extends ResourceObjectNormalizer {
     $this->renderer = $renderer;
   }
 
-  /**
-   * {@inheritdoc}
-   */
   public function normalize($object, $format = NULL, array $context = []) {
+    assert($object instanceof Relationship);
     $parent_normalization = parent::normalize($object, $format, $context);
     assert($parent_normalization instanceof CacheableNormalization);
     $altered_normalization = $parent_normalization->getNormalization();
-    $event = new CollectResourceObjectMetaEvent($object, $context);
+    $event = new CollectRelationshipMetaEvent($object, $context);
     $render_context = new RenderContext();
     $this->renderer->executeInRenderContext($render_context, function () use ($event) {
-      $this->eventDispatcher->dispatch(JsonapiEvents::COLLECT_RESOURCE_OBJECT_META, $event);
+      $this->eventDispatcher->dispatch(JsonapiEvents::COLLECT_RELATIONSHIP_META, $event);
     });
     $altered_normalization['meta'] = $event->getMeta();
     if (!$render_context->isEmpty()) {
