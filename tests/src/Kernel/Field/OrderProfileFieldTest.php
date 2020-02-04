@@ -122,13 +122,34 @@ final class OrderProfileFieldTest extends KernelTestBase {
       $test_address,
       array_filter($billing_information->address)
     );
+
+    $updated_address = [
+      'country_code' => 'US',
+      'administrative_area' => 'CA',
+      'locality' => 'Mountain View',
+      'postal_code' => '94043',
+      'address_line1' => '1098 Alta Ave',
+      'organization' => 'Google Inc.',
+      'given_name' => 'John',
+      'family_name' => 'Smith',
+    ];
+    $order->set('billing_information', [
+      'address' => $updated_address,
+    ]);
+    $order->save();
+    $order = $this->reloadEntity($order);
+    assert($order instanceof OrderInterface);
+    $billing_information = $order->get('billing_information')->first();
+    assert($billing_information instanceof OrderProfile);
+    $this->assertEquals(
+      $updated_address,
+      array_filter($billing_information->address)
+    );
   }
 
   public function testWithTaxNumber() {
     $this->installModule('commerce_tax');
     $this->installConfig(['commerce_tax']);
-    $this->container->get('entity_field.manager')->clearCachedFieldDefinitions();
-    $this->container->get('entity_type.manager')->clearCachedDefinitions();
 
     $order = $this->createOrder();
 

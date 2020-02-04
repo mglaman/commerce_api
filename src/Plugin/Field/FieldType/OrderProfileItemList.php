@@ -6,6 +6,7 @@ use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\TypedData\ComputedItemListTrait;
 use Drupal\profile\Entity\Profile;
+use Drupal\profile\Entity\ProfileInterface;
 
 final class OrderProfileItemList extends FieldItemList {
   use ComputedItemListTrait;
@@ -14,18 +15,7 @@ final class OrderProfileItemList extends FieldItemList {
    * {@inheritdoc}
    */
   protected function computeValue() {
-    $order = $this->getEntity();
-    assert($order instanceof OrderInterface);
-    $profile_type = $this->getSetting('profile_type') ?: 'billing';
-    $collected_profiles = $order->collectProfiles();
-    $profile = $collected_profiles[$profile_type] ?? NULL;
-    if ($profile === NULL) {
-      $profile = Profile::create([
-        'type' => $this->getSetting('profile_bundle'),
-        'uid' => 0,
-      ]);
-    }
-
+    $profile = $this->getProfile();
     $value = [
       'entity' => $profile,
     ];
@@ -40,6 +30,28 @@ final class OrderProfileItemList extends FieldItemList {
       $value[$field_name] = $profile->get($field_name)->first()->getValue();
     }
     $this->list[0] = $this->createItem(0, $value);
+  }
+
+  public function setValue($values, $notify = TRUE) {
+    if (!isset($values['entity'])) {
+      $values['entity'] = $this->getProfile();
+    }
+    parent::setValue($values, $notify);
+  }
+
+  private function getProfile(): ProfileInterface {
+    $order = $this->getEntity();
+    assert($order instanceof OrderInterface);
+    $profile_type = $this->getSetting('profile_type') ?: 'billing';
+    $collected_profiles = $order->collectProfiles();
+    $profile = $collected_profiles[$profile_type] ?? NULL;
+    if ($profile === NULL) {
+      $profile = Profile::create([
+        'type' => $this->getSetting('profile_bundle'),
+        'uid' => 0,
+      ]);
+    }
+    return $profile;
   }
 
 }
