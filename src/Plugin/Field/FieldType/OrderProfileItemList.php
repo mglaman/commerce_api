@@ -32,11 +32,18 @@ final class OrderProfileItemList extends FieldItemList {
     $this->list[0] = $this->createItem(0, $value);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function setValue($values, $notify = TRUE) {
     if (!isset($values['entity'])) {
       $values['entity'] = $this->getProfile();
     }
     parent::setValue($values, $notify);
+
+    // Make sure to mark this as computed, overriding the method prevents
+    // ComputedItemListTrait::setValue from running, which performs this flag.
+    $this->valueComputed = TRUE;
   }
 
   private function getProfile(): ProfileInterface {
