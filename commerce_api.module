@@ -90,6 +90,11 @@ function commerce_api_entity_base_field_info_alter(&$fields, EntityTypeInterface
  */
 function commerce_api_entity_base_field_info(EntityTypeInterface $entity_type) {
   if ($entity_type->id() === 'commerce_order') {
+    $fields['billing_information'] = BaseFieldDefinition::create('order_profile')
+      ->setLabel(t('Billing information'))
+      ->setSetting('profile_type', 'billing')
+      ->setComputed(TRUE);
+
     // @todo needs a test.
     $fields['order_total'] = BaseFieldDefinition::create('map')
       ->setLabel(t('Order total'))
