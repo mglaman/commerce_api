@@ -5,6 +5,7 @@ namespace Drupal\commerce_api\Plugin\Field\FieldType;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\DataReferenceDefinition;
 
 /**
@@ -15,8 +16,8 @@ use Drupal\Core\TypedData\DataReferenceDefinition;
  *   list_class = "\Drupal\commerce_api\Plugin\Field\FieldType\OrderProfileItemList",
  * )
  *
- * @property \Drupal\Core\Entity\Plugin\DataType\EntityAdapter $entity
- * @property array $address
+ * @property \Drupal\profile\Entity\ProfileInterface $entity
+ * @property string[] $address
  */
 final class OrderProfile extends FieldItemBase {
 
@@ -36,7 +37,7 @@ final class OrderProfile extends FieldItemBase {
     $fields = $entity_field_manager->getFieldDefinitions('profile', $profile_type);
     foreach ($fields as $field) {
       if ($field->getType() === 'address') {
-        $properties[$field->getName()] = DataReferenceDefinition::create('address')
+        $properties[$field->getName()] = DataDefinition::create('address')
           ->setLabel(t('Address'));
       }
     }
@@ -61,8 +62,22 @@ final class OrderProfile extends FieldItemBase {
   /**
    * {@inheritdoc}
    */
+  public function preSave() {
+    $profile = $this->entity;
+    foreach ($this->properties as $name => $property) {
+      if ($property->getDataDefinition()->isComputed()) {
+        continue;
+      }
+      $profile->set($name, $property->getValue());
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function postSave($update) {
-    // @todo push values into the profile.
+    $profile = $this->entity;
+    $profile->save();
   }
 
 }
