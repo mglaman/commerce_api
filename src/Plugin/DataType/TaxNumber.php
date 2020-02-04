@@ -6,13 +6,13 @@ use Drupal\Core\TypedData\TypedData;
 
 /**
  * @DataType(
- *   id = "address",
- *   label = @Translation("Address"),
- *   description = @Translation("An address."),
- *   definition_class = "\Drupal\commerce_api\TypedData\AddressDataDefinition"
+ *   id = "tax_number",
+ *   label = @Translation("Tax number"),
+ *   description = @Translation("Tax number information."),
+ *   definition_class = "\Drupal\commerce_api\TypedData\TaxNumberDataDefinition"
  * )
  */
-final class Address extends TypedData {
+final class TaxNumber extends TypedData {
 
   /**
    * The value.
