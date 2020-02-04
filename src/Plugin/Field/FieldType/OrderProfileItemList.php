@@ -16,14 +16,14 @@ final class OrderProfileItemList extends FieldItemList {
   protected function computeValue() {
     $order = $this->getEntity();
     assert($order instanceof OrderInterface);
-    $profile_type = $this->getSetting('profile_type') ?: 'billing';
+    $profile_context = $this->getSetting('profile_context') ?: 'billing';
     $collected_profiles = $order->collectProfiles();
-    $profile = $collected_profiles[$profile_type] ?? NULL;
+    $profile = $collected_profiles[$profile_context] ?? NULL;
     if ($profile instanceof ProfileInterface) {
       $value = [
         'entity' => $profile,
       ];
-      if ($profile->hasField('address')) {
+      if ($profile->hasField('address') && !$profile->get('address')->isEmpty()) {
         $value['address'] = $profile->get('address')->first()->getValue();
       }
     }

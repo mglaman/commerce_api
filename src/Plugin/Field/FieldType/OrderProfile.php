@@ -2,7 +2,7 @@
 
 namespace Drupal\commerce_api\Plugin\Field\FieldType;
 
-use Drupal\address\Plugin\Field\FieldType\AddressItem;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataReferenceDefinition;
@@ -29,8 +29,18 @@ final class OrderProfile extends FieldItemBase {
       ->setLabel(t('Profile entity'))
       ->setComputed(TRUE)
       ->setInternal(TRUE);
-    $properties['address'] = DataReferenceDefinition::create('address')
-      ->setLabel(t('Address'));
+
+    $profile_type = $field_definition->getSetting('profile_type') ?: 'customer';
+    $entity_field_manager = \Drupal::getContainer()->get('entity_field.manager');
+    assert($entity_field_manager instanceof EntityFieldManagerInterface);
+    $fields = $entity_field_manager->getFieldDefinitions('profile', $profile_type);
+    foreach ($fields as $field) {
+      if ($field->getType() === 'address') {
+        $properties[$field->getName()] = DataReferenceDefinition::create('address')
+          ->setLabel(t('Address'));
+      }
+    }
+
     return $properties;
   }
 
@@ -54,10 +64,5 @@ final class OrderProfile extends FieldItemBase {
   public function postSave($update) {
     // @todo push values into the profile.
   }
-
-  public function getValue() {
-    return parent::getValue();
-  }
-
 
 }
