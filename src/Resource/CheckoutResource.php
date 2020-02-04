@@ -2,7 +2,6 @@
 
 namespace Drupal\commerce_api\Resource;
 
-use Drupal\commerce_api\Plugin\Field\FieldType\OrderProfile;
 use Drupal\commerce_api\ResourceType\RenamableResourceType;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Event\OrderEvent;
@@ -327,6 +326,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     }
     $fields['state'] = $order->getState()->getId();
     $fields['email'] = $order->getEmail();
+    $fields['billing_information'] = $order->get('billing_information');
     $fields['order_items'] = $order->get('order_items');
     $fields['coupons'] = $order->get('coupons');
     $fields['total_price'] = $order->get('total_price');

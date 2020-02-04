@@ -74,6 +74,18 @@ final class OrderProfile extends FieldItemBase {
   /**
    * {@inheritdoc}
    */
+  public function isEmpty() {
+    foreach ($this->getValue() as $property_value) {
+      if (!empty($property_value)) {
+        return FALSE;
+      }
+    }
+    return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function preSave() {
     $profile = $this->entity;
     // Computed values are ignored.

@@ -97,6 +97,7 @@ class FieldAccess implements FieldAccessInterface {
         'uuid',
         'order_number',
         'store_id',
+        'billing_information',
         // Allow after https://www.drupal.org/project/commerce/issues/2916252.
         // 'adjustments',
         'coupons',

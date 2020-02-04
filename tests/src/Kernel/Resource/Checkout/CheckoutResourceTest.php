@@ -70,6 +70,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
         'state' => 'draft',
+        'billing_information' => NULL,
         'order_total' => [
           'subtotal' => [
             'number' => '4.0',
@@ -150,6 +151,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
         'state' => 'draft',
+        'billing_information' => NULL,
         'shipping_information' => [
           'country_code' => 'US',
           'postal_code' => '94043',
@@ -241,6 +243,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
         'state' => 'draft',
+        'billing_information' => NULL,
         'shipping_information' => [
           'country_code' => 'US',
           'administrative_area' => 'CA',
@@ -332,6 +335,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
         'state' => 'draft',
+        'billing_information' => NULL,
         'shipping_information' => [
           'country_code' => 'US',
           'postal_code' => '94043',
@@ -439,10 +443,12 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           ],
           'shipping_method' => '2--default',
           'billing_information' => [
-            'country_code' => 'US',
-            'postal_code' => '94043',
-            'given_name' => 'Bryan',
-            'family_name' => 'Centarro',
+            'address' => [
+              'country_code' => 'US',
+              'postal_code' => '94043',
+              'given_name' => 'Bryan',
+              'family_name' => 'Centarro',
+            ],
           ],
           'payment_instrument' => [
             // Payment method type.
@@ -458,6 +464,19 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
         'state' => 'draft',
+        // @todo we need a custom DataType normalizer that targets the Address
+        //       data type. That can filter empty values and ensure it is under
+        //       the `address` property.
+        // @see \Drupal\jsonapi\Normalizer\FieldItemNormalizer::normalize
+        // @see Line 79
+        'billing_information' => [
+          'address' => [
+            'country_code' => 'US',
+            'postal_code' => '94043',
+            'given_name' => 'Bryan',
+            'family_name' => 'Centarro',
+          ],
+        ],
         'shipping_information' => [
           'country_code' => 'US',
           'postal_code' => '94043',
@@ -584,6 +603,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'email' => 'tester@example.com',
         'state' => 'draft',
         'payment_gateway' => 'onsite',
+        'billing_information' => NULL,
         'order_total' => [
           'subtotal' => [
             'number' => '4.0',

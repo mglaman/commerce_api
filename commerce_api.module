@@ -97,7 +97,6 @@ function commerce_api_entity_base_field_info(EntityTypeInterface $entity_type) {
       ->setSetting('profile_type', 'billing')
       ->setComputed(TRUE);
 
-    // @todo needs a test.
     $fields['order_total'] = BaseFieldDefinition::create('map')
       ->setLabel(t('Order total'))
       ->setReadOnly(TRUE)
@@ -107,7 +106,6 @@ function commerce_api_entity_base_field_info(EntityTypeInterface $entity_type) {
     return $fields;
   }
   if ($entity_type->id() === 'commerce_product_variation') {
-    // @todo needs a test.
     $fields['resolved_price'] = BaseFieldDefinition::create('commerce_price')
       ->setLabel(t('Resolved price'))
       ->setReadOnly(TRUE)

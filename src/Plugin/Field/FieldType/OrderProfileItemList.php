@@ -46,6 +46,14 @@ final class OrderProfileItemList extends FieldItemList {
     $this->valueComputed = TRUE;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function applyDefaultValue($notify = TRUE) {
+    $this->computeValue();
+    return $this;
+  }
+
   private function getProfile(): ProfileInterface {
     $order = $this->getEntity();
     assert($order instanceof OrderInterface);
