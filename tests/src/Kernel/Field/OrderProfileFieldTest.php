@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\commerce_api\Kernel\Field;
 
+use Drupal\commerce_api\Plugin\Field\FieldType\OrderProfile;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\profile\Entity\Profile;
@@ -35,6 +36,8 @@ final class OrderProfileFieldTest extends KernelTestBase {
     assert($profile instanceof ProfileInterface);
     $order->setBillingProfile($profile);
 
+    $billing_information = $order->get('billing_information')->first();
+    assert($billing_information instanceof OrderProfile);
     $this->assertEquals(
       [
         'country_code' => 'US',
@@ -45,8 +48,9 @@ final class OrderProfileFieldTest extends KernelTestBase {
         'given_name' => 'Frederick',
         'family_name' => 'Pabst',
       ],
-      $order->get('billing_information')->first()->getValue()
+      $billing_information->address
     );
+    $this->assertEquals($profile, $billing_information->entity);
   }
 
 }

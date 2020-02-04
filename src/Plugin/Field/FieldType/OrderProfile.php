@@ -14,6 +14,9 @@ use Drupal\Core\TypedData\DataReferenceDefinition;
  *   no_ui = TRUE,
  *   list_class = "\Drupal\commerce_api\Plugin\Field\FieldType\OrderProfileItemList",
  * )
+ *
+ * @property \Drupal\Core\Entity\Plugin\DataType\EntityAdapter $entity
+ * @property array $address
  */
 final class OrderProfile extends FieldItemBase {
 
@@ -26,11 +29,9 @@ final class OrderProfile extends FieldItemBase {
       ->setLabel(t('Profile entity'))
       ->setComputed(TRUE)
       ->setInternal(TRUE);
-
-    return array_merge(
-      $properties,
-      AddressItem::propertyDefinitions($field_definition)
-    );
+    $properties['address'] = DataReferenceDefinition::create('address')
+      ->setLabel(t('Address'));
+    return $properties;
   }
 
   /**
@@ -53,5 +54,10 @@ final class OrderProfile extends FieldItemBase {
   public function postSave($update) {
     // @todo push values into the profile.
   }
+
+  public function getValue() {
+    return parent::getValue();
+  }
+
 
 }

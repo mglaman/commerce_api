@@ -24,7 +24,7 @@ final class OrderProfileItemList extends FieldItemList {
         'entity' => $profile,
       ];
       if ($profile->hasField('address')) {
-        $value = array_merge($value, $profile->get('address')->first()->getValue());
+        $value['address'] = $profile->get('address')->first()->getValue();
       }
     }
     else {
