@@ -22,7 +22,7 @@ before_install:
   - composer global require "hirak/prestissimo:^0.3"
 install:
   - composer global require "drupal/coder:8.3.*"
-  - phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer
+  - composer global require dealerdirect/phpcodesniffer-composer-installer
 
   # Install Chromedriver.
   - mkdir travis-chromedriver

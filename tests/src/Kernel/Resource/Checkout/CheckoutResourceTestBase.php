@@ -62,6 +62,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
    */
   protected function setUp() {
     parent::setUp();
+
     $this->installEntitySchema('commerce_shipment');
     $this->installEntitySchema('commerce_shipping_method');
     $this->installConfig(['commerce_shipping']);
@@ -304,6 +305,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
         'type' => 'checkout',
         'attributes' => $attributes,
         'relationships' => [
+          'coupons' => [],
           'order_items' => [
             'data' => [
               [

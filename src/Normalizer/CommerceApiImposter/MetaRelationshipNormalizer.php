@@ -3,7 +3,6 @@
 namespace Drupal\jsonapi\Normalizer\CommerceApiImposter;
 
 use Drupal\commerce_api\Events\CollectRelationshipMetaEvent;
-use Drupal\commerce_api\Events\CollectResourceObjectMetaEvent;
 use Drupal\commerce_api\Events\JsonapiEvents;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
@@ -48,6 +47,9 @@ final class MetaRelationshipNormalizer extends RelationshipNormalizer {
     $this->renderer = $renderer;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function normalize($object, $format = NULL, array $context = []) {
     assert($object instanceof Relationship);
     $parent_normalization = parent::normalize($object, $format, $context);

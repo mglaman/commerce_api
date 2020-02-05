@@ -141,22 +141,11 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       }
 
       if ($resource_object->hasField('billing_information')) {
-        // @todo cannot validate entity reference, due to entity access.
-        // @see 'billing_profile.0.target_id: This entity (profile: 1) cannot be referenced.
-        // $field_names[] = 'billing_profile';
-        $billing_information = $resource_object->getField('billing_information');
-        // @todo On `commerce_checkout.init` event, set an empty billing profile.
-        // Although we need to handle the event people may not call
-        // GET /checkout to initialize the order.
-        $billing_profile = $commerce_order->getBillingProfile() ?: $this->entityTypeManager->getStorage('profile')->create([
-          'type' => 'customer',
-          'uid' => 0,
-        ]);
-        assert($billing_profile instanceof ProfileInterface);
-        // @todo allow partial constraint validation?
-        $billing_profile->set('address', $billing_information);
-        $billing_profile->save();
-        $commerce_order->setBillingProfile($billing_profile);
+        // @todo provide a validation constraint.
+        $commerce_order->set(
+          'billing_information',
+          $resource_object->getField('billing_information')
+        );
       }
 
       // If shipping information was provided, do Shipping stuff.
@@ -314,7 +303,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     foreach ($shipments->referencedEntities() as $shipment) {
       assert($shipment instanceof ShipmentInterface);
       $options[] = array_map(static function (ShippingRate $rate) use ($resource_type) {
-        list($shipping_method_id, $shipping_rate_id) = explode('--', $rate->getId());
+        [$shipping_method_id, $shipping_rate_id] = explode('--', $rate->getId());
         $delivery_date = $rate->getDeliveryDate();
         $service = $rate->getService();
         return [
@@ -326,6 +315,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
             'serviceId' => $service->getId(),
             'amount' => $rate->getAmount()->toArray(),
             'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
+            'description' => $rate->getDescription(),
           ],
         ];
       }, $this->shipmentManager->calculateRates($shipment));
@@ -336,6 +326,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     }
     $fields['state'] = $order->getState()->getId();
     $fields['email'] = $order->getEmail();
+    $fields['billing_information'] = $order->get('billing_information');
     $fields['order_items'] = $order->get('order_items');
     $fields['coupons'] = $order->get('coupons');
     $fields['total_price'] = $order->get('total_price');
@@ -391,8 +382,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       return $resource_type->getEntityTypeId() === 'commerce_promotion_coupon';
     }));
 
-
-    // @todo custom resource object so ID does not contain `--`
     $resource_type = new RenamableResourceType(
       'checkout_order',
       'checkout_order',

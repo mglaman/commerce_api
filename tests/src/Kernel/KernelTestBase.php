@@ -25,6 +25,7 @@ abstract class KernelTestBase extends CommerceKernelTestBase {
     'path',
     'physical',
     'commerce_shipping',
+    'commerce_promotion',
     'commerce_product',
     'commerce_cart',
     'commerce_api',
@@ -40,6 +41,8 @@ abstract class KernelTestBase extends CommerceKernelTestBase {
     $this->installEntitySchema('commerce_order_item');
     $this->installEntitySchema('commerce_product');
     $this->installEntitySchema('commerce_product_variation');
+    $this->installEntitySchema('commerce_promotion');
+    $this->installEntitySchema('commerce_promotion_coupon');
     EntityFormMode::create([
       'id' => 'commerce_order_item.add_to_cart',
       'label' => 'Add to cart',

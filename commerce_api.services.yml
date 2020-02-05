@@ -75,3 +75,9 @@ services:
     decorates: jsonapi.resource_type.repository
     decoration_priority: 5
     parent: jsonapi.resource_type.repository
+
+  serializer.normalizer.address:
+    class: Drupal\commerce_api\Normalizer\AddressNormalizer
+    tags:
+      # Priority must be higher than serializer.normalizer.primitive_data.
+      - { name: normalizer, priority: 20 }
