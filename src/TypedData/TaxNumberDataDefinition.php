@@ -9,6 +9,9 @@ use Drupal\Core\TypedData\MapDataDefinition;
 
 final class TaxNumberDataDefinition extends ComplexDataDefinitionBase {
 
+  /**
+   * {@inheritdoc}
+   */
   public function getPropertyDefinitions() {
     $properties = [];
     $properties['type'] = DataDefinition::create('string')

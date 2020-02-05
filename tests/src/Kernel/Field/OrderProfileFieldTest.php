@@ -4,15 +4,26 @@ namespace Drupal\Tests\commerce_api\Kernel\Field;
 
 use Drupal\commerce_api\Plugin\DataType\Address;
 use Drupal\commerce_api\Plugin\Field\FieldType\OrderProfile;
+use Drupal\commerce_api\Plugin\Field\FieldType\OrderProfileItemList;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_tax\Plugin\Commerce\TaxNumberType\VerificationResult;
+use Drupal\jsonapi\JsonApiResource\ResourceObject;
+use Drupal\jsonapi\Normalizer\Value\CacheableNormalization;
 use Drupal\profile\Entity\Profile;
 use Drupal\profile\Entity\ProfileInterface;
 use Drupal\Tests\commerce_api\Kernel\KernelTestBase;
 
+/**
+ * Test the order profile field.
+ *
+ * @group commerce_api
+ */
 final class OrderProfileFieldTest extends KernelTestBase {
 
+  /**
+   * Tests the billing order profile through the order profile field.
+   */
   public function testBillingOrderProfile() {
     $order = $this->createOrder();
     $this->assertTrue($order->hasField('billing_information'));
@@ -82,6 +93,9 @@ final class OrderProfileFieldTest extends KernelTestBase {
     );
   }
 
+  /**
+   * Test that a profile is created dynamically.
+   */
   public function testCreateBillingOrderProfile() {
     $test_address = [
       'country_code' => 'US',
@@ -147,6 +161,9 @@ final class OrderProfileFieldTest extends KernelTestBase {
     );
   }
 
+  /**
+   * Test with the tax number field added.
+   */
   public function testWithTaxNumber() {
     $this->installModule('commerce_tax');
     $this->installConfig(['commerce_tax']);
@@ -201,6 +218,57 @@ final class OrderProfileFieldTest extends KernelTestBase {
     ], array_filter($billing_information->tax_number));
   }
 
+  /**
+   * Tests normalization of the field.
+   */
+  public function testNormalization() {
+    $order = $this->createOrder();
+    $profile = Profile::create([
+      'type' => 'customer',
+      'uid' => 0,
+      'address' => [
+        'country_code' => 'US',
+        'postal_code' => '53177',
+        'locality' => 'Milwaukee',
+        'address_line1' => 'Pabst Blue Ribbon Dr',
+        'administrative_area' => 'WI',
+        'given_name' => 'Frederick',
+        'family_name' => 'Pabst',
+      ],
+    ]);
+    assert($profile instanceof ProfileInterface);
+    $order->setBillingProfile($profile);
+
+    $field = $order->get('billing_information');
+    assert($field instanceof OrderProfileItemList);
+
+    $jsonapi_serializer = $this->container->get('jsonapi.serializer');
+    $resource_type = $this->container->get('jsonapi.resource_type.repository')->get('commerce_order', 'default');
+    $normalized = $jsonapi_serializer->normalize($field, 'api_json', [
+      'resource_type' => $resource_type,
+      'resource_object' => ResourceObject::createFromEntity($resource_type, $order),
+    ]);
+    assert($normalized instanceof CacheableNormalization);
+    $normalization = $normalized->getNormalization();
+    $this->assertEquals([
+      'address' => [
+        'country_code' => 'US',
+        'postal_code' => '53177',
+        'locality' => 'Milwaukee',
+        'address_line1' => 'Pabst Blue Ribbon Dr',
+        'administrative_area' => 'WI',
+        'given_name' => 'Frederick',
+        'family_name' => 'Pabst',
+      ],
+    ], $normalization);
+  }
+
+  /**
+   * Creates a test order.
+   *
+   * @return \Drupal\commerce_order\Entity\OrderInterface
+   *   The order.
+   */
   private function createOrder(): OrderInterface {
     $order = Order::create([
       'type' => 'default',

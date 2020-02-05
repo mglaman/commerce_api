@@ -7,6 +7,9 @@ use Drupal\Core\TypedData\DataDefinition;
 
 final class AddressDataDefinition extends ComplexDataDefinitionBase {
 
+  /**
+   * {@inheritdoc}
+   */
   public function getPropertyDefinitions() {
     $properties = [];
     $properties['langcode'] = DataDefinition::create('string')

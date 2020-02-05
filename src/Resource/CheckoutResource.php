@@ -315,7 +315,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
             'serviceId' => $service->getId(),
             'amount' => $rate->getAmount()->toArray(),
             'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
-            'terms' => $rate->getDeliveryTerms(),
+            'description' => $rate->getDescription(),
           ],
         ];
       }, $this->shipmentManager->calculateRates($shipment));
@@ -382,8 +382,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       return $resource_type->getEntityTypeId() === 'commerce_promotion_coupon';
     }));
 
-
-    // @todo custom resource object so ID does not contain `--`
     $resource_type = new RenamableResourceType(
       'checkout_order',
       'checkout_order',

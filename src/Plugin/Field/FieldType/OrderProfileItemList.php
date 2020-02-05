@@ -54,6 +54,12 @@ final class OrderProfileItemList extends FieldItemList {
     return $this;
   }
 
+  /**
+   * Get the profile for the field.
+   *
+   * @return \Drupal\profile\Entity\ProfileInterface
+   *   The profile.
+   */
   private function getProfile(): ProfileInterface {
     $order = $this->getEntity();
     assert($order instanceof OrderInterface);

@@ -115,6 +115,7 @@ final class CartClearResourceTest extends CartResourceTestBase {
               'adjustments' => [],
               'total' => NULL,
             ],
+            'billing_information' => NULL,
           ],
           'relationships' => [
             'store_id' => [
@@ -128,7 +129,6 @@ final class CartClearResourceTest extends CartResourceTestBase {
               ],
             ],
             'order_items' => [
-              'data' => [],
               'links' => [
                 'self' => ['href' => Url::fromRoute('jsonapi.orders--default.order_items.relationship.get', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
                 'related' => ['href' => Url::fromRoute('jsonapi.orders--default.order_items.related', ['entity' => $cart->uuid()])->setAbsolute()->toString()],

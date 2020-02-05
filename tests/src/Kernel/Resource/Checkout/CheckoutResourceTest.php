@@ -464,11 +464,6 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
         'state' => 'draft',
-        // @todo we need a custom DataType normalizer that targets the Address
-        //       data type. That can filter empty values and ensure it is under
-        //       the `address` property.
-        // @see \Drupal\jsonapi\Normalizer\FieldItemNormalizer::normalize
-        // @see Line 79
         'billing_information' => [
           'address' => [
             'country_code' => 'US',
