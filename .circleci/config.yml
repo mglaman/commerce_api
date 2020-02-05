@@ -41,7 +41,7 @@ jobs:
     steps:
       - setup-job
       - run: composer global require "drupal/coder:8.3.*"
-      - run: phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer
+      - run: composer global require dealerdirect/phpcodesniffer-composer-installer
       - run: phpcs --standard=phpcs.xml . -s
   phpunit:
     docker:

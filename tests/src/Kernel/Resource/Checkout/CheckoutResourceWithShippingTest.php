@@ -103,6 +103,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
             'country_code' => 'US',
             'postal_code' => '94043',
           ],
+          'billing_information' => NULL,
         ],
       ],
       [
@@ -118,7 +119,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
               'currency_code' => 'USD',
             ],
             'deliveryDate' => NULL,
-            'terms' => NULL,
+            'description' => NULL,
           ],
         ],
         [
@@ -133,7 +134,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
               'currency_code' => 'USD',
             ],
             'deliveryDate' => NULL,
-            'terms' => NULL,
+            'description' => NULL,
           ],
         ],
       ],
@@ -183,6 +184,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
           'currency_code' => 'USD',
           'formatted' => '$24.00',
         ],
+        'billing_information' => NULL,
       ],
         [$constraints],
         [
@@ -200,7 +202,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
                     'currency_code' => 'USD',
                   ],
                   'deliveryDate' => NULL,
-                  'terms' => NULL,
+                  'description' => NULL,
                 ],
               ],
               [
@@ -215,7 +217,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
                     'currency_code' => 'USD',
                   ],
                   'deliveryDate' => NULL,
-                  'terms' => NULL,
+                  'description' => NULL,
                 ],
               ],
             ],

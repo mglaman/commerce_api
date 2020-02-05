@@ -134,6 +134,12 @@ final class CartClearResourceTest extends CartResourceTestBase {
                 'related' => ['href' => Url::fromRoute('jsonapi.orders--default.order_items.related', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
               ],
             ],
+            'coupons' => [
+              'links' => [
+                'self' => ['href' => Url::fromRoute('jsonapi.orders--default.coupons.relationship.get', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
+                'related' => ['href' => Url::fromRoute('jsonapi.orders--default.coupons.related', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
+              ],
+            ],
           ],
           'meta' => [
             'constraints' => [

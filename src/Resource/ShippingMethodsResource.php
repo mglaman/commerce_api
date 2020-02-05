@@ -89,7 +89,7 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
             'serviceId' => $service->getId(),
             'amount' => $rate->getAmount()->toArray(),
             'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
-            'terms' => $rate->getDeliveryTerms(),
+            'description' => $rate->getDescription(),
           ],
           // @todo link template to provide PATCH data :?
           new LinkCollection([])

@@ -60,6 +60,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
           'currency_code' => 'USD',
           'formatted' => '$1,000.00',
         ],
+        'billing_information' => NULL,
       ],
       'relationships' => [
         'order_items' => [
@@ -70,6 +71,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
             ],
           ],
         ],
+        'coupons' => [],
       ],
       'meta' => [
         'constraints' => [
@@ -122,7 +124,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
             'currency_code' => 'USD',
           ],
           'deliveryDate' => NULL,
-          'terms' => NULL,
+          'description' => NULL,
         ],
       ],
       [
@@ -137,7 +139,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
             'currency_code' => 'USD',
           ],
           'deliveryDate' => NULL,
-          'terms' => NULL,
+          'description' => NULL,
         ],
       ],
     ], $shipping_methods_body['data']);
@@ -202,6 +204,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
           'currency_code' => 'USD',
           'formatted' => '$1,005.00',
         ],
+        'billing_information' => NULL,
       ],
       'relationships' => [
         'order_items' => [
@@ -226,7 +229,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
                   'currency_code' => 'USD',
                 ],
                 'deliveryDate' => NULL,
-                'terms' => NULL,
+                'description' => NULL,
               ],
             ],
             [
@@ -241,11 +244,12 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
                   'currency_code' => 'USD',
                 ],
                 'deliveryDate' => NULL,
-                'terms' => NULL,
+                'description' => NULL,
               ],
             ],
           ],
         ],
+        'coupons' => [],
       ],
       'meta' => [
         'constraints' => [
