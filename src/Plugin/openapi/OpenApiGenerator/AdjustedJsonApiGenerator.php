@@ -113,7 +113,7 @@ final class AdjustedJsonApiGenerator extends JsonApiGenerator {
    *   The prefix where this schema is embedded.
    *
    * @return array
-   *  The references
+   *   The references.
    *
    * @todo remove after https://www.drupal.org/project/openapi_jsonapi/issues/3091299
    */
