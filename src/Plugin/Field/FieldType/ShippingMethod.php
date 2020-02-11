@@ -24,6 +24,7 @@ final class ShippingMethod extends FieldItemBase {
    * {@inheritdoc}
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
+    // @todo should this be a two propert field: method ID + service ID?
     $properties['value'] = DataDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Shipping rate option'))
       ->setRequired(TRUE);

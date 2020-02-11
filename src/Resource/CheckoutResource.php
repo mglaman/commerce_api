@@ -283,6 +283,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     }
 
     // @todo this would be better if we had a nornalizer to format a value object and ensure spec.
+    // @todo move this into a computed relationship field.
     $options = [];
     foreach ($this->getOrderShipments($order) as $shipment) {
       assert($shipment instanceof ShipmentInterface);
@@ -335,14 +336,13 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    *
    * @return \Drupal\jsonapi\ResourceType\ResourceType
    *   The resource type.
+   *
+   * @todo remove once shipping_methods is a computed relationship.
    */
   private function getCheckoutOrderResourceType(): ResourceType {
     $order_item_resource_types = array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) {
       return $resource_type->getEntityTypeId() === 'commerce_order_item';
     });
-    // @todo need to add more of the same fields from orders.
-    // @todo the main point is to _not_ require additional endpoints for setting billing information and shipping information.
-    // the real "fix" would be allowing updating a relationship value as if it was embedded in the entity - which is the billing profile.
     $fields = [];
     $fields['state'] = new ResourceTypeAttribute('state');
     $fields['email'] = new ResourceTypeAttribute('email');
@@ -357,7 +357,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     // @todo return the available shipping methods as a resource identifier.
     $shipping_methods_field = new ResourceTypeRelationship('shipping_methods', 'shipping_methods', TRUE, FALSE);
     $fields['shipping_methods'] = $shipping_methods_field->withRelatableResourceTypes([
-      'shipping_rate_option--shipping_rate_option' => $this->getShippingRateOptionResourceType(),
+      'shipping-rate-option' => $this->getShippingRateOptionResourceType(),
     ]);
 
     $order_item_field = new ResourceTypeRelationship('order_items', 'order_items', TRUE, FALSE);
@@ -418,6 +418,8 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    *
    * @return \Drupal\jsonapi\ResourceType\ResourceType
    *   The resource type.
+   *
+   * @todo move into RenamableResourceTypeRepository as part of resource types.
    */
   private function getShippingRateOptionResourceType(): ResourceType {
     $resource_type = new RenamableResourceType(
