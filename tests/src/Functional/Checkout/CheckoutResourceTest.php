@@ -98,8 +98,10 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
         'id' => $test_cart_id,
         'attributes' => [
           'shipping_information' => [
-            'country_code' => 'US',
-            'postal_code' => '94043',
+            'address' => [
+              'country_code' => 'US',
+              'postal_code' => '94043',
+            ]
           ],
         ],
       ],
@@ -164,8 +166,10 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
         'email' => $this->account->getEmail(),
         'shipping_method' => '1--default',
         'shipping_information' => [
-          'country_code' => 'US',
-          'postal_code' => '94043',
+          'address' => [
+            'country_code' => 'US',
+            'postal_code' => '94043',
+          ],
         ],
         'order_total' => [
           'subtotal' => [

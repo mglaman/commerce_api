@@ -96,7 +96,12 @@ function commerce_api_entity_base_field_info(EntityTypeInterface $entity_type) {
       ->setSetting('profile_bundle', 'customer')
       ->setSetting('profile_type', 'billing')
       ->setComputed(TRUE);
-
+    $fields['shipping_information'] = BaseFieldDefinition::create('order_profile')
+      ->setLabel(t('Shipping information'))
+      // @todo determine the profile type for shipping.
+      ->setSetting('profile_bundle', 'customer')
+      ->setSetting('profile_type', 'shipping')
+      ->setComputed(TRUE);
     $fields['order_total'] = BaseFieldDefinition::create('map')
       ->setLabel(t('Order total'))
       ->setReadOnly(TRUE)

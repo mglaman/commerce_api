@@ -81,3 +81,9 @@ services:
     tags:
       # Priority must be higher than serializer.normalizer.primitive_data.
       - { name: normalizer, priority: 20 }
+
+  commerce_api.shipping_profile_subscriber:
+    class: Drupal\commerce_api\EventSubscriber\ShippingProfileSubscriber
+    arguments: ['@commerce_shipping.order_manager']
+    tags:
+      - { name: event_subscriber }

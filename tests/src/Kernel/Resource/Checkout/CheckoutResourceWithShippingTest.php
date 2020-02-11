@@ -100,8 +100,10 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
           'email' => 'tester@example.com',
           'shipping_information' => [
             // Required to always send the country code.
-            'country_code' => 'US',
-            'postal_code' => '94043',
+            'address' => [
+              'country_code' => 'US',
+              'postal_code' => '94043',
+            ]
           ],
           'billing_information' => NULL,
         ],
@@ -143,8 +145,10 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
         'email' => 'tester@example.com',
         'state' => 'draft',
         'shipping_information' => [
-          'country_code' => 'US',
-          'postal_code' => '94043',
+          'address' => [
+            'country_code' => 'US',
+            'postal_code' => '94043',
+          ]
         ],
         'shipping_method' => '2--default',
         'order_total' => [

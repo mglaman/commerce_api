@@ -142,6 +142,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
 
       if ($resource_object->hasField('billing_information')) {
         // @todo provide a validation constraint.
+        $field_names[] = 'billing_information';
         $commerce_order->set(
           'billing_information',
           $resource_object->getField('billing_information')
@@ -151,11 +152,12 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       // If shipping information was provided, do Shipping stuff.
       if ($resource_object->hasField('shipping_information')) {
         $field_names[] = 'shipments';
-        $shipping_information = $resource_object->getField('shipping_information');
-        $shipping_profile = $this->getOrderShippingProfile($commerce_order);
-        // @todo allow partial constraint validation?
-        $shipping_profile->set('address', $shipping_information);
-        $shipping_profile->save();
+        $commerce_order->set(
+          'shipping_information',
+          $resource_object->getField('shipping_information')
+        );
+        $shipping_profile = $commerce_order->get('shipping_information')->entity;
+        assert($shipping_profile instanceof ProfileInterface);
         $shipments = $this->shippingOrderManager->pack($commerce_order, $shipping_profile);
         foreach ($shipments as $shipment) {
           $shipment->save();
@@ -282,12 +284,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $fields['payment_gateway'] = $payment_gateway->first()->target_id;
     }
 
-    $shipping_profile = $this->getOrderShippingProfile($order);
-    assert($shipping_profile instanceof ProfileInterface);
-    // @todo this needs constraints if the address isn't completely populated.
-    if (!$shipping_profile->get('address')->isEmpty()) {
-      $fields['shipping_information'] = array_filter($shipping_profile->get('address')->first()->getValue());
-    }
     $shipments = $order->get('shipments');
     assert($shipments instanceof EntityReferenceFieldItemListInterface);
     if (!$shipments->isEmpty()) {
@@ -327,6 +323,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $fields['state'] = $order->getState()->getId();
     $fields['email'] = $order->getEmail();
     $fields['billing_information'] = $order->get('billing_information');
+    $fields['shipping_information'] = $order->get('shipping_information');
     $fields['order_items'] = $order->get('order_items');
     $fields['coupons'] = $order->get('coupons');
     $fields['total_price'] = $order->get('total_price');

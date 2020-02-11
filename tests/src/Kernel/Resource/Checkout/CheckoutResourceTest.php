@@ -143,8 +143,10 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           'email' => 'tester@example.com',
           'shipping_information' => [
             // Required to always send the country code.
-            'country_code' => 'US',
-            'postal_code' => '94043',
+            'address' => [
+              'country_code' => 'US',
+              'postal_code' => '94043',
+            ],
           ],
         ],
       ],
@@ -153,8 +155,10 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'state' => 'draft',
         'billing_information' => NULL,
         'shipping_information' => [
-          'country_code' => 'US',
-          'postal_code' => '94043',
+          'address' => [
+            'country_code' => 'US',
+            'postal_code' => '94043',
+          ],
         ],
         'order_total' => [
           'subtotal' => [
@@ -234,9 +238,11 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           'email' => 'tester@example.com',
           'shipping_information' => [
             // This should throw an error on postal_code validation.
-            'country_code' => 'US',
-            'administrative_area' => 'CA',
-            'postal_code' => '11111',
+            'address' => [
+              'country_code' => 'US',
+              'administrative_area' => 'CA',
+              'postal_code' => '11111',
+            ]
           ],
         ],
       ],
@@ -245,9 +251,11 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'state' => 'draft',
         'billing_information' => NULL,
         'shipping_information' => [
-          'country_code' => 'US',
-          'administrative_area' => 'CA',
-          'postal_code' => '11111',
+          'address' => [
+            'country_code' => 'US',
+            'administrative_area' => 'CA',
+            'postal_code' => '11111',
+          ]
         ],
         'order_total' => [
           'subtotal' => [
@@ -326,8 +334,10 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'attributes' => [
           'email' => 'tester@example.com',
           'shipping_information' => [
-            'country_code' => 'US',
-            'postal_code' => '94043',
+            'address' => [
+              'country_code' => 'US',
+              'postal_code' => '94043',
+            ]
           ],
           'shipping_method' => '2--default',
         ],
@@ -337,8 +347,10 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'state' => 'draft',
         'billing_information' => NULL,
         'shipping_information' => [
-          'country_code' => 'US',
-          'postal_code' => '94043',
+          'address' => [
+            'country_code' => 'US',
+            'postal_code' => '94043',
+          ]
         ],
         'shipping_method' => '2--default',
         'order_total' => [
@@ -438,8 +450,10 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           'email' => 'tester@example.com',
           'state' => 'draft',
           'shipping_information' => [
-            'country_code' => 'US',
-            'postal_code' => '94043',
+            'address' => [
+              'country_code' => 'US',
+              'postal_code' => '94043',
+            ]
           ],
           'shipping_method' => '2--default',
           'billing_information' => [
@@ -473,8 +487,10 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           ],
         ],
         'shipping_information' => [
-          'country_code' => 'US',
-          'postal_code' => '94043',
+          'address' => [
+            'country_code' => 'US',
+            'postal_code' => '94043',
+          ]
         ],
         'shipping_method' => '2--default',
         'order_total' => [
