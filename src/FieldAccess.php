@@ -99,6 +99,7 @@ class FieldAccess implements FieldAccessInterface {
         'store_id',
         'billing_information',
         'shipping_information',
+        'shipping_method',
         // Allow after https://www.drupal.org/project/commerce/issues/2916252.
         // 'adjustments',
         'coupons',

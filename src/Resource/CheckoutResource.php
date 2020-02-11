@@ -105,7 +105,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request.
    * @param array $resource_types
-   *   The resource tpyes for this resource.
+   *   The resource types for this resource.
    * @param \Drupal\commerce_order\Entity\OrderInterface $commerce_order
    *   The order.
    * @param \Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel $document
@@ -158,7 +158,10 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       // Again this is 😱.
       if ($resource_object->hasField('shipping_method')) {
         $field_names[] = 'shipments';
-        $this->applyShippingRateToShipments($commerce_order, $resource_object->getField('shipping_method'));
+        $shipping_method_rate_option_id = $resource_object->getField('shipping_method');
+        assert(is_string($shipping_method_rate_option_id));
+        $commerce_order->set('shipping_method', $shipping_method_rate_option_id);
+        $this->applyShippingRateToShipments($commerce_order, $shipping_method_rate_option_id);
       }
 
       if ($resource_object->hasField('payment_gateway')) {
@@ -279,19 +282,9 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $fields['payment_gateway'] = $payment_gateway->first()->target_id;
     }
 
-    /** @var \Drupal\commerce_shipping\Entity\ShipmentInterface[] $shipments */
-    $shipments = $this->getOrderShipments($order);
-    if (!empty($shipments)) {
-      $shipment = reset($shipments);
-      assert($shipment instanceof ShipmentInterface);
-      if ($shipment->getShippingMethodId() !== NULL) {
-        $fields['shipping_method'] = $shipment->getShippingMethodId() . '--' . $shipment->getShippingService();
-      }
-    }
-
     // @todo this would be better if we had a nornalizer to format a value object and ensure spec.
     $options = [];
-    foreach ($shipments as $shipment) {
+    foreach ($this->getOrderShipments($order) as $shipment) {
       assert($shipment instanceof ShipmentInterface);
       $options[] = array_map(static function (ShippingRate $rate) use ($resource_type) {
         [$shipping_method_id, $shipping_rate_id] = explode('--', $rate->getId());
@@ -317,6 +310,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     }
     $fields['state'] = $order->getState()->getId();
     $fields['email'] = $order->getEmail();
+    $fields['shipping_method'] = $order->get('shipping_method');
     $fields['billing_information'] = $order->get('billing_information');
     $fields['shipping_information'] = $order->get('shipping_information');
     $fields['order_items'] = $order->get('order_items');

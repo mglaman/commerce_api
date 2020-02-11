@@ -67,6 +67,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
         ],
         'billing_information' => NULL,
         'shipping_information' => NULL,
+        'shipping_method' => NULL,
       ],
       'relationships' => [
         'order_items' => [

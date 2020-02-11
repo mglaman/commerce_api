@@ -72,6 +72,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'state' => 'draft',
         'billing_information' => NULL,
         'shipping_information' => NULL,
+        'shipping_method' => NULL,
         'order_total' => [
           'subtotal' => [
             'number' => '4.0',
@@ -159,6 +160,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'email' => 'tester@example.com',
         'state' => 'draft',
         'billing_information' => NULL,
+        'shipping_method' => NULL,
         'shipping_information' => [
           'address' => [
             'country_code' => 'US',
@@ -218,6 +220,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'email' => 'tester@example.com',
         'state' => 'draft',
         'billing_information' => NULL,
+        'shipping_method' => NULL,
         'shipping_information' => [
           'address' => [
             'country_code' => 'US',
@@ -473,6 +476,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'payment_gateway' => 'onsite',
         'billing_information' => NULL,
         'shipping_information' => NULL,
+        'shipping_method' => NULL,
         'order_total' => [
           'subtotal' => [
             'number' => '4.0',
