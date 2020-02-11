@@ -71,6 +71,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'email' => 'tester@example.com',
         'state' => 'draft',
         'billing_information' => NULL,
+        'shipping_information' => NULL,
         'order_total' => [
           'subtotal' => [
             'number' => '4.0',
@@ -107,6 +108,10 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
             ],
           ],
         ],
+      ],
+      [],
+      [
+        'shipping-methods' => static::getShippingMethodsLink(),
       ]
       ),
     ];
@@ -189,46 +194,9 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
             ],
           ],
         ],
+        [],
         [
-          'shipping_methods' => [
-            'data' => [
-              [
-                'type' => 'shipping--service',
-                'id' => '2--default',
-                'meta' => [
-                  'label' => 'Flat rate',
-                  'methodId' => '2',
-                  'serviceId' => 'default',
-                  'amount' => [
-                    'number' => '20',
-                    'currency_code' => 'USD',
-                  ],
-                  'deliveryDate' => NULL,
-                  'description' => NULL,
-                ],
-              ],
-              [
-                'type' => 'shipping--service',
-                'id' => '1--default',
-                'meta' => [
-                  'label' => 'Flat rate',
-                  'methodId' => '1',
-                  'serviceId' => 'default',
-                  'amount' => [
-                    'number' => '5',
-                    'currency_code' => 'USD',
-                  ],
-                  'deliveryDate' => NULL,
-                  'description' => NULL,
-                ],
-              ],
-            ],
-          ],
-        ],
-        [
-          'shipping-methods' => [
-            'href' => 'http://localhost/jsonapi/checkout/' . self::TEST_ORDER_UUID . '/shipping-methods',
-          ],
+          'shipping-methods' => static::getShippingMethodsLink(),
         ]
       ),
     ];
@@ -242,7 +210,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
               'country_code' => 'US',
               'administrative_area' => 'CA',
               'postal_code' => '11111',
-            ]
+            ],
           ],
         ],
       ],
@@ -255,7 +223,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
             'country_code' => 'US',
             'administrative_area' => 'CA',
             'postal_code' => '11111',
-          ]
+          ],
         ],
         'order_total' => [
           'subtotal' => [
@@ -286,46 +254,9 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
             ],
           ],
         ],
+        [],
         [
-          'shipping_methods' => [
-            'data' => [
-              [
-                'type' => 'shipping--service',
-                'id' => '2--default',
-                'meta' => [
-                  'label' => 'Flat rate',
-                  'methodId' => '2',
-                  'serviceId' => 'default',
-                  'amount' => [
-                    'number' => '20',
-                    'currency_code' => 'USD',
-                  ],
-                  'deliveryDate' => NULL,
-                  'description' => NULL,
-                ],
-              ],
-              [
-                'type' => 'shipping--service',
-                'id' => '1--default',
-                'meta' => [
-                  'label' => 'Flat rate',
-                  'methodId' => '1',
-                  'serviceId' => 'default',
-                  'amount' => [
-                    'number' => '5',
-                    'currency_code' => 'USD',
-                  ],
-                  'deliveryDate' => NULL,
-                  'description' => NULL,
-                ],
-              ],
-            ],
-          ],
-        ],
-        [
-          'shipping-methods' => [
-            'href' => 'http://localhost/jsonapi/checkout/' . self::TEST_ORDER_UUID . '/shipping-methods',
-          ],
+          'shipping-methods' => static::getShippingMethodsLink(),
         ]
       ),
     ];
@@ -337,7 +268,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
             'address' => [
               'country_code' => 'US',
               'postal_code' => '94043',
-            ]
+            ],
           ],
           'shipping_method' => '2--default',
         ],
@@ -350,7 +281,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           'address' => [
             'country_code' => 'US',
             'postal_code' => '94043',
-          ]
+          ],
         ],
         'shipping_method' => '2--default',
         'order_total' => [
@@ -401,46 +332,9 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
             ],
           ],
         ],
+        [],
         [
-          'shipping_methods' => [
-            'data' => [
-              [
-                'type' => 'shipping--service',
-                'id' => '2--default',
-                'meta' => [
-                  'label' => 'Flat rate',
-                  'methodId' => '2',
-                  'serviceId' => 'default',
-                  'amount' => [
-                    'number' => '20',
-                    'currency_code' => 'USD',
-                  ],
-                  'deliveryDate' => NULL,
-                  'description' => NULL,
-                ],
-              ],
-              [
-                'type' => 'shipping--service',
-                'id' => '1--default',
-                'meta' => [
-                  'label' => 'Flat rate',
-                  'methodId' => '1',
-                  'serviceId' => 'default',
-                  'amount' => [
-                    'number' => '5',
-                    'currency_code' => 'USD',
-                  ],
-                  'deliveryDate' => NULL,
-                  'description' => NULL,
-                ],
-              ],
-            ],
-          ],
-        ],
-        [
-          'shipping-methods' => [
-            'href' => 'http://localhost/jsonapi/checkout/' . self::TEST_ORDER_UUID . '/shipping-methods',
-          ],
+          'shipping-methods' => static::getShippingMethodsLink(),
         ]
       ),
     ];
@@ -453,7 +347,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
             'address' => [
               'country_code' => 'US',
               'postal_code' => '94043',
-            ]
+            ],
           ],
           'shipping_method' => '2--default',
           'billing_information' => [
@@ -490,7 +384,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           'address' => [
             'country_code' => 'US',
             'postal_code' => '94043',
-          ]
+          ],
         ],
         'shipping_method' => '2--default',
         'order_total' => [
@@ -532,46 +426,9 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         ],
       ],
         NULL,
+        [],
         [
-          'shipping_methods' => [
-            'data' => [
-              [
-                'type' => 'shipping--service',
-                'id' => '2--default',
-                'meta' => [
-                  'label' => 'Flat rate',
-                  'methodId' => '2',
-                  'serviceId' => 'default',
-                  'amount' => [
-                    'number' => '20',
-                    'currency_code' => 'USD',
-                  ],
-                  'deliveryDate' => NULL,
-                  'description' => NULL,
-                ],
-              ],
-              [
-                'type' => 'shipping--service',
-                'id' => '1--default',
-                'meta' => [
-                  'label' => 'Flat rate',
-                  'methodId' => '1',
-                  'serviceId' => 'default',
-                  'amount' => [
-                    'number' => '5',
-                    'currency_code' => 'USD',
-                  ],
-                  'deliveryDate' => NULL,
-                  'description' => NULL,
-                ],
-              ],
-            ],
-          ],
-        ],
-        [
-          'shipping-methods' => [
-            'href' => 'http://localhost/jsonapi/checkout/' . self::TEST_ORDER_UUID . '/shipping-methods',
-          ],
+          'shipping-methods' => static::getShippingMethodsLink(),
         ]
       ),
     ];
@@ -615,6 +472,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'state' => 'draft',
         'payment_gateway' => 'onsite',
         'billing_information' => NULL,
+        'shipping_information' => NULL,
         'order_total' => [
           'subtotal' => [
             'number' => '4.0',
@@ -651,6 +509,10 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
               ],
             ],
           ],
+        ],
+        [],
+        [
+          'shipping-methods' => static::getShippingMethodsLink(),
         ]
       ),
     ];

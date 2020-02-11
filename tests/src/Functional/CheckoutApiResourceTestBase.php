@@ -214,4 +214,47 @@ abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
     $this->assertSame($expected_status_code, $response->getStatusCode(), var_export(Json::decode((string) $response->getBody()), TRUE));
   }
 
+  /**
+   * Get the shipping methods relationship.
+   *
+   * @return array
+   *   The relationship.
+   */
+  protected static function getShippingMethodsRelationship() {
+    return [
+      'data' => [
+        [
+          'type' => 'shipping--service',
+          'id' => '2--default',
+          'meta' => [
+            'label' => 'Flat rate',
+            'methodId' => '2',
+            'serviceId' => 'default',
+            'amount' => [
+              'number' => '20',
+              'currency_code' => 'USD',
+            ],
+            'deliveryDate' => NULL,
+            'description' => NULL,
+          ],
+        ],
+        [
+          'type' => 'shipping--service',
+          'id' => '1--default',
+          'meta' => [
+            'label' => 'Flat rate',
+            'methodId' => '1',
+            'serviceId' => 'default',
+            'amount' => [
+              'number' => '5',
+              'currency_code' => 'USD',
+            ],
+            'deliveryDate' => NULL,
+            'description' => NULL,
+          ],
+        ],
+      ],
+    ];
+  }
+
 }

@@ -24,7 +24,7 @@ final class AddressNormalizer extends NormalizerBase {
     // not want that for the OrderProfile field, as `address` should be present.
     // This only happens if there is one field on the profile.
     // @see \Drupal\jsonapi\Normalizer\FieldItemNormalizer::normalize
-    // @todo open issue FieldItemNormalizer::normalize should ignore if mainPropertyName is NULL.
+    // @todo remove after https://www.drupal.org/project/drupal/issues/3112229
     $parent = $object->getParent();
     if ($parent instanceof OrderProfile) {
       $field_properties = TypedDataInternalPropertiesHelper::getNonInternalProperties($parent);

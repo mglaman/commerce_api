@@ -6,7 +6,8 @@ use Drupal\jsonapi\JsonApiResource\Relationship;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * @todo document.
+ * Event to collect meta for a Relationship object.
+ *
  * @todo remove after https://www.drupal.org/project/drupal/issues/3100732
  */
 final class CollectRelationshipMetaEvent extends Event {

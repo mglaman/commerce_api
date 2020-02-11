@@ -61,6 +61,7 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
           'attributes' => [
             'order_number' => NULL,
             'billing_information' => NULL,
+            'shipping_information' => NULL,
             'total_price' => [
               'number' => '5000.0',
               'currency_code' => 'USD',

@@ -28,6 +28,7 @@ final class CurrentStoreResource extends EntityResourceBase {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function process(Request $request): ResourceResponse {
+    // @todo inject service using DI.
     $current_store = \Drupal::service('commerce_store.current_store');
     assert($current_store instanceof CurrentStoreInterface);
     $store = $current_store->getStore();

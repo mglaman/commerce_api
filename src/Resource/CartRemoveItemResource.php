@@ -73,7 +73,6 @@ final class CartRemoveItemResource extends CartResourceBase {
     /* @var \Drupal\jsonapi\JsonApiResource\ResourceIdentifier[] $resource_identifiers */
     $resource_identifiers = $this->inner->deserialize($resource_type, $request, ResourceIdentifier::class, 'order_items');
     foreach ($resource_identifiers as $resource_identifier) {
-      // @todo inject entity repository.
       $order_item = $order_item_storage->loadByProperties(['uuid' => $resource_identifier->getId()]);
       $order_item = reset($order_item);
       if (!$order_item instanceof OrderItemInterface || !$commerce_order->hasItem($order_item)) {

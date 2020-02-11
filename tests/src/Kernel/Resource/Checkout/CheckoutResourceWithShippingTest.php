@@ -104,7 +104,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
             'address' => [
               'country_code' => 'US',
               'postal_code' => '94043',
-            ]
+            ],
           ],
           'billing_information' => NULL,
         ],
@@ -149,7 +149,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
           'address' => [
             'country_code' => 'US',
             'postal_code' => '94043',
-          ]
+          ],
         ],
         'shipping_method' => '2--default',
         'order_total' => [

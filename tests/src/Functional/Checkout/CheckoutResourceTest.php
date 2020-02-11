@@ -8,12 +8,17 @@ use Drupal\Core\Url;
 use Drupal\Tests\commerce_api\Functional\CheckoutApiResourceTestBase;
 use GuzzleHttp\RequestOptions;
 
+/**
+ * Tests the Checkout resource.
+ *
+ * @group commerce_api
+ */
 final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
 
   /**
    * Test the checkout response.
    */
-  public function testCheckout() {
+  public function testCheckout(): void {
     $url = Url::fromRoute('commerce_api.carts.add');
     $response = $this->performRequest('POST', $url, [
       'data' => [
@@ -61,6 +66,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
           'formatted' => '$1,000.00',
         ],
         'billing_information' => NULL,
+        'shipping_information' => NULL,
       ],
       'relationships' => [
         'order_items' => [
@@ -72,6 +78,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
           ],
         ],
         'coupons' => [],
+        'shipping_methods' => static::getShippingMethodsRelationship(),
       ],
       'meta' => [
         'constraints' => [
@@ -89,6 +96,11 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
           ],
         ],
       ],
+      'links' => [
+        'shipping-methods' => [
+          'href' => Url::fromRoute('commerce_api.checkout.shipping_methods', ['commerce_order' => $test_cart_id])->setAbsolute()->toString(),
+        ],
+      ],
     ], $checkout_body['data']);
 
     $url = Url::fromRoute('commerce_api.checkout', ['commerce_order' => $test_cart_id]);
@@ -101,7 +113,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
             'address' => [
               'country_code' => 'US',
               'postal_code' => '94043',
-            ]
+            ],
           ],
         ],
       ],

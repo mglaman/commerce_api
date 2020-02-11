@@ -6,7 +6,8 @@ use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * @todo document.
+ * Event to collect meta for a Resource object.
+ *
  * @todo remove after https://www.drupal.org/project/drupal/issues/3100732
  */
 final class CollectResourceObjectMetaEvent extends Event {

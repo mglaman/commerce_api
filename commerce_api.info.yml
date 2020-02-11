@@ -8,6 +8,7 @@ dependencies:
   - commerce:commerce_cart
   # @todo review how this got added as a hard dependency.
   - commerce:commerce_promotion
+  # @todo remove hard dependency on shipping.
   - commerce_shipping:commerce_shipping
   - drupal:jsonapi
   - drupal:serialization

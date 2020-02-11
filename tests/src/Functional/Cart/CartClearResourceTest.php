@@ -116,6 +116,7 @@ final class CartClearResourceTest extends CartResourceTestBase {
               'total' => NULL,
             ],
             'billing_information' => NULL,
+            'shipping_information' => NULL,
           ],
           'relationships' => [
             'store_id' => [

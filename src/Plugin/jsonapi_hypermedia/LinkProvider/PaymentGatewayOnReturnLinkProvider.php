@@ -19,21 +19,17 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
 * Class PaymentGatewayOnReturnLinkprovider.
 *
-* @todo provide a derivative for each order resource type.
-*
 * @JsonapiHypermediaLinkProvider(
 *   id = "commerce_api.payment_gateway.approve",
 *   link_relation_type = "payment-gateway-approve",
-*   link_context = {
-*     "resource_object" = TRUE,
-*   },
+*   deriver = "\Drupal\commerce_api\Plugin\Derivative\OrderResourceTypeDeriver",
 * )
 *
 * @internal
 */
 final class PaymentGatewayOnReturnLinkprovider extends LinkProviderBase implements ContainerFactoryPluginInterface {
 
-    /**
+  /**
    * The entity repository.
    *
    * @var \Drupal\Core\Entity\EntityRepositoryInterface
@@ -48,7 +44,7 @@ final class PaymentGatewayOnReturnLinkprovider extends LinkProviderBase implemen
     $this->entityRepository = $entity_repository;
   }
 
-    /**
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -60,7 +56,8 @@ final class PaymentGatewayOnReturnLinkprovider extends LinkProviderBase implemen
    */
   public function getLink($resource_object) {
     assert($resource_object instanceof ResourceObject);
-    if ($resource_object->getTypeName() !== 'checkout' && $resource_object->getResourceType()->getEntityTypeId() !== 'commerce_order') {
+    // @todo inject the route match.
+    if (\Drupal::routeMatch()->getRouteName() !== 'commerce_api.checkout') {
       return AccessRestrictedLink::createInaccessibleLink(new CacheableMetadata());
     }
     $entity = $this->entityRepository->loadEntityByUuid(
@@ -93,22 +90,6 @@ final class PaymentGatewayOnReturnLinkprovider extends LinkProviderBase implemen
       ]),
       $this->getLinkRelationType()
     );
-  }
-
-  /**
-   * Gets the entity represented by the given resource object.
-   *
-   * @param \Drupal\jsonapi\JsonApiResource\ResourceObject $resource_object
-   *   The resource object.
-   *
-   * @return \Drupal\Core\Entity\EntityInterface|null
-   *   The represented entity or NULL if the entity does not exist.
-   *
-   * @throws \Drupal\Core\Entity\EntityStorageException
-   *   Thrown in case the requested entity type does not support UUIDs.
-   */
-  public function loadEntityFromResourceObject(ResourceObject $resource_object) {
-    return $this->entityRepository->loadEntityByUuid($resource_object->getResourceType()->getEntityTypeId(), $resource_object->getId());
   }
 
 }

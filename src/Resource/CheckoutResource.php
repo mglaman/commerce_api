@@ -12,7 +12,6 @@ use Drupal\commerce_shipping\ShippingRate;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
@@ -27,7 +26,6 @@ use Drupal\jsonapi\ResourceType\ResourceTypeAttribute;
 use Drupal\jsonapi\ResourceType\ResourceTypeRelationship;
 use Drupal\jsonapi_hypermedia\Plugin\LinkProviderManagerInterface;
 use Drupal\jsonapi_resources\Resource\ResourceBase;
-use Drupal\profile\Entity\ProfileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -219,16 +217,14 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    *   The order.
    * @param string $shipping_rate_option_id
    *   The shipping rate option ID.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   private function applyShippingRateToShipments(OrderInterface $order, string $shipping_rate_option_id) {
     [$shipping_method_id, $shipping_service_id] = explode('--', $shipping_rate_option_id);
-    $shipments_field = $order->get('shipments');
-    assert($shipments_field instanceof EntityReferenceFieldItemListInterface);
-    $shipments = $shipments_field->referencedEntities();
-    if (empty($shipments)) {
-      $shipping_profile = $order->get('shipping_information')->entity;
-      $shipments = $this->shippingOrderManager->pack($order, $shipping_profile);
-    }
+    $shipments = $this->getOrderShipments($order);
 
     $shipping_method_storage = $this->entityTypeManager->getStorage('commerce_shipping_method');
     /** @var \Drupal\commerce_shipping\Entity\ShippingMethodInterface $shipping_method */
@@ -283,10 +279,10 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $fields['payment_gateway'] = $payment_gateway->first()->target_id;
     }
 
-    $shipments = $order->get('shipments');
-    assert($shipments instanceof EntityReferenceFieldItemListInterface);
-    if (!$shipments->isEmpty()) {
-      $shipment = $shipments->first()->entity;
+    /** @var \Drupal\commerce_shipping\Entity\ShipmentInterface[] $shipments */
+    $shipments = $this->getOrderShipments($order);
+    if (!empty($shipments)) {
+      $shipment = reset($shipments);
       assert($shipment instanceof ShipmentInterface);
       if ($shipment->getShippingMethodId() !== NULL) {
         $fields['shipping_method'] = $shipment->getShippingMethodId() . '--' . $shipment->getShippingService();
@@ -295,7 +291,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
 
     // @todo this would be better if we had a nornalizer to format a value object and ensure spec.
     $options = [];
-    foreach ($shipments->referencedEntities() as $shipment) {
+    foreach ($shipments as $shipment) {
       assert($shipment instanceof ShipmentInterface);
       $options[] = array_map(static function (ShippingRate $rate) use ($resource_type) {
         [$shipping_method_id, $shipping_rate_id] = explode('--', $rate->getId());
@@ -403,16 +399,24 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
   }
 
   /**
-   * Get the order's shipping profile.
+   * Get the shipments for an order.
+   *
+   * The shipments may or may not be saved.
    *
    * @param \Drupal\commerce_order\Entity\OrderInterface $order
    *   The order.
    *
-   * @return \Drupal\Core\Entity\EntityInterface|\Drupal\profile\Entity\ProfileInterface
-   *   The profile.
+   * @return array
+   *   The array of shipments.
    */
-  private function getOrderShippingProfile(OrderInterface $order): ProfileInterface {
-    return $this->shippingOrderManager->getProfile($order) ?: $this->shippingOrderManager->createProfile($order);
+  private function getOrderShipments(OrderInterface $order): array {
+    /** @var \Drupal\commerce_shipping\Entity\ShipmentInterface[] $shipments */
+    $shipments = $order->get('shipments')->referencedEntities();
+    if (empty($shipments)) {
+      $shipping_profile = $order->get('shipping_information')->entity;
+      $shipments = $this->shippingOrderManager->pack($order, $shipping_profile);
+    }
+    return $shipments;
   }
 
   /**

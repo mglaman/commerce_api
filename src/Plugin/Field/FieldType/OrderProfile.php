@@ -96,7 +96,6 @@ final class OrderProfile extends FieldItemBase {
     $order = $this->getEntity();
     assert($order instanceof OrderInterface);
 
-    // @todo we need to ensure collectProfiles provides an saved & attached profile_bundle.
     $profile_type = $this->getSetting('profile_type') ?: 'billing';
     if ($profile_type === 'billing') {
       $order->setBillingProfile($profile);

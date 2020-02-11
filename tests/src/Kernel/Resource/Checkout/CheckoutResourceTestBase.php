@@ -207,6 +207,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
     $route = $this->container->get('router')->getRouteCollection()->get($route_name);
     $request->attributes->set('_format', 'api_json');
     $request->attributes->set(RouteObjectInterface::ROUTE_OBJECT, $route);
+    $request->attributes->set(RouteObjectInterface::ROUTE_NAME, $route_name);
     $resource_types = $resource->getRouteResourceTypes($route, $route_name);
     $request->attributes->set('resource_types', $resource_types);
     $this->container->get('request_stack')->push($request);
@@ -314,6 +315,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
               ],
             ],
           ],
+          'shipping_methods' => static::getShippingMethodsRelationship(),
         ] + $relationships,
         'meta' => [
           'constraints' => $constraints,
@@ -335,6 +337,61 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
       $document['data']['links'] = $links;
     }
     return $document;
+  }
+
+  /**
+   * Get the shipping-methods link.
+   *
+   * @return array
+   *   The link.
+   */
+  protected static function getShippingMethodsLink() {
+    return [
+      'href' => 'http://localhost/jsonapi/checkout/' . self::TEST_ORDER_UUID . '/shipping-methods',
+    ];
+  }
+
+  /**
+   * Get the shipping methods relationship.
+   *
+   * @return array
+   *   The relationship.
+   */
+  protected static function getShippingMethodsRelationship() {
+    return [
+      'data' => [
+        [
+          'type' => 'shipping--service',
+          'id' => '2--default',
+          'meta' => [
+            'label' => 'Flat rate',
+            'methodId' => '2',
+            'serviceId' => 'default',
+            'amount' => [
+              'number' => '20',
+              'currency_code' => 'USD',
+            ],
+            'deliveryDate' => NULL,
+            'description' => NULL,
+          ],
+        ],
+        [
+          'type' => 'shipping--service',
+          'id' => '1--default',
+          'meta' => [
+            'label' => 'Flat rate',
+            'methodId' => '1',
+            'serviceId' => 'default',
+            'amount' => [
+              'number' => '5',
+              'currency_code' => 'USD',
+            ],
+            'deliveryDate' => NULL,
+            'description' => NULL,
+          ],
+        ],
+      ],
+    ];
   }
 
 }

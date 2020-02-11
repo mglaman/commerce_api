@@ -57,7 +57,7 @@ final class OnReturnResource extends EntityResourceBase implements ContainerInje
    */
   public function process(Request $request, OrderInterface $commerce_order) {
     // @todo should this actually be a "not allowed" exception?
-    // instead be kind and just return the order object to be reentrant.
+    //   instead be kind and just return the order object to be reentrant.
     if ($commerce_order->getState()->getId() !== 'draft') {
       $this->fixOrderInclude($request);
       $top_level_data = $this->createIndividualDataFromEntity($commerce_order);
