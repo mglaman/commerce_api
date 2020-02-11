@@ -92,13 +92,13 @@ function commerce_api_entity_base_field_info(EntityTypeInterface $entity_type) {
   if ($entity_type->id() === 'commerce_order') {
     $fields['billing_information'] = BaseFieldDefinition::create('order_profile')
       ->setLabel(t('Billing information'))
-      // @todo determine the profile type for billing.
+      // @note this will change after https://www.drupal.org/project/commerce/issues/2992281.
       ->setSetting('profile_bundle', 'customer')
       ->setSetting('profile_type', 'billing')
       ->setComputed(TRUE);
     $fields['shipping_information'] = BaseFieldDefinition::create('order_profile')
       ->setLabel(t('Shipping information'))
-      // @todo determine the profile type for shipping.
+      // @note this will change after https://www.drupal.org/project/commerce/issues/2992281.
       ->setSetting('profile_bundle', 'customer')
       ->setSetting('profile_type', 'shipping')
       ->setComputed(TRUE);

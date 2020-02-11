@@ -23,7 +23,7 @@ services:
     tags:
       - { name: event_subscriber }
 
-  # @todo remove and add as a patch to https://www.drupal.org/project/commerce/issues/3088598
+  # @todo remove after https://www.drupal.org/project/commerce/issues/3088598
   commerce_api.published_availability_checker:
     class: Drupal\commerce_api\AvailabilityChecker\PublishedAvailabilityChecker
     tags:
