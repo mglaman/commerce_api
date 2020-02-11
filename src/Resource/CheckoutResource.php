@@ -151,22 +151,15 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
 
       // If shipping information was provided, do Shipping stuff.
       if ($resource_object->hasField('shipping_information')) {
-        $field_names[] = 'shipments';
         $commerce_order->set(
           'shipping_information',
           $resource_object->getField('shipping_information')
         );
-        $shipping_profile = $commerce_order->get('shipping_information')->entity;
-        assert($shipping_profile instanceof ProfileInterface);
-        $shipments = $this->shippingOrderManager->pack($commerce_order, $shipping_profile);
-        foreach ($shipments as $shipment) {
-          $shipment->save();
-        }
-        $commerce_order->set('shipments', $shipments);
       }
 
       // Again this is 😱.
       if ($resource_object->hasField('shipping_method')) {
+        $field_names[] = 'shipments';
         $this->applyShippingRateToShipments($commerce_order, $resource_object->getField('shipping_method'));
       }
 
@@ -232,6 +225,11 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $shipments_field = $order->get('shipments');
     assert($shipments_field instanceof EntityReferenceFieldItemListInterface);
     $shipments = $shipments_field->referencedEntities();
+    if (empty($shipments)) {
+      $shipping_profile = $order->get('shipping_information')->entity;
+      $shipments = $this->shippingOrderManager->pack($order, $shipping_profile);
+    }
+
     $shipping_method_storage = $this->entityTypeManager->getStorage('commerce_shipping_method');
     /** @var \Drupal\commerce_shipping\Entity\ShippingMethodInterface $shipping_method */
     $shipping_method = $shipping_method_storage->load($shipping_method_id);
@@ -258,6 +256,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $shipping_method_plugin->selectRate($shipment, $select_rate);
       $shipment->save();
     }
+    $order->set('shipments', $shipments);
   }
 
   /**

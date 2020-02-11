@@ -102,7 +102,7 @@ final class OrderProfile extends FieldItemBase {
       $order->setBillingProfile($profile);
     }
     else {
-      // @todo how do we get this attached to something for shipping?
+      $order->setData('shipping_profile_id', $profile->id());
     }
   }
 

@@ -84,6 +84,6 @@ services:
 
   commerce_api.shipping_profile_subscriber:
     class: Drupal\commerce_api\EventSubscriber\ShippingProfileSubscriber
-    arguments: ['@commerce_shipping.order_manager']
+    arguments: ['@commerce_shipping.order_manager', '@entity_type.manager']
     tags:
       - { name: event_subscriber }

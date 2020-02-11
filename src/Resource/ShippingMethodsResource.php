@@ -6,6 +6,7 @@ use Drupal\commerce_api\ResourceType\RenamableResourceType;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\commerce_shipping\ShipmentManagerInterface;
+use Drupal\commerce_shipping\ShippingOrderManagerInterface;
 use Drupal\commerce_shipping\ShippingRate;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
@@ -32,13 +33,23 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
   private $shipmentManager;
 
   /**
+   * The shipping order manager.
+   *
+   * @var \Drupal\commerce_shipping\ShippingOrderManagerInterface
+   */
+  private $shippingOrderManager;
+
+  /**
    * Constructs a new ShippingMethodsResource object.
    *
    * @param \Drupal\commerce_shipping\ShipmentManagerInterface $shipment_manager
    *   The shipment manager.
+   * @param \Drupal\commerce_shipping\ShippingOrderManagerInterface $shipping_order_manager
+   *   The shipping order manager.
    */
-  public function __construct(ShipmentManagerInterface $shipment_manager) {
+  public function __construct(ShipmentManagerInterface $shipment_manager, ShippingOrderManagerInterface $shipping_order_manager) {
     $this->shipmentManager = $shipment_manager;
+    $this->shippingOrderManager = $shipping_order_manager;
   }
 
   /**
@@ -46,7 +57,8 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
    */
   public static function create(ContainerInterface $container) {
     return new self(
-      $container->get('commerce_shipping.shipment_manager')
+      $container->get('commerce_shipping.shipment_manager'),
+      $container->get('commerce_shipping.order_manager')
     );
   }
 
@@ -66,7 +78,8 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
   public function process(Request $request, array $resource_types, OrderInterface $commerce_order): ResourceResponse {
     $shipments = $commerce_order->get('shipments')->referencedEntities();
     if (empty($shipments)) {
-      throw new UnprocessableHttpEntityException();
+      $shipping_profile = $commerce_order->get('shipping_information')->entity;
+      $shipments = $this->shippingOrderManager->pack($commerce_order, $shipping_profile);
     }
     $cacheability = new CacheableMetadata();
     $cacheability->addCacheableDependency($commerce_order);
@@ -75,7 +88,7 @@ final class ShippingMethodsResource extends ResourceBase implements ContainerInj
     foreach ($shipments as $shipment) {
       assert($shipment instanceof ShipmentInterface);
       $options[] = array_map(static function (ShippingRate $rate) use ($resource_type) {
-        list($shipping_method_id, $shipping_rate_id) = explode('--', $rate->getId());
+        [$shipping_method_id, $shipping_rate_id] = explode('--', $rate->getId());
         $delivery_date = $rate->getDeliveryDate();
         $service = $rate->getService();
         return new ResourceObject(
