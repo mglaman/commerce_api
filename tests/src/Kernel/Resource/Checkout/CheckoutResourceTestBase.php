@@ -284,14 +284,14 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
    *
    * @param array $attributes
    *   The resource object's attributes.
-   * @param array|null $constraints
+   * @param array|null $meta
    *   The meta constraints.
    * @param array $relationships
    *   The relationships.
    * @param array $links
    *   The links.
    */
-  protected function buildResponseJsonApiDocument(array $attributes, ?array $constraints = NULL, array $relationships = [], array $links = []) {
+  protected function buildResponseJsonApiDocument(array $attributes, ?array $meta = NULL, array $relationships = [], array $links = []) {
     $document = [
       'jsonapi' => [
         'meta' => [
@@ -315,11 +315,8 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
               ],
             ],
           ],
-          'shipping_methods' => static::getShippingMethodsRelationship(),
         ] + $relationships,
-        'meta' => [
-          'constraints' => $constraints,
-        ],
+        'meta' => $meta,
       ],
       'links' => [
         'self' => [
@@ -327,7 +324,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
         ],
       ] + $links,
     ];
-    if ($constraints === NULL) {
+    if ($meta === NULL) {
       unset($document['data']['meta']);
     }
     if ($relationships === NULL) {
@@ -359,37 +356,29 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
    */
   protected static function getShippingMethodsRelationship() {
     return [
-      'data' => [
-        [
-          'type' => 'shipping--service',
-          'id' => '2--default',
-          'meta' => [
-            'label' => 'Flat rate',
-            'methodId' => '2',
-            'serviceId' => 'default',
-            'amount' => [
-              'number' => '20',
-              'currency_code' => 'USD',
-            ],
-            'deliveryDate' => NULL,
-            'description' => NULL,
-          ],
+      [
+        'id' => '2--default',
+        'label' => 'Flat rate',
+        'methodId' => '2',
+        'serviceId' => 'default',
+        'amount' => [
+          'number' => '20',
+          'currency_code' => 'USD',
         ],
-        [
-          'type' => 'shipping--service',
-          'id' => '1--default',
-          'meta' => [
-            'label' => 'Flat rate',
-            'methodId' => '1',
-            'serviceId' => 'default',
-            'amount' => [
-              'number' => '5',
-              'currency_code' => 'USD',
-            ],
-            'deliveryDate' => NULL,
-            'description' => NULL,
-          ],
+        'deliveryDate' => NULL,
+        'description' => NULL,
+      ],
+      [
+        'id' => '1--default',
+        'label' => 'Flat rate',
+        'methodId' => '1',
+        'serviceId' => 'default',
+        'amount' => [
+          'number' => '5',
+          'currency_code' => 'USD',
         ],
+        'deliveryDate' => NULL,
+        'description' => NULL,
       ],
     ];
   }

@@ -14,6 +14,8 @@ use Drupal\Component\Serialization\Json;
  */
 final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
 
+//  protected $runTestInSeparateProcess = FALSE;
+
   /**
    * Tests using checkout with shipping options.
    *
@@ -82,14 +84,6 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
    *   The test data.
    */
   public function dataShippingDocuments(): \Generator {
-    $constraints = [
-      'required' => [
-        'detail' => 'This value should not be null.',
-        'source' => [
-          'pointer' => 'billing_profile',
-        ],
-      ],
-    ];
     $links = [
       'shipping-methods' => [
         'href' => 'http://localhost/jsonapi/checkout/' . self::TEST_ORDER_UUID . '/shipping-methods',
@@ -191,43 +185,20 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
         ],
         'billing_information' => NULL,
       ],
-        [$constraints],
         [
-          'shipping_methods' => [
-            'data' => [
-              [
-                'type' => 'shipping--service',
-                'id' => '2--default',
-                'meta' => [
-                  'label' => 'Flat rate',
-                  'methodId' => '2',
-                  'serviceId' => 'default',
-                  'amount' => [
-                    'number' => '20',
-                    'currency_code' => 'USD',
-                  ],
-                  'deliveryDate' => NULL,
-                  'description' => NULL,
-                ],
-              ],
-              [
-                'type' => 'shipping--service',
-                'id' => '1--default',
-                'meta' => [
-                  'label' => 'Flat rate',
-                  'methodId' => '1',
-                  'serviceId' => 'default',
-                  'amount' => [
-                    'number' => '5',
-                    'currency_code' => 'USD',
-                  ],
-                  'deliveryDate' => NULL,
-                  'description' => NULL,
+          'constraints' => [
+            [
+              'required' => [
+                'detail' => 'This value should not be null.',
+                'source' => [
+                  'pointer' => 'billing_profile',
                 ],
               ],
             ],
           ],
+          'shipping_rates' => static::getShippingMethodsRelationship(),
         ],
+        [],
         $links
       ),
     ];

@@ -14,7 +14,6 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\jsonapi\Entity\EntityValidationTrait;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
 use Drupal\jsonapi\JsonApiResource\LinkCollection;
@@ -282,33 +281,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $fields['payment_gateway'] = $payment_gateway->first()->target_id;
     }
 
-    // @todo this would be better if we had a nornalizer to format a value object and ensure spec.
-    // @todo move this into a computed relationship field.
-    $options = [];
-    foreach ($this->getOrderShipments($order) as $shipment) {
-      assert($shipment instanceof ShipmentInterface);
-      $options[] = array_map(static function (ShippingRate $rate) use ($resource_type) {
-        [$shipping_method_id, $shipping_rate_id] = explode('--', $rate->getId());
-        $delivery_date = $rate->getDeliveryDate();
-        $service = $rate->getService();
-        return [
-          'type' => 'shipping--service',
-          'id' => $rate->getId(),
-          'meta' => [
-            'label' => $service->getLabel(),
-            'methodId' => $shipping_method_id,
-            'serviceId' => $service->getId(),
-            'amount' => $rate->getAmount()->toArray(),
-            'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
-            'description' => $rate->getDescription(),
-          ],
-        ];
-      }, $this->shipmentManager->calculateRates($shipment));
-    }
-    $options = array_merge([], ...$options);
-    if (count($options) > 0) {
-      $fields['shipping_methods'] = ['data' => array_values($options)];
-    }
     $fields['state'] = $order->getState()->getId();
     $fields['email'] = $order->getEmail();
     $fields['shipping_method'] = $order->get('shipping_method');
@@ -354,11 +326,13 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $fields['order_total'] = new ResourceTypeAttribute('order_total');
     $fields['total_price'] = new ResourceTypeAttribute('total_price');
 
+    /*
     // @todo return the available shipping methods as a resource identifier.
-    $shipping_methods_field = new ResourceTypeRelationship('shipping_methods', 'shipping_methods', TRUE, FALSE);
-    $fields['shipping_methods'] = $shipping_methods_field->withRelatableResourceTypes([
+    $shipping_methods_field = new ResourceTypeRelationship('shipping_rates', 'shipping_rates', TRUE, FALSE);
+    $fields['shipping_rates'] = $shipping_methods_field->withRelatableResourceTypes([
       'shipping-rate-option' => $this->getShippingRateOptionResourceType(),
     ]);
+    */
 
     $order_item_field = new ResourceTypeRelationship('order_items', 'order_items', TRUE, FALSE);
     $fields['order_items'] = $order_item_field->withRelatableResourceTypes($order_item_resource_types);
