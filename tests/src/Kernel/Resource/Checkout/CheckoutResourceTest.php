@@ -93,19 +93,21 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         ],
       ],
       [
-        [
-          'required' => [
-            'detail' => 'This value should not be null.',
-            'source' => [
-              'pointer' => 'billing_profile',
+        'constraints' => [
+          [
+            'required' => [
+              'detail' => 'This value should not be null.',
+              'source' => [
+                'pointer' => 'billing_profile',
+              ],
             ],
           ],
-        ],
-        [
-          'required' => [
-            'detail' => 'This value should not be null.',
-            'source' => [
-              'pointer' => 'shipping_information',
+          [
+            'required' => [
+              'detail' => 'This value should not be null.',
+              'source' => [
+                'pointer' => 'shipping_information',
+              ],
             ],
           ],
         ],
@@ -187,11 +189,13 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         ],
       ],
         [
-          [
-            'required' => [
-              'detail' => 'This value should not be null.',
-              'source' => [
-                'pointer' => 'billing_profile',
+          'constraints' => [
+            [
+              'required' => [
+                'detail' => 'This value should not be null.',
+                'source' => [
+                  'pointer' => 'billing_profile',
+                ],
               ],
             ],
           ],
@@ -248,11 +252,13 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         ],
       ],
         [
-          [
-            'required' => [
-              'detail' => 'This value should not be null.',
-              'source' => [
-                'pointer' => 'billing_profile',
+          'constraints' => [
+            [
+              'required' => [
+                'detail' => 'This value should not be null.',
+                'source' => [
+                  'pointer' => 'billing_profile',
+                ],
               ],
             ],
           ],
@@ -326,11 +332,13 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         ],
       ],
         [
-          [
-            'required' => [
-              'detail' => 'This value should not be null.',
-              'source' => [
-                'pointer' => 'billing_profile',
+          'constraints' => [
+            [
+              'required' => [
+                'detail' => 'This value should not be null.',
+                'source' => [
+                  'pointer' => 'billing_profile',
+                ],
               ],
             ],
           ],
@@ -428,11 +436,9 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
           'formatted' => '$24.00',
         ],
       ],
-        NULL,
         [],
-        [
-          'shipping-methods' => static::getShippingMethodsLink(),
-        ]
+        [],
+        ['shipping-methods' => static::getShippingMethodsLink()]
       ),
     ];
     yield [
@@ -497,22 +503,24 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         ],
       ],
         [
-          [
-            'required' => [
-              'detail' => 'This value should not be null.',
-              'source' => [
-                'pointer' => 'billing_profile',
+          'constraints' => [
+            [
+              'required' => [
+                'detail' => 'This value should not be null.',
+                'source' => [
+                  'pointer' => 'billing_profile',
+                ],
               ],
             ],
-          ],
-          [
-            'required' => [
-              'detail' => 'This value should not be null.',
-              'source' => [
-                'pointer' => 'shipping_information',
+            [
+              'required' => [
+                'detail' => 'This value should not be null.',
+                'source' => [
+                  'pointer' => 'shipping_information',
+                ],
               ],
             ],
-          ],
+          ]
         ],
         [],
         [

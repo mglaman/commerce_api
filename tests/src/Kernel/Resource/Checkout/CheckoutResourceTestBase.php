@@ -284,14 +284,14 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
    *
    * @param array $attributes
    *   The resource object's attributes.
-   * @param array|null $meta
+   * @param array $meta
    *   The meta constraints.
    * @param array $relationships
    *   The relationships.
    * @param array $links
    *   The links.
    */
-  protected function buildResponseJsonApiDocument(array $attributes, ?array $meta = NULL, array $relationships = [], array $links = []) {
+  protected function buildResponseJsonApiDocument(array $attributes, array $meta = [], array $relationships = [], array $links = []) {
     $document = [
       'jsonapi' => [
         'meta' => [
@@ -316,7 +316,9 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
             ],
           ],
         ] + $relationships,
-        'meta' => $meta,
+        'meta' => [
+          'shipping_rates' => static::getShippingMethodsRelationship(),
+        ] + $meta,
       ],
       'links' => [
         'self' => [
@@ -324,9 +326,6 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
         ],
       ] + $links,
     ];
-    if ($meta === NULL) {
-      unset($document['data']['meta']);
-    }
     if ($relationships === NULL) {
       unset($document['data']['relationships']);
     }

@@ -222,37 +222,29 @@ abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
    */
   protected static function getShippingMethodsRelationship() {
     return [
-      'data' => [
-        [
-          'type' => 'shipping--service',
-          'id' => '2--default',
-          'meta' => [
-            'label' => 'Flat rate',
-            'methodId' => '2',
-            'serviceId' => 'default',
-            'amount' => [
-              'number' => '20',
-              'currency_code' => 'USD',
-            ],
-            'deliveryDate' => NULL,
-            'description' => NULL,
-          ],
+      [
+        'id' => '2--default',
+        'label' => 'Flat rate',
+        'methodId' => '2',
+        'serviceId' => 'default',
+        'amount' => [
+          'number' => '20',
+          'currency_code' => 'USD',
         ],
-        [
-          'type' => 'shipping--service',
-          'id' => '1--default',
-          'meta' => [
-            'label' => 'Flat rate',
-            'methodId' => '1',
-            'serviceId' => 'default',
-            'amount' => [
-              'number' => '5',
-              'currency_code' => 'USD',
-            ],
-            'deliveryDate' => NULL,
-            'description' => NULL,
-          ],
+        'deliveryDate' => NULL,
+        'description' => NULL,
+      ],
+      [
+        'id' => '1--default',
+        'label' => 'Flat rate',
+        'methodId' => '1',
+        'serviceId' => 'default',
+        'amount' => [
+          'number' => '5',
+          'currency_code' => 'USD',
         ],
+        'deliveryDate' => NULL,
+        'description' => NULL,
       ],
     ];
   }

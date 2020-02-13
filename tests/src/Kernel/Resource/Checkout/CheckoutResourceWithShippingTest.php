@@ -14,8 +14,6 @@ use Drupal\Component\Serialization\Json;
  */
 final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
 
-//  protected $runTestInSeparateProcess = FALSE;
-
   /**
    * Tests using checkout with shipping options.
    *
@@ -196,7 +194,6 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
               ],
             ],
           ],
-          'shipping_rates' => static::getShippingMethodsRelationship(),
         ],
         [],
         $links

@@ -79,7 +79,6 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
           ],
         ],
         'coupons' => [],
-        'shipping_methods' => static::getShippingMethodsRelationship(),
       ],
       'meta' => [
         'constraints' => [
@@ -96,6 +95,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
             ],
           ],
         ],
+        'shipping_rates' => static::getShippingMethodsRelationship(),
       ],
       'links' => [
         'shipping-methods' => [
@@ -232,40 +232,6 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
             ],
           ],
         ],
-        'shipping_methods' => [
-          'data' => [
-            [
-              'type' => 'shipping--service',
-              'id' => '2--default',
-              'meta' => [
-                'label' => 'Flat rate',
-                'methodId' => '2',
-                'serviceId' => 'default',
-                'amount' => [
-                  'number' => '20',
-                  'currency_code' => 'USD',
-                ],
-                'deliveryDate' => NULL,
-                'description' => NULL,
-              ],
-            ],
-            [
-              'type' => 'shipping--service',
-              'id' => '1--default',
-              'meta' => [
-                'label' => 'Flat rate',
-                'methodId' => '1',
-                'serviceId' => 'default',
-                'amount' => [
-                  'number' => '5',
-                  'currency_code' => 'USD',
-                ],
-                'deliveryDate' => NULL,
-                'description' => NULL,
-              ],
-            ],
-          ],
-        ],
         'coupons' => [],
       ],
       'meta' => [
@@ -275,6 +241,32 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
               'detail' => 'This value should not be null.',
               'source' => ['pointer' => 'billing_profile'],
             ],
+          ],
+        ],
+        'shipping_rates' => [
+          [
+            'id' => '2--default',
+            'label' => 'Flat rate',
+            'methodId' => '2',
+            'serviceId' => 'default',
+            'amount' => [
+              'number' => '20',
+              'currency_code' => 'USD',
+            ],
+            'deliveryDate' => NULL,
+            'description' => NULL,
+          ],
+          [
+            'id' => '1--default',
+            'label' => 'Flat rate',
+            'methodId' => '1',
+            'serviceId' => 'default',
+            'amount' => [
+              'number' => '5',
+              'currency_code' => 'USD',
+            ],
+            'deliveryDate' => NULL,
+            'description' => NULL,
           ],
         ],
       ],
@@ -299,6 +291,9 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
    *   The URL.
    * @param array|null $body
    *   The body.
+   *
+   * @return \Psr\Http\Message\ResponseInterface
+   *   The response.
    */
   protected function performRequest(string $method, Url $url, ?array $body = NULL) {
     $request_options = [];

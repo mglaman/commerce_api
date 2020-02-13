@@ -8,7 +8,9 @@ use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\commerce_shipping\ShippingOrderManagerInterface;
 use Drupal\commerce_shipping\ShippingRate;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\jsonapi_hypermedia\AccessRestrictedLink;
 use Drupal\profile\Entity\ProfileInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Validator\ConstraintViolation;
@@ -95,29 +97,33 @@ final class CollectResourceObjectMetaSubscriber implements EventSubscriberInterf
       }
     }
 
-    $shipment_manager = \Drupal::getContainer()->get('commerce_shipping.shipment_manager');
-    assert($shipment_manager !== NULL);
-    $options = [];
-    foreach ($this->getOrderShipments($order) as $shipment) {
-      assert($shipment instanceof ShipmentInterface);
-      $options[] = array_map(static function (ShippingRate $rate) {
-        [$shipping_method_id, $shipping_rate_id] = explode('--', $rate->getId());
-        $delivery_date = $rate->getDeliveryDate();
-        $service = $rate->getService();
-        return [
-          'id' => $rate->getId(),
-          'label' => $service->getLabel(),
-          'methodId' => $shipping_method_id,
-          'serviceId' => $service->getId(),
-          'amount' => $rate->getAmount()->toArray(),
-          'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
-          'description' => $rate->getDescription(),
-        ];
-      }, $shipment_manager->calculateRates($shipment));
-    }
-    $options = array_merge([], ...$options);
-    if (count($options) > 0) {
-      $meta['shipping_rates'] = array_values($options);
+    // @todo inject the route match.
+    $route_match = \Drupal::routeMatch();
+    if (strpos($route_match->getRouteName(), 'commerce_api.checkout') === 0) {
+      $shipment_manager = \Drupal::getContainer()->get('commerce_shipping.shipment_manager');
+      assert($shipment_manager !== NULL);
+      $options = [];
+      foreach ($this->getOrderShipments($order) as $shipment) {
+        assert($shipment instanceof ShipmentInterface);
+        $options[] = array_map(static function (ShippingRate $rate) {
+          [$shipping_method_id, $shipping_rate_id] = explode('--', $rate->getId());
+          $delivery_date = $rate->getDeliveryDate();
+          $service = $rate->getService();
+          return [
+            'id' => $rate->getId(),
+            'label' => $service->getLabel(),
+            'methodId' => $shipping_method_id,
+            'serviceId' => $service->getId(),
+            'amount' => $rate->getAmount()->toArray(),
+            'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
+            'description' => $rate->getDescription(),
+          ];
+        }, $shipment_manager->calculateRates($shipment));
+      }
+      $options = array_merge([], ...$options);
+      if (count($options) > 0) {
+        $meta['shipping_rates'] = array_values($options);
+      }
     }
 
     $event->setMeta($meta);
