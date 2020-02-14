@@ -68,6 +68,8 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
         'billing_information' => NULL,
         'shipping_information' => NULL,
         'shipping_method' => NULL,
+        'order_number' => NULL,
+        'payment_gateway_id' => NULL,
       ],
       'relationships' => [
         'order_items' => [
@@ -77,8 +79,27 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
               'id' => $order_item_id,
             ],
           ],
+          'links' => [
+            'self' => ['href' => Url::fromRoute('jsonapi.orders--default.order_items.relationship.get', ['entity' => $test_cart_id])->setAbsolute()->toString()],
+            'related' => ['href' => Url::fromRoute('jsonapi.orders--default.order_items.related', ['entity' => $test_cart_id])->setAbsolute()->toString()],
+          ],
         ],
-        'coupons' => [],
+        'coupons' => [
+          'links' => [
+            'self' => ['href' => Url::fromRoute('jsonapi.orders--default.coupons.relationship.get', ['entity' => $test_cart_id])->setAbsolute()->toString()],
+            'related' => ['href' => Url::fromRoute('jsonapi.orders--default.coupons.related', ['entity' => $test_cart_id])->setAbsolute()->toString()],
+          ],
+        ],
+        'store_id' => [
+          'data' => [
+            'type' => 'stores--online',
+            'id' => $this->store->uuid(),
+          ],
+          'links' => [
+            'self' => ['href' => Url::fromRoute('jsonapi.orders--default.store_id.relationship.get', ['entity' => $test_cart_id])->setAbsolute()->toString()],
+            'related' => ['href' => Url::fromRoute('jsonapi.orders--default.store_id.related', ['entity' => $test_cart_id])->setAbsolute()->toString()],
+          ],
+        ],
       ],
       'meta' => [
         'constraints' => [
@@ -101,6 +122,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
         'shipping-methods' => [
           'href' => Url::fromRoute('commerce_api.checkout.shipping_methods', ['commerce_order' => $test_cart_id])->setAbsolute()->toString(),
         ],
+        'self' => ['href' => Url::fromRoute('jsonapi.orders--default.individual', ['entity' => $test_cart_id])->setAbsolute()->toString()],
       ],
     ], $checkout_body['data']);
 
@@ -162,7 +184,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     $url = Url::fromRoute('commerce_api.checkout', ['commerce_order' => $test_cart_id]);
     $response = $this->performRequest('PATCH', $url, [
       'data' => [
-        'type' => 'checkout',
+        'type' => 'orders--default',
         'id' => $test_cart_id,
         'attributes' => [
           'shipping_method' => '1--default',
@@ -222,6 +244,8 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
           'formatted' => '$1,005.00',
         ],
         'billing_information' => NULL,
+        'order_number' => NULL,
+        'payment_gateway_id' => NULL,
       ],
       'relationships' => [
         'order_items' => [
@@ -231,8 +255,27 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
               'id' => $order_item_id,
             ],
           ],
+          'links' => [
+            'self' => ['href' => Url::fromRoute('jsonapi.orders--default.order_items.relationship.get', ['entity' => $test_cart_id])->setAbsolute()->toString()],
+            'related' => ['href' => Url::fromRoute('jsonapi.orders--default.order_items.related', ['entity' => $test_cart_id])->setAbsolute()->toString()],
+          ],
         ],
-        'coupons' => [],
+        'coupons' => [
+          'links' => [
+            'self' => ['href' => Url::fromRoute('jsonapi.orders--default.coupons.relationship.get', ['entity' => $test_cart_id])->setAbsolute()->toString()],
+            'related' => ['href' => Url::fromRoute('jsonapi.orders--default.coupons.related', ['entity' => $test_cart_id])->setAbsolute()->toString()],
+          ],
+        ],
+        'store_id' => [
+          'data' => [
+            'type' => 'stores--online',
+            'id' => $this->store->uuid(),
+          ],
+          'links' => [
+            'self' => ['href' => Url::fromRoute('jsonapi.orders--default.store_id.relationship.get', ['entity' => $test_cart_id])->setAbsolute()->toString()],
+            'related' => ['href' => Url::fromRoute('jsonapi.orders--default.store_id.related', ['entity' => $test_cart_id])->setAbsolute()->toString()],
+          ],
+        ],
       ],
       'meta' => [
         'constraints' => [
@@ -271,12 +314,8 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
         ],
       ],
       'links' => [
-        'shipping-methods' => [
-          'href' => Url::fromRoute(
-            'commerce_api.checkout.shipping_methods',
-            ['commerce_order' => $test_cart_id]
-          )->setAbsolute()->toString(),
-        ],
+        'shipping-methods' => ['href' => Url::fromRoute('commerce_api.checkout.shipping_methods', ['commerce_order' => $test_cart_id])->setAbsolute()->toString()],
+        'self' => ['href' => Url::fromRoute('jsonapi.orders--default.individual', ['entity' => $test_cart_id])->setAbsolute()->toString()],
       ],
     ], $checkout_body['data']);
 

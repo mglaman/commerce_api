@@ -118,6 +118,9 @@ final class CartClearResourceTest extends CartResourceTestBase {
             'billing_information' => NULL,
             'shipping_information' => NULL,
             'shipping_method' => NULL,
+            'email' => $this->account->getEmail(),
+            'state' => 'draft',
+            'payment_gateway_id' => NULL,
           ],
           'relationships' => [
             'store_id' => [

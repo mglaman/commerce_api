@@ -81,6 +81,9 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
                 'formatted' => '$5,000.00',
               ],
             ],
+            'email' => $this->account->getEmail(),
+            'state' => 'draft',
+            'payment_gateway_id' => NULL,
           ],
           'relationships' => [
             'store_id' => [
