@@ -7,11 +7,13 @@ use Drupal\commerce_api\Plugin\Field\FieldType\OrderProfile;
 use Drupal\commerce_api\Plugin\Field\FieldType\OrderProfileItemList;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\commerce_shipping\Entity\ShipmentType;
 use Drupal\commerce_tax\Plugin\Commerce\TaxNumberType\VerificationResult;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Drupal\jsonapi\Normalizer\Value\CacheableNormalization;
 use Drupal\profile\Entity\Profile;
 use Drupal\profile\Entity\ProfileInterface;
+use Drupal\profile\Entity\ProfileType;
 use Drupal\Tests\commerce_api\Kernel\KernelTestBase;
 
 /**
@@ -261,6 +263,31 @@ final class OrderProfileFieldTest extends KernelTestBase {
         'family_name' => 'Pabst',
       ],
     ], $normalization);
+  }
+
+  /**
+   * Tests customized shipping profile types are supported.
+   */
+  public function testShippingProfileType() {
+    $profile_type = ProfileType::create([
+      'id' => 'customer_shipping',
+    ]);
+    $profile_type->setThirdPartySetting('commerce_order', 'customer_profile_type', TRUE);
+    $profile_type->save();
+
+    $shipment_type = ShipmentType::load('default');
+    $shipment_type->setProfileTypeId('customer_shipping');
+    $shipment_type->save();
+
+    $order = $this->createOrder();
+    $shipping_information = $order->get('shipping_information')->first();
+    assert($shipping_information instanceof OrderProfile);
+    $address = $shipping_information->get('address');
+    assert($address instanceof Address);
+    $this->assertEquals([], $shipping_information->address);
+    $this->assertNotNull($shipping_information->entity);
+    $this->assertTrue($shipping_information->entity->isNew());
+    $this->assertEquals($profile_type->id(), $shipping_information->entity->bundle());
   }
 
   /**
