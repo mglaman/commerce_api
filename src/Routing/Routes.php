@@ -212,10 +212,12 @@ class Routes extends RouteProviderBase {
    *   The route.
    */
   protected function cartCheckout() {
+    $order_resource_types = $this->getResourceTypesForEntityType('commerce_order');
     $route = new Route('/checkout/{commerce_order}');
     $route->setMethods(['GET', 'PATCH']);
     $route->addDefaults([
       '_jsonapi_resource' => CheckoutResource::class,
+      '_jsonapi_resource_types' => $this->getResourceTypeNames($order_resource_types),
     ]);
     static::addRouteParameter($route, 'commerce_order', ['type' => 'entity:commerce_order']);
     $route->setRequirement('_entity_access', 'commerce_order.update');

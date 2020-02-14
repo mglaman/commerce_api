@@ -11,6 +11,7 @@ use Drupal\commerce_price\Price;
 use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\commerce_product\Entity\ProductVariationType;
 use Drupal\commerce_shipping\Entity\ShippingMethod;
+use Drupal\commerce_store\Entity\Store;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceModifierInterface;
@@ -40,6 +41,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
 
   protected const TEST_ORDER_UUID = 'd59cd06e-c674-490d-aad9-541a1625e47f';
   protected const TEST_ORDER_ITEM_UUID = 'e8daecd7-6444-4d9a-9bd1-84dc5466dba7';
+  protected const TEST_STORE_UUID = '01ffcd69-eb18-4e76-980c-395c60babf83';
 
   /**
    * The test order.
@@ -78,23 +80,6 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
     ]);
     $onsite_gateway->save();
 
-    /** @var \Drupal\commerce_product\Entity\ProductVariationTypeInterface $product_variation_type */
-    $product_variation_type = ProductVariationType::load('default');
-    $product_variation_type->setGenerateTitle(FALSE);
-    $product_variation_type->save();
-    // Install the variation trait.
-    $trait_manager = $this->container->get('plugin.manager.commerce_entity_trait');
-    $trait = $trait_manager->createInstance('purchasable_entity_shippable');
-    $trait_manager->installTrait($trait, 'commerce_product_variation', 'default');
-
-    /** @var \Drupal\commerce_order\Entity\OrderTypeInterface $order_type */
-    $order_type = OrderType::load('default');
-    $order_type->setThirdPartySetting('commerce_shipping', 'shipment_type', 'default');
-    $order_type->save();
-    // Create the order field.
-    $field_definition = commerce_shipping_build_shipment_field_definition($order_type->id());
-    $this->container->get('commerce.configurable_field_manager')->createField($field_definition);
-
     /** @var \Drupal\commerce_product\Entity\ProductVariation $product_variation */
     $product_variation = ProductVariation::create([
       'type' => 'default',
@@ -124,6 +109,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
     assert($order instanceof Order);
     $order->save();
     $this->order = $order;
+    $this->container->get('commerce_cart.cart_session')->addCartId($this->order->id());
 
     $shipping_method = ShippingMethod::create([
       'stores' => $this->store->id(),
@@ -172,11 +158,11 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
    */
   protected function getCheckoutResource(): CheckoutResource {
     $controller = new CheckoutResource(
-      $this->container->get('entity_type.manager'),
       $this->container->get('commerce_shipping.order_manager'),
-      $this->container->get('commerce_shipping.shipment_manager'),
       $this->container->get('event_dispatcher')
     );
+    $controller->setEntityTypeManager($this->container->get('entity_type.manager'));
+    $controller->setEntityAccessChecker($this->container->get('jsonapi_resources.entity_access_checker'));
     $controller->setResourceResponseFactory($this->container->get('jsonapi_resources.resource_response_factory'));
     $controller->setResourceTypeRepository($this->container->get('jsonapi.resource_type.repository'));
     return $controller;
@@ -290,6 +276,9 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
    *   The relationships.
    * @param array $links
    *   The links.
+   *
+   * @return array
+   *   The document.
    */
   protected function buildResponseJsonApiDocument(array $attributes, array $meta = [], array $relationships = [], array $links = []) {
     $document = [
@@ -303,10 +292,19 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
       ],
       'data' => [
         'id' => self::TEST_ORDER_UUID,
-        'type' => 'checkout',
-        'attributes' => $attributes,
+        'type' => 'orders--default',
+        'attributes' => $attributes + ['order_number' => NULL],
         'relationships' => [
-          'coupons' => [],
+          'coupons' => [
+            'links' => [
+              'self' => [
+                'href' => 'http://localhost/jsonapi/orders/default/' . self::TEST_ORDER_UUID . '/relationships/coupons',
+              ],
+              'related' => [
+                'href' => 'http://localhost/jsonapi/orders/default/' . self::TEST_ORDER_UUID . '/coupons',
+              ],
+            ],
+          ],
           'order_items' => [
             'data' => [
               [
@@ -314,23 +312,47 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
                 'type' => 'order-items--default',
               ],
             ],
+            'links' => [
+              'self' => [
+                'href' => 'http://localhost/jsonapi/orders/default/' . self::TEST_ORDER_UUID . '/relationships/order_items',
+              ],
+              'related' => [
+                'href' => 'http://localhost/jsonapi/orders/default/' . self::TEST_ORDER_UUID . '/order_items',
+              ],
+            ],
+          ],
+          'store_id' => [
+            'data' => [
+              'id' => self::TEST_ORDER_ITEM_UUID,
+              'type' => 'stores--online',
+            ],
+            'links' => [
+              'self' => [
+                'href' => 'http://localhost/jsonapi/orders/default/' . self::TEST_ORDER_UUID . '/relationships/store_id',
+              ],
+              'related' => [
+                'href' => 'http://localhost/jsonapi/orders/default/' . self::TEST_ORDER_UUID . '/store_id',
+              ],
+            ],
           ],
         ] + $relationships,
         'meta' => [
           'shipping_rates' => static::getShippingMethodsRelationship(),
         ] + $meta,
+        'links' => [
+          'self' => [
+            'href' => 'http://localhost/jsonapi/orders/default/' . self::TEST_ORDER_UUID,
+          ],
+        ] + $links,
       ],
       'links' => [
         'self' => [
           'href' => 'https://localhost/checkout/' . self::TEST_ORDER_UUID,
         ],
-      ] + $links,
+      ],
     ];
     if ($relationships === NULL) {
       unset($document['data']['relationships']);
-    }
-    if ($links !== []) {
-      $document['data']['links'] = $links;
     }
     return $document;
   }

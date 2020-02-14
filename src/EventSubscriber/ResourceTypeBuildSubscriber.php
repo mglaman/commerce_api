@@ -61,6 +61,9 @@ final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
       elseif ($field->getInternalName() === 'billing_profile') {
         $event->disableField($field);
       }
+      elseif ($field->getInternalName() === 'mail') {
+        $event->setPublicFieldName($field, 'email');
+      }
     }
   }
 

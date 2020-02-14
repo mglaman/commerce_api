@@ -24,6 +24,7 @@ use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\jsonapi\ResourceType\ResourceTypeAttribute;
 use Drupal\jsonapi\ResourceType\ResourceTypeRelationship;
 use Drupal\jsonapi_hypermedia\Plugin\LinkProviderManagerInterface;
+use Drupal\jsonapi_resources\Resource\EntityResourceBase;
 use Drupal\jsonapi_resources\Resource\ResourceBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -35,16 +36,9 @@ use Symfony\Component\Routing\Route;
  * @todo :/ this means we have a custom resource that isn't the normal order.
  *          is that OK? it's like a meta resource
  */
-final class CheckoutResource extends ResourceBase implements ContainerInjectionInterface {
+final class CheckoutResource extends EntityResourceBase implements ContainerInjectionInterface {
 
   use EntityValidationTrait;
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  private $entityTypeManager;
 
   /**
    * The shipping order manager.
@@ -52,13 +46,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    * @var \Drupal\commerce_shipping\ShippingOrderManagerInterface
    */
   private $shippingOrderManager;
-
-  /**
-   * The shipment manager.
-   *
-   * @var \Drupal\commerce_shipping\ShipmentManagerInterface
-   */
-  private $shipmentManager;
 
   /**
    * The event dispatcher.
@@ -70,19 +57,13 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
   /**
    * CheckoutResource constructor.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
    * @param \Drupal\commerce_shipping\ShippingOrderManagerInterface $shipping_order_manager
    *   The shipping order manager.
-   * @param \Drupal\commerce_shipping\ShipmentManagerInterface $shipment_manager
-   *   The shipment manager.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ShippingOrderManagerInterface $shipping_order_manager, ShipmentManagerInterface $shipment_manager, EventDispatcherInterface $event_dispatcher) {
-    $this->entityTypeManager = $entity_type_manager;
+  public function __construct(ShippingOrderManagerInterface $shipping_order_manager, EventDispatcherInterface $event_dispatcher) {
     $this->shippingOrderManager = $shipping_order_manager;
-    $this->shipmentManager = $shipment_manager;
     $this->eventDispatcher = $event_dispatcher;
   }
 
@@ -91,9 +72,7 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
    */
   public static function create(ContainerInterface $container) {
     return new self(
-      $container->get('entity_type.manager'),
       $container->get('commerce_shipping.order_manager'),
-      $container->get('commerce_shipping.shipment_manager'),
       $container->get('event_dispatcher')
     );
   }
@@ -191,25 +170,10 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $commerce_order->save();
     }
 
-    $resource_object = $this->getResourceObjectFromOrder($commerce_order, $resource_type);
-    $primary_data = new ResourceObjectData([$resource_object], 1);
-
-    $renderer = \Drupal::getContainer()->get('renderer');
-    assert($renderer instanceof RendererInterface);
-    $context = new RenderContext();
-
-    // Add links to the root level.
-    // @todo is this needed?
-    $hypermedia_links_manager = \Drupal::service('jsonapi_hypermedia_provider.manager');
-    assert($hypermedia_links_manager instanceof LinkProviderManagerInterface);
-    $link_collection = $renderer->executeInRenderContext($context, function () use ($hypermedia_links_manager, $resource_object) {
-      return $hypermedia_links_manager->getLinkCollection($resource_object);
-    });
-    $response = $this->createJsonapiResponse($primary_data, $request, 200, [], $link_collection);
-    if (!$context->isEmpty()) {
-      $response->addCacheableDependency($context->pop());
-    }
-    return $response;
+    // $resource_object = $this->getResourceObjectFromOrder($commerce_order, $resource_type);
+    // $primary_data = new ResourceObjectData([$resource_object], 1);
+    $primary_data = $this->createIndividualDataFromEntity($commerce_order);
+    return $this->createJsonapiResponse($primary_data, $request);
   }
 
   /**
@@ -377,36 +341,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
       $shipments = $this->shippingOrderManager->pack($order, $shipping_profile);
     }
     return $shipments;
-  }
-
-  /**
-   * Get the shipping rate option resource type.
-   *
-   * @return \Drupal\jsonapi\ResourceType\ResourceType
-   *   The resource type.
-   *
-   * @todo move into RenamableResourceTypeRepository as part of resource types.
-   */
-  private function getShippingRateOptionResourceType(): ResourceType {
-    $resource_type = new RenamableResourceType(
-      'shipping_rate_option',
-      'shipping_rate_option',
-      NULL,
-      'shipping-rate-option',
-      FALSE,
-      FALSE,
-      FALSE,
-      FALSE,
-      [
-        'optionId' => new ResourceTypeAttribute('optionId', 'optionId'),
-        'label' => new ResourceTypeAttribute('label', 'label'),
-        'methodId' => new ResourceTypeAttribute('methodId', 'methodId'),
-        'rate' => new ResourceTypeAttribute('rate', 'rate'),
-
-      ]
-    );
-    $resource_type->setRelatableResourceTypes([]);
-    return $resource_type;
   }
 
 }
