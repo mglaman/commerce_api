@@ -520,7 +520,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
                 ],
               ],
             ],
-          ]
+          ],
         ],
         [],
         [

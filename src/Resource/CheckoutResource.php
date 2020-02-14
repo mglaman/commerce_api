@@ -326,14 +326,6 @@ final class CheckoutResource extends ResourceBase implements ContainerInjectionI
     $fields['order_total'] = new ResourceTypeAttribute('order_total');
     $fields['total_price'] = new ResourceTypeAttribute('total_price');
 
-    /*
-    // @todo return the available shipping methods as a resource identifier.
-    $shipping_methods_field = new ResourceTypeRelationship('shipping_rates', 'shipping_rates', TRUE, FALSE);
-    $fields['shipping_rates'] = $shipping_methods_field->withRelatableResourceTypes([
-      'shipping-rate-option' => $this->getShippingRateOptionResourceType(),
-    ]);
-    */
-
     $order_item_field = new ResourceTypeRelationship('order_items', 'order_items', TRUE, FALSE);
     $fields['order_items'] = $order_item_field->withRelatableResourceTypes($order_item_resource_types);
 
