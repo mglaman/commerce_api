@@ -12,6 +12,7 @@ commands:
             echo 'export DRUPAL_TEST_BASE_URL="http://127.0.0.1:8080"' >> $BASH_ENV
             echo 'export SIMPLETEST_DB="sqlite://localhost/sites/default/files/.ht.sqlite"' >> $BASH_ENV
             echo 'export DRUPAL_TEST_DB_URL="sqlite://localhost/sites/default/files/.ht.sqlite"' >> $BASH_ENV
+            echo 'export DRUPAL_PROJECT_PATH=$HOME/drupal' >> $BASH_ENV
       # @todo remove after https://www.drupal.org/project/jsonapi_hypermedia/issues/3111905
       - run:
           name: Weaked deprecation checks
@@ -23,12 +24,12 @@ commands:
       - run: sudo apt-get update && sudo apt-get install -y libpng-dev libjpeg62-turbo-dev
       - run: sudo docker-php-ext-install gd bcmath
       - run: |
-          composer --no-interaction create-project drupal/recommended-project:^8.8@alpha $DRUPAL_PROJECT_PATH
+          composer --no-interaction create-project --prefer-dist drupal/recommended-project:^8.8@alpha $DRUPAL_PROJECT_PATH
   install-commerce-api:
     steps:
       - run: |
           cd $DRUPAL_PROJECT_PATH
-          composer require --dev drupal/core-dev-pinned:^8.8
+          composer require --dev --prefer-dist drupal/core-dev:^8.8
           composer config repositories.0 path ${CIRCLE_WORKING_DIRECTORY}
           composer config repositories.1 composer https://packages.drupal.org/8
           composer require drupal/commerce_api *@dev

@@ -2,11 +2,14 @@ language: php
 addons:
   chrome: stable
 php:
+  - 7.4
   - 7.3
   - 7.2
   - 7.1
 matrix:
   fast_finish: true
+  allow_failures:
+    - php: 7.4
 mysql:
   database: drupal_travis_db
   username: root
@@ -35,9 +38,9 @@ install:
   - export PATH=$PWD/travis-chromedriver:$PATH
   - chromedriver --version
 before_script:
-  - composer --no-interaction create-project drupal/recommended-project:^8.8@alpha $TRAVIS_BUILD_DIR/../drupal
+  - composer --no-interaction create-project --prefer-dist drupal/recommended-project:^8.8@alpha $TRAVIS_BUILD_DIR/../drupal
   - cd $TRAVIS_BUILD_DIR/../drupal
-  - composer require --dev drupal/core-dev-pinned:^8.8
+  - composer require --dev --prefer-dist drupal/core-dev:^8.8
   - |
     composer config repositories.0 path $TRAVIS_BUILD_DIR
     composer config repositories.1 composer https://packages.drupal.org/8
