@@ -323,7 +323,8 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
           ],
           'store_id' => [
             'data' => [
-              'id' => self::TEST_ORDER_ITEM_UUID,
+              // Replaced before assertion.
+              'id' => NULL,
               'type' => 'stores--online',
             ],
             'links' => [
@@ -337,7 +338,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
           ],
         ] + $relationships,
         'meta' => [
-          'shipping_rates' => static::getShippingMethodsRelationship(),
+          'shipping_rates' => static::getShippingMethodsMetaValue(),
         ] + $meta,
         'links' => [
           'self' => [
@@ -375,7 +376,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
    * @return array
    *   The relationship.
    */
-  protected static function getShippingMethodsRelationship() {
+  protected static function getShippingMethodsMetaValue(): array {
     return [
       [
         'id' => '2--default',

@@ -142,9 +142,10 @@ final class CheckoutResource extends EntityResourceBase implements ContainerInje
         $this->applyShippingRateToShipments($commerce_order, $shipping_method_rate_option_id);
       }
 
-      if ($resource_object->hasField('payment_gateway')) {
+      if ($resource_object->hasField('payment_gateway_id')) {
         $field_names[] = 'payment_gateway';
-        $commerce_order->set('payment_gateway', $resource_object->getField('payment_gateway'));
+        $commerce_order->set('payment_gateway', $resource_object->getField('payment_gateway_id'));
+        $commerce_order->set('payment_gateway_id', $resource_object->getField('payment_gateway_id'));
       }
 
       // Validate the provided fields, which will throw 422 if invalid.
@@ -170,8 +171,6 @@ final class CheckoutResource extends EntityResourceBase implements ContainerInje
       $commerce_order->save();
     }
 
-    // $resource_object = $this->getResourceObjectFromOrder($commerce_order, $resource_type);
-    // $primary_data = new ResourceObjectData([$resource_object], 1);
     $primary_data = $this->createIndividualDataFromEntity($commerce_order);
     return $this->createJsonapiResponse($primary_data, $request);
   }
@@ -219,107 +218,6 @@ final class CheckoutResource extends EntityResourceBase implements ContainerInje
       $shipment->save();
     }
     $order->set('shipments', $shipments);
-  }
-
-  /**
-   * Get the checkout order resource object.
-   *
-   * @param \Drupal\commerce_order\Entity\OrderInterface $order
-   *   The order.
-   * @param \Drupal\jsonapi\ResourceType\ResourceType $resource_type
-   *   The resource type.
-   *
-   * @return \Drupal\jsonapi\JsonApiResource\ResourceObject
-   *   The resource object.
-   *
-   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
-   */
-  private function getResourceObjectFromOrder(OrderInterface $order, ResourceType $resource_type): ResourceObject {
-    $cacheability = new CacheableMetadata();
-    $cacheability->addCacheableDependency($order);
-
-    $fields = [];
-
-    $payment_gateway = $order->get('payment_gateway');
-    if (!$payment_gateway->isEmpty()) {
-      $fields['payment_gateway'] = $payment_gateway->first()->target_id;
-    }
-
-    $fields['state'] = $order->getState()->getId();
-    $fields['email'] = $order->getEmail();
-    $fields['shipping_method'] = $order->get('shipping_method');
-    $fields['billing_information'] = $order->get('billing_information');
-    $fields['shipping_information'] = $order->get('shipping_information');
-    $fields['order_items'] = $order->get('order_items');
-    $fields['coupons'] = $order->get('coupons');
-    $fields['total_price'] = $order->get('total_price');
-    $fields['order_total'] = $order->get('order_total');
-
-    return new ResourceObject(
-      new CacheableMetadata(),
-      $resource_type,
-      $order->uuid(),
-      NULL,
-      $fields,
-      new LinkCollection([])
-    );
-  }
-
-  /**
-   * Get the checkout order resource type.
-   *
-   * This is the custom resource type used for this resource.
-   *
-   * @return \Drupal\jsonapi\ResourceType\ResourceType
-   *   The resource type.
-   *
-   * @todo remove once shipping_methods is a computed relationship.
-   */
-  private function getCheckoutOrderResourceType(): ResourceType {
-    $order_item_resource_types = array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) {
-      return $resource_type->getEntityTypeId() === 'commerce_order_item';
-    });
-    $fields = [];
-    $fields['state'] = new ResourceTypeAttribute('state');
-    $fields['email'] = new ResourceTypeAttribute('email');
-    $fields['shipping_information'] = new ResourceTypeAttribute('shipping_information');
-    $fields['shipping_method'] = new ResourceTypeAttribute('shipping_method');
-    $fields['billing_information'] = new ResourceTypeAttribute('billing_information');
-    $fields['payment_gateway'] = new ResourceTypeAttribute('payment_gateway');
-    $fields['payment_instrument'] = new ResourceTypeAttribute('payment_instrument');
-    $fields['order_total'] = new ResourceTypeAttribute('order_total');
-    $fields['total_price'] = new ResourceTypeAttribute('total_price');
-
-    $order_item_field = new ResourceTypeRelationship('order_items', 'order_items', TRUE, FALSE);
-    $fields['order_items'] = $order_item_field->withRelatableResourceTypes($order_item_resource_types);
-
-    $coupons_field = new ResourceTypeRelationship('coupons', 'coupons', TRUE, FALSE);
-    $fields['coupons'] = $coupons_field->withRelatableResourceTypes(array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) {
-      return $resource_type->getEntityTypeId() === 'commerce_promotion_coupon';
-    }));
-
-    $resource_type = new RenamableResourceType(
-      'checkout_order',
-      'checkout_order',
-      NULL,
-      'checkout',
-      FALSE,
-      FALSE,
-      TRUE,
-      FALSE,
-      $fields
-    );
-    $resource_type->setRelatableResourceTypes([
-      'order_items' => $order_item_resource_types,
-    ]);
-    return $resource_type;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getRouteResourceTypes(Route $route, string $route_name): array {
-    return [$this->getCheckoutOrderResourceType()];
   }
 
   /**

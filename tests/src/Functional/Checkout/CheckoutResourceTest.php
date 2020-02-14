@@ -43,7 +43,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     $order_item_id = $checkout_body['data']['relationships']['order_items']['data'][0]['id'] ?? NULL;
     $this->assertEquals([
       'id' => $test_cart_id,
-      'type' => 'checkout',
+      'type' => 'orders--default',
       'attributes' => [
         'state' => 'draft',
         'email' => $this->account->getEmail(),
@@ -107,7 +107,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     $url = Url::fromRoute('commerce_api.checkout', ['commerce_order' => $test_cart_id]);
     $response = $this->performRequest('PATCH', $url, [
       'data' => [
-        'type' => 'checkout',
+        'type' => 'orders--default',
         'id' => $test_cart_id,
         'attributes' => [
           'shipping_information' => [
@@ -173,7 +173,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     $this->assertSame(200, $response->getStatusCode(), var_export($checkout_body, TRUE));
     $this->assertEquals([
       'id' => $test_cart_id,
-      'type' => 'checkout',
+      'type' => 'orders--default',
       'attributes' => [
         'state' => 'draft',
         'email' => $this->account->getEmail(),

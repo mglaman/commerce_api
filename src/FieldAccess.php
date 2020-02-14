@@ -100,6 +100,7 @@ class FieldAccess implements FieldAccessInterface {
         'billing_information',
         'shipping_information',
         'shipping_method',
+        'payment_gateway_id',
         'mail',
         'state',
         // Allow after https://www.drupal.org/project/commerce/issues/2916252.

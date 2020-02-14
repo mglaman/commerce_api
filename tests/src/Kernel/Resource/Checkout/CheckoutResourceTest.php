@@ -28,7 +28,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
   public function testRequestAndResponse(array $test_document, array $expected_document) {
     $controller = $this->getCheckoutResource();
     $document['data'] = [
-      'type' => 'checkout',
+      'type' => 'orders--default',
       'id' => self::TEST_ORDER_UUID,
       'attributes' => $test_document['attributes'] ?? [],
       'relationships' => $test_document['relationships'] ?? [],
@@ -50,6 +50,9 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       $this->assertEquals($expected_document, $decoded_document, var_export($decoded_document, TRUE));
     }
     else {
+      if (isset($expected_document['data']['relationships']['store_id']['data'])) {
+        $expected_document['data']['relationships']['store_id']['data']['id'] = $this->store->uuid();
+      }
       $this->assertEquals($expected_document, $decoded_document, var_export($decoded_document, TRUE));
     }
   }
@@ -73,6 +76,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'billing_information' => NULL,
         'shipping_information' => NULL,
         'shipping_method' => NULL,
+        'payment_gateway_id' => NULL,
         'order_total' => [
           'subtotal' => [
             'number' => '4.0',
@@ -163,6 +167,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'state' => 'draft',
         'billing_information' => NULL,
         'shipping_method' => NULL,
+        'payment_gateway_id' => NULL,
         'shipping_information' => [
           'address' => [
             'country_code' => 'US',
@@ -225,6 +230,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'state' => 'draft',
         'billing_information' => NULL,
         'shipping_method' => NULL,
+        'payment_gateway_id' => NULL,
         'shipping_information' => [
           'address' => [
             'country_code' => 'US',
@@ -286,6 +292,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
         'email' => 'tester@example.com',
         'state' => 'draft',
         'billing_information' => NULL,
+        'payment_gateway_id' => NULL,
         'shipping_information' => [
           'address' => [
             'country_code' => 'US',
@@ -383,6 +390,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
         'state' => 'draft',
+        'payment_gateway_id' => NULL,
         'billing_information' => [
           'address' => [
             'country_code' => 'US',
@@ -445,7 +453,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       [
         'attributes' => [
           'email' => 'tester@example.com',
-          'payment_gateway' => 'invalid',
+          'payment_gateway_id' => 'invalid',
         ],
       ],
       [
@@ -473,13 +481,13 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
       [
         'attributes' => [
           'email' => 'tester@example.com',
-          'payment_gateway' => 'onsite',
+          'payment_gateway_id' => 'onsite',
         ],
       ],
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
         'state' => 'draft',
-        'payment_gateway' => 'onsite',
+        'payment_gateway_id' => 'onsite',
         'billing_information' => NULL,
         'shipping_information' => NULL,
         'shipping_method' => NULL,

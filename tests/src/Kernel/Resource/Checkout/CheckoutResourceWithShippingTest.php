@@ -22,7 +22,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
   public function testShipping(array $test_document, array $expected_shipping_methods, string $shipping_method, array $expected_order_document) {
     $checkoutResourceController = $this->getCheckoutResource();
     $document['data'] = [
-      'type' => 'checkout',
+      'type' => 'orders--default',
       'id' => self::TEST_ORDER_UUID,
       'attributes' => $test_document['attributes'] ?? [],
       'relationships' => $test_document['relationships'] ?? [],
@@ -56,7 +56,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
     $this->assertEquals($expected_shipping_methods, $decoded_document['data'], var_export($decoded_document['data'], TRUE));
 
     $document['data'] = [
-      'type' => 'checkout',
+      'type' => 'orders--default',
       'id' => self::TEST_ORDER_UUID,
       'attributes' => [
         'shipping_method' => $shipping_method,
@@ -72,6 +72,9 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
     );
     $response = $this->processRequest($request, $checkoutResourceController);
     $decoded_document = Json::decode($response->getContent());
+    if (isset($expected_order_document['data']['relationships']['store_id']['data'])) {
+      $expected_order_document['data']['relationships']['store_id']['data']['id'] = $this->store->uuid();
+    }
     $this->assertEquals($expected_order_document, $decoded_document, var_export($decoded_document, TRUE));
   }
 
@@ -137,6 +140,7 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
       $this->buildResponseJsonApiDocument([
         'email' => 'tester@example.com',
         'state' => 'draft',
+        'payment_gateway_id' => NULL,
         'shipping_information' => [
           'address' => [
             'country_code' => 'US',
