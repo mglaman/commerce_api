@@ -17,6 +17,8 @@ env:
     - SIMPLETEST_BASE_URL="http://127.0.0.1:8080"
     - SIMPLETEST_DB="sqlite://localhost/sites/default/files/.ht.sqlite"
     - MINK_DRIVER_ARGS_WEBDRIVER='["chrome", {"browserName":"chrome","chromeOptions":{"args":["--disable-gpu", "--no-sandbox"]}}, "http://127.0.0.1:9515"]'
+    # @todo remove after https://www.drupal.org/project/jsonapi_hypermedia/issues/3111905
+    - SYMFONY_DEPRECATIONS_HELPER="weak"
 before_install:
   - phpenv config-rm xdebug.ini || true
   - composer global require "hirak/prestissimo:^0.3"
