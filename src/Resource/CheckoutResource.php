@@ -2,35 +2,21 @@
 
 namespace Drupal\commerce_api\Resource;
 
-use Drupal\commerce_api\ResourceType\RenamableResourceType;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Event\OrderEvent;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
-use Drupal\commerce_shipping\ShipmentManagerInterface;
 use Drupal\commerce_shipping\ShippingOrderManagerInterface;
 use Drupal\commerce_shipping\ShippingRate;
-use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Render\RenderContext;
-use Drupal\Core\Render\RendererInterface;
 use Drupal\jsonapi\Entity\EntityValidationTrait;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
-use Drupal\jsonapi\JsonApiResource\LinkCollection;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
-use Drupal\jsonapi\JsonApiResource\ResourceObjectData;
 use Drupal\jsonapi\ResourceResponse;
-use Drupal\jsonapi\ResourceType\ResourceType;
-use Drupal\jsonapi\ResourceType\ResourceTypeAttribute;
-use Drupal\jsonapi\ResourceType\ResourceTypeRelationship;
-use Drupal\jsonapi_hypermedia\Plugin\LinkProviderManagerInterface;
 use Drupal\jsonapi_resources\Resource\EntityResourceBase;
-use Drupal\jsonapi_resources\Resource\ResourceBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
-use Symfony\Component\Routing\Route;
 
 /**
  * @todo :/ this means we have a custom resource that isn't the normal order.
