@@ -40,7 +40,8 @@ final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
     list($entity_type_id, $bundle) = explode('--', $event->getResourceTypeName());
     $resource_type_name_base = Inflector::pluralize(str_replace('commerce_', '', $entity_type_id));
     if ($entity_type_id !== $bundle) {
-      $resource_type_name = "$resource_type_name_base--$bundle";
+      $resource_type_bundle = str_replace('commerce_', '', $bundle);
+      $resource_type_name = "$resource_type_name_base--$resource_type_bundle";
     }
     else {
       $resource_type_name = $resource_type_name_base;
