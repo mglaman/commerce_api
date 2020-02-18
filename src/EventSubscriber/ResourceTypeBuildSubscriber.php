@@ -71,6 +71,11 @@ final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
           $event->setPublicFieldName($field, 'email');
         }
       }
+      elseif ($entity_type_id === 'commerce_shipment') {
+        if ($field->getInternalName() === 'shipping_profile') {
+          $event->disableField($field);
+        }
+      }
     }
   }
 
