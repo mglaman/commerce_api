@@ -10,6 +10,3 @@ dependencies:
   - drupal:serialization
   - jsonapi_resources:jsonapi_resources
   - jsonapi_hypermedia:jsonapi_hypermedia
-
-test_dependencies:
-  - commerce_shipping:commerce_shipping
