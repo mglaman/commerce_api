@@ -4,7 +4,6 @@ namespace Drupal\Tests\commerce_api\Functional;
 
 use Drupal\commerce_order\Entity\OrderType;
 use Drupal\commerce_product\Entity\ProductVariationType;
-use Drupal\commerce_shipping\Entity\ShippingMethod;
 use Drupal\commerce_store\StoreCreationTrait;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Entity\EntityInterface;

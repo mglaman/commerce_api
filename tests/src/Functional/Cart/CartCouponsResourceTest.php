@@ -3,9 +3,7 @@
 namespace Drupal\Tests\commerce_api\Functional\Cart;
 
 use Drupal\commerce_order\Entity\OrderInterface;
-use Drupal\commerce_promotion\Entity\Coupon;
 use Drupal\commerce_promotion\Entity\CouponInterface;
-use Drupal\commerce_promotion\Entity\Promotion;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Url;
 use GuzzleHttp\RequestOptions;
@@ -28,7 +26,7 @@ class CartCouponsResourceTest extends CartResourceTestBase {
    * Tests applying a valid coupon.
    */
   public function testApplyCoupons() {
-    $promotion = Promotion::create([
+    $promotion = $this->createEntity('commerce_promotion', [
       'order_types' => ['default'],
       'stores' => [$this->store->id()],
       'usage_limit' => 1,
@@ -41,15 +39,13 @@ class CartCouponsResourceTest extends CartResourceTestBase {
         ],
       ],
     ]);
-    $promotion->save();
 
-    $coupon = Coupon::create([
+    $coupon = $this->createEntity('commerce_promotion_coupon', [
       'promotion_id' => $promotion->id(),
       'code' => 'PERCENTAGE_OFF',
       'usage_limit' => 1,
       'status' => TRUE,
     ]);
-    $coupon->save();
     assert($coupon instanceof CouponInterface);
 
     // Add a cart that does belong to the account.
@@ -88,7 +84,7 @@ class CartCouponsResourceTest extends CartResourceTestBase {
    * Tests applying an invalid coupon.
    */
   public function testInvalidCoupons() {
-    $promotion = Promotion::create([
+    $promotion = $this->createEntity('commerce_promotion', [
       'order_types' => ['default'],
       'stores' => [$this->store->id()],
       'usage_limit' => 1,
@@ -101,14 +97,12 @@ class CartCouponsResourceTest extends CartResourceTestBase {
         ],
       ],
     ]);
-    $promotion->save();
-    $coupon = Coupon::create([
+    $coupon = $this->createEntity('commerce_promotion_coupon', [
       'promotion_id' => $promotion->id(),
       'code' => 'INVALID_COUPON_CODE',
       'usage_limit' => 1,
       'status' => FALSE,
     ]);
-    $coupon->save();
 
     $cart = $this->container->get('commerce_cart.cart_provider')->createCart('default', $this->store, $this->account);
     $this->assertInstanceOf(OrderInterface::class, $cart);
