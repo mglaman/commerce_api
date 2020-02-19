@@ -12,11 +12,13 @@ services:
     decorates: commerce_cart.cart_session
     public: false
     arguments: ['@commerce_api.cart_token_session.inner', '@request_stack', '@tempstore.shared']
+
   commerce_api.cart_token_session_configuration:
     class: Drupal\commerce_api\Session\CartTokenSessionConfiguration
     decorates: session_configuration
     public: false
     arguments: ['@commerce_api.cart_token_session_configuration.inner']
+
   commerce_api.token_cart_convert_subscriber:
     class: Drupal\commerce_api\EventSubscriber\CartTokenSubscriber
     arguments: ['@commerce_cart.cart_session', '@tempstore.shared']
@@ -35,12 +37,6 @@ services:
     tags:
       - { name: commerce_store.store_resolver, priority: 100 }
 
-  commerce_api.collect_resource_object_meta_subscriber:
-    class: Drupal\commerce_api\EventSubscriber\CollectResourceObjectMetaSubscriber
-    arguments: ['@entity.repository', '@commerce_shipping.order_manager']
-    tags:
-      - { name: event_subscriber }
-
   # @todo remove after https://www.drupal.org/project/drupal/issues/3100732
   commerce_api.normalizer.resource_object.jsonapi:
     class: Drupal\jsonapi\Normalizer\CommerceApiImposter\MetaResourceObjectNormalizer
@@ -49,6 +45,7 @@ services:
     calls:
       - [setEventDispatcher, ['@event_dispatcher']]
       - [setRenderer, ['@renderer']]
+
   # @todo remove after https://www.drupal.org/project/drupal/issues/3100732
   commerce_api.normalizer.relationship.jsonapi:
     class: Drupal\jsonapi\Normalizer\CommerceApiImposter\MetaRelationshipNormalizer
@@ -81,9 +78,3 @@ services:
     tags:
       # Priority must be higher than serializer.normalizer.primitive_data.
       - { name: normalizer, priority: 20 }
-
-  commerce_api.shipping_profile_subscriber:
-    class: Drupal\commerce_api\EventSubscriber\ShippingProfileSubscriber
-    arguments: ['@commerce_shipping.order_manager', '@entity_type.manager']
-    tags:
-      - { name: event_subscriber }

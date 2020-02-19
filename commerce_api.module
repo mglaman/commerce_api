@@ -96,15 +96,19 @@ function commerce_api_entity_base_field_info(EntityTypeInterface $entity_type) {
       ->setSetting('profile_bundle', 'customer')
       ->setSetting('profile_type', 'billing')
       ->setComputed(TRUE);
-    $fields['shipping_information'] = BaseFieldDefinition::create('order_profile')
-      ->setLabel(t('Shipping information'))
-      // @note this will change after https://www.drupal.org/project/commerce/issues/2992281.
-      ->setSetting('profile_bundle', 'customer')
-      ->setSetting('profile_type', 'shipping')
-      ->setComputed(TRUE);
-    $fields['shipping_method'] = BaseFieldDefinition::create('shipping_method')
-      ->setLabel(t('Shipping method'))
-      ->setComputed(TRUE);
+
+    if (\Drupal::moduleHandler()->moduleExists('commerce_shipping')) {
+      $fields['shipping_information'] = BaseFieldDefinition::create('order_profile')
+        ->setLabel(t('Shipping information'))
+        // @note this will change after https://www.drupal.org/project/commerce/issues/2992281.
+        ->setSetting('profile_bundle', 'customer')
+        ->setSetting('profile_type', 'shipping')
+        ->setComputed(TRUE);
+      $fields['shipping_method'] = BaseFieldDefinition::create('shipping_method')
+        ->setLabel(t('Shipping method'))
+        ->setComputed(TRUE);
+    }
+
     $fields['payment_gateway_id'] = BaseFieldDefinition::create('payment_gateway_id')
       ->setLabel(t('Payment method'))
       ->setComputed(TRUE);

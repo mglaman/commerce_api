@@ -6,11 +6,10 @@ package: 'Commerce (web services)'
 dependencies:
   - commerce:commerce
   - commerce:commerce_cart
-  # @todo review how this got added as a hard dependency.
-  - commerce:commerce_promotion
-  # @todo remove hard dependency on shipping.
-  - commerce_shipping:commerce_shipping
   - drupal:jsonapi
   - drupal:serialization
   - jsonapi_resources:jsonapi_resources
   - jsonapi_hypermedia:jsonapi_hypermedia
+
+test_dependencies:
+  - commerce_shipping:commerce_shipping

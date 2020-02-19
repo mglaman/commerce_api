@@ -9,21 +9,21 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\profile\Entity\ProfileInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-final class ShippingProfileSubscriber implements EventSubscriberInterface {
+class ShippingProfileSubscriber implements EventSubscriberInterface {
 
   /**
    * The shipping order manager.
    *
    * @var \Drupal\commerce_shipping\ShippingOrderManagerInterface
    */
-  private $shippingOrderManager;
+  protected $shippingOrderManager;
 
   /**
    * The profile storage.
    *
    * @var \Drupal\profile\ProfileStorageInterface
    */
-  private $profileStorage;
+  protected $profileStorage;
 
   /**
    * Constructs a new ShippingProfileSubscriber object.

@@ -6,9 +6,12 @@ use Drupal\commerce_api\Events\CollectResourceObjectMetaEvent;
 use Drupal\commerce_api\Events\JsonapiEvents;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
+use Drupal\commerce_shipping\ShipmentManagerInterface;
 use Drupal\commerce_shipping\ShippingOrderManagerInterface;
 use Drupal\commerce_shipping\ShippingRate;
 use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\profile\Entity\ProfileInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Validator\ConstraintViolation;
@@ -16,33 +19,53 @@ use Symfony\Component\Validator\ConstraintViolation;
 /**
  * Adds metadata to resource objects.
  */
-final class CollectResourceObjectMetaSubscriber implements EventSubscriberInterface {
+class CollectResourceObjectMetaSubscriber implements EventSubscriberInterface {
 
   /**
    * The entity repository.
    *
    * @var \Drupal\Core\Entity\EntityRepositoryInterface
    */
-  private $entityRepository;
+  protected $entityRepository;
+
+  /**
+   * The route match.
+   *
+   * @var \Drupal\Core\Routing\RouteMatchInterface
+   */
+  protected $routeMatch;
 
   /**
    * The shipping order manager.
    *
    * @var \Drupal\commerce_shipping\ShippingOrderManagerInterface
    */
-  private $shippingOrderManager;
+  protected $shippingOrderManager;
+
+  /**
+   * The shipment manager.
+   *
+   * @var \Drupal\commerce_shipping\ShipmentManagerInterface
+   */
+  protected $shipmentManager;
 
   /**
    * Constructs a new CollectResourceObjectMetaSubscriber object.
    *
    * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
    *   The entity repository.
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match.
    * @param \Drupal\commerce_shipping\ShippingOrderManagerInterface $shipping_order_manager
    *   The shipping order manager.
+   * @param \Drupal\commerce_shipping\ShipmentManagerInterface $shipment_manager
+   *   The shipment manager.
    */
-  public function __construct(EntityRepositoryInterface $entity_repository, ShippingOrderManagerInterface $shipping_order_manager) {
+  public function __construct(EntityRepositoryInterface $entity_repository, RouteMatchInterface $route_match, ShippingOrderManagerInterface $shipping_order_manager, ShipmentManagerInterface $shipment_manager) {
     $this->entityRepository = $entity_repository;
+    $this->routeMatch = $route_match;
     $this->shippingOrderManager = $shipping_order_manager;
+    $this->shipmentManager = $shipment_manager;
   }
 
   /**
@@ -95,11 +118,7 @@ final class CollectResourceObjectMetaSubscriber implements EventSubscriberInterf
       }
     }
 
-    // @todo inject the route match.
-    $route_match = \Drupal::routeMatch();
-    if (strpos($route_match->getRouteName(), 'commerce_api.checkout') === 0) {
-      $shipment_manager = \Drupal::getContainer()->get('commerce_shipping.shipment_manager');
-      assert($shipment_manager !== NULL);
+    if (strpos($this->routeMatch->getRouteName(), 'commerce_api.checkout') === 0) {
       $options = [];
       foreach ($this->getOrderShipments($order) as $shipment) {
         assert($shipment instanceof ShipmentInterface);
@@ -116,7 +135,7 @@ final class CollectResourceObjectMetaSubscriber implements EventSubscriberInterf
             'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
             'description' => $rate->getDescription(),
           ];
-        }, $shipment_manager->calculateRates($shipment));
+        }, $this->shipmentManager->calculateRates($shipment));
       }
       $options = array_merge([], ...$options);
       if (count($options) > 0) {
@@ -136,7 +155,7 @@ final class CollectResourceObjectMetaSubscriber implements EventSubscriberInterf
    * @return \Drupal\Core\Entity\EntityInterface|\Drupal\profile\Entity\ProfileInterface
    *   The profile.
    */
-  private function getOrderShippingProfile(OrderInterface $order): ProfileInterface {
+  protected function getOrderShippingProfile(OrderInterface $order): ProfileInterface {
     $shipping_profile = $order->get('shipping_information')->entity;
     assert($shipping_profile instanceof ProfileInterface);
     return $shipping_profile;
@@ -153,14 +172,12 @@ final class CollectResourceObjectMetaSubscriber implements EventSubscriberInterf
    * @return array
    *   The array of shipments.
    */
-  private function getOrderShipments(OrderInterface $order): array {
-    $shipping_order_manager = \Drupal::getContainer()->get('commerce_shipping.order_manager');
-    assert($shipping_order_manager !== NULL);
+  protected function getOrderShipments(OrderInterface $order): array {
     /** @var \Drupal\commerce_shipping\Entity\ShipmentInterface[] $shipments */
     $shipments = $order->get('shipments')->referencedEntities();
     if (empty($shipments)) {
       $shipping_profile = $order->get('shipping_information')->entity;
-      $shipments = $shipping_order_manager->pack($order, $shipping_profile);
+      $shipments = $this->shippingOrderManager->pack($order, $shipping_profile);
     }
     return $shipments;
   }

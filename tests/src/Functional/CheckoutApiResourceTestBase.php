@@ -56,6 +56,7 @@ abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
   protected static $modules = [
     'basic_auth',
     'commerce_payment',
+    'commerce_promotion',
     'commerce_shipping',
     'jsonapi_resources',
     'commerce_api',
@@ -121,7 +122,7 @@ abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
 
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
 
-    $shipping_method = ShippingMethod::create([
+    $shipping_method = $this->createEntity('commerce_shipping_method', [
       'stores' => $this->store->id(),
       'name' => 'Example',
       'plugin' => [
@@ -137,9 +138,8 @@ abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
       'status' => TRUE,
       'weight' => 1,
     ]);
-    $shipping_method->save();
 
-    $another_shipping_method = ShippingMethod::create([
+    $another_shipping_method = $this->createEntity('commerce_shipping_method', [
       'stores' => $this->store->id(),
       'name' => 'Another shipping method',
       'plugin' => [
@@ -155,7 +155,6 @@ abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
       'status' => TRUE,
       'weight' => 0,
     ]);
-    $another_shipping_method->save();
   }
 
   /**
