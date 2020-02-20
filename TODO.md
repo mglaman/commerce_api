@@ -1,5 +1,5 @@
 # TODOS!
 
-@todo Commit a generated example OpenAPI 2 spec from the OpenAPI modules
-@todo Document how to disable resource type rewriting in `commerce_api.resource_type_build_subscriber` (remove it.)
-@todo Move `README (Cart API).md` into `README.md`.
+@todo Need to document checkout resource
+@todo document that this only works with offiste gateways (use event to subscribe to)
+@todo PayPal checkout

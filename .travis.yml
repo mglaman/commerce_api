@@ -45,6 +45,7 @@ before_script:
     composer config repositories.0 path $TRAVIS_BUILD_DIR
     composer config repositories.1 composer https://packages.drupal.org/8
   - composer require drupal/commerce_api *@dev
+  - composer require drupal/commerce_shipping:2.x-dev
 script:
   - cd $TRAVIS_BUILD_DIR
   - phpcs --standard=phpcs.xml src -s
