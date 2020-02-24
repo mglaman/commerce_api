@@ -53,9 +53,6 @@ final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
       if (strpos($field->getPublicName(), 'drupal_internal__') === 0) {
         $event->disableField($field);
       }
-      elseif (strpos($field->getPublicName(), 'field_') === 0) {
-        $event->setPublicFieldName($field, str_replace('field_', '', $field->getPublicName()));
-      }
       elseif ($field->getPublicName() === $entity_type_id . '_type') {
         $event->setPublicFieldName($field, str_replace('commerce_', '', $field->getPublicName()));
       }
