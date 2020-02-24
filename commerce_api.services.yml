@@ -78,3 +78,9 @@ services:
     tags:
       # Priority must be higher than serializer.normalizer.primitive_data.
       - { name: normalizer, priority: 20 }
+
+  paramconverter.commerce_api.entity_uuid:
+    parent: paramconverter.entity
+    class: Drupal\commerce_api\ParamConverter\EntityUuidConverter
+    tags:
+      - { name: paramconverter, priority: 10 }

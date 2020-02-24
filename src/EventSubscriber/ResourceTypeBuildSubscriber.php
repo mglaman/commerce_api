@@ -61,7 +61,6 @@ final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
       }
       elseif ($entity_type_id === 'commerce_order') {
         if ($field->getInternalName() === 'payment_gateway') {
-          // @todo should we prevent fetching the config entity or alias it.
           $event->disableField($field);
         }
         elseif ($field->getInternalName() === 'billing_profile') {
