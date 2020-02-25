@@ -1,0 +1,146 @@
+<?php
+
+/**
+ * @file
+ * Provides hooks.
+ */
+
+use Drupal\commerce_api\Plugin\Field\ComputedOrderTotal;
+use Drupal\commerce_api\Plugin\Field\ComputedResolvedPrice;
+use Drupal\commerce_api\Plugin\openapi\OpenApiGenerator\AdjustedJsonApiGenerator;
+use Drupal\commerce_cart\CartSessionInterface;
+use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\commerce_order\Entity\OrderItemInterface;
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Session\AccountInterface;
+
+/**
+ * Implements hook_entity_field_access().
+ */
+function commerce_api_entity_field_access($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
+  $field_access = \Drupal::getContainer()->get('commerce_api.field_access');
+  return $field_access->handle($operation, $field_definition, $account, $items);
+}
+
+/**
+ * Implements hook_entity_access().
+ *
+ * Allows customers to view their own carts without granting the
+ * `view own commerce_order` permission.
+ */
+function commerce_api_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  if ($entity instanceof OrderInterface) {
+    $order = $entity;
+  }
+  elseif ($entity instanceof OrderItemInterface) {
+    $order = $entity->getOrder();
+  }
+  else {
+    return AccessResult::neutral();
+  }
+  if ($order->getState()->getId() === 'canceled') {
+    return AccessResult::forbidden();
+  }
+  $customer_id = (int) $order->getCustomerId();
+  $order_id = $order->id();
+
+  if ($account->isAuthenticated()) {
+    $customer_check = (int) $account->id() === $customer_id;
+  }
+  else {
+    $cart_session = \Drupal::getContainer()->get('commerce_cart.cart_session');
+    assert($cart_session instanceof CartSessionInterface);
+    $active_cart = $cart_session->hasCartId($order_id, CartSessionInterface::ACTIVE);
+    $completed_cart = $cart_session->hasCartId($order_id, CartSessionInterface::COMPLETED);
+    $customer_check = $active_cart || $completed_cart;
+  }
+
+  if ($operation === 'view') {
+    return AccessResult::allowedIf($customer_check);
+  }
+  if ($operation === 'update') {
+    return AccessResult::allowedIf($customer_check && $order->getState()->getId() === 'draft');
+  }
+
+  return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_entity_base_field_info_alter().
+ */
+function commerce_api_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
+  /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
+  if ($entity_type->id() === 'commerce_order') {
+    $fields['order_number']->setRequired(FALSE);
+    $fields['billing_profile']->setRequired(TRUE);
+
+    if (isset($fields['payment_gateway'])) {
+      // @todo add a constraint which marks it required if order total > 0;
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function commerce_api_entity_base_field_info(EntityTypeInterface $entity_type) {
+  if ($entity_type->id() === 'commerce_order') {
+    $fields['billing_information'] = BaseFieldDefinition::create('order_profile')
+      ->setLabel(t('Billing information'))
+      // @note this will change after https://www.drupal.org/project/commerce/issues/2992281.
+      ->setSetting('profile_bundle', 'customer')
+      ->setSetting('profile_type', 'billing')
+      ->setComputed(TRUE);
+
+    if (\Drupal::moduleHandler()->moduleExists('commerce_shipping')) {
+      $fields['shipping_information'] = BaseFieldDefinition::create('order_profile')
+        ->setLabel(t('Shipping information'))
+        // @note this will change after https://www.drupal.org/project/commerce/issues/2992281.
+        ->setSetting('profile_bundle', 'customer')
+        ->setSetting('profile_type', 'shipping')
+        ->setComputed(TRUE);
+      $fields['shipping_method'] = BaseFieldDefinition::create('shipping_method')
+        ->setLabel(t('Shipping method'))
+        ->setComputed(TRUE);
+    }
+
+    $fields['payment_gateway_id'] = BaseFieldDefinition::create('payment_gateway_id')
+      ->setLabel(t('Payment method'))
+      ->setComputed(TRUE);
+    $fields['order_total'] = BaseFieldDefinition::create('map')
+      ->setLabel(t('Order total'))
+      ->setReadOnly(TRUE)
+      ->setComputed(TRUE)
+      ->setCardinality(1)
+      ->setClass(ComputedOrderTotal::class);
+    return $fields;
+  }
+  if ($entity_type->id() === 'commerce_product_variation') {
+    $fields['resolved_price'] = BaseFieldDefinition::create('commerce_price')
+      ->setLabel(t('Resolved price'))
+      ->setReadOnly(TRUE)
+      ->setComputed(TRUE)
+      ->setCardinality(1)
+      ->setSetting('source_field', 'price')
+      ->setClass(ComputedResolvedPrice::class);
+    return $fields;
+  }
+
+  return [];
+}
+
+/**
+ * Implements hook_openapi_generator_alter().
+ *
+ * Prevents Cart API resources from crashing OpenAPI.
+ */
+function commerce_api_openapi_generator_alter(array &$definitions) {
+  if (isset($definitions['jsonapi'])) {
+    $definitions['jsonapi']['class'] = AdjustedJsonApiGenerator::class;
+  }
+}

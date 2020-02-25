@@ -1,0 +1,86 @@
+services:
+  commerce_api.jsonapi_controller_shim:
+    parent: jsonapi.entity_resource
+    class: Drupal\commerce_api\EntityResourceShim
+
+  commerce_api.field_access:
+    class: Drupal\commerce_api\FieldAccess
+    arguments: ['@current_route_match']
+
+  commerce_api.cart_token_session:
+    class: Drupal\commerce_api\CartTokenSession
+    decorates: commerce_cart.cart_session
+    public: false
+    arguments: ['@commerce_api.cart_token_session.inner', '@request_stack', '@tempstore.shared']
+
+  commerce_api.cart_token_session_configuration:
+    class: Drupal\commerce_api\Session\CartTokenSessionConfiguration
+    decorates: session_configuration
+    public: false
+    arguments: ['@commerce_api.cart_token_session_configuration.inner']
+
+  commerce_api.token_cart_convert_subscriber:
+    class: Drupal\commerce_api\EventSubscriber\CartTokenSubscriber
+    arguments: ['@commerce_cart.cart_session', '@tempstore.shared']
+    tags:
+      - { name: event_subscriber }
+
+  # @todo remove after https://www.drupal.org/project/commerce/issues/3088598
+  commerce_api.published_availability_checker:
+    class: Drupal\commerce_api\AvailabilityChecker\PublishedAvailabilityChecker
+    tags:
+      - { name: commerce.availability_checker }
+
+  commerce_api.store_header_resolver:
+    class: Drupal\commerce_api\Resolvers\CurrentStoreHeaderResolver
+    arguments: ['@request_stack', '@entity.repository']
+    tags:
+      - { name: commerce_store.store_resolver, priority: 100 }
+
+  # @todo remove after https://www.drupal.org/project/drupal/issues/3100732
+  commerce_api.normalizer.resource_object.jsonapi:
+    class: Drupal\jsonapi\Normalizer\CommerceApiImposter\MetaResourceObjectNormalizer
+    decorates: 'serializer.normalizer.resource_object.jsonapi'
+    parent: 'serializer.normalizer.resource_object.jsonapi'
+    calls:
+      - [setEventDispatcher, ['@event_dispatcher']]
+      - [setRenderer, ['@renderer']]
+
+  # @todo remove after https://www.drupal.org/project/drupal/issues/3100732
+  commerce_api.normalizer.relationship.jsonapi:
+    class: Drupal\jsonapi\Normalizer\CommerceApiImposter\MetaRelationshipNormalizer
+    decorates: 'serializer.normalizer.relationship.jsonapi'
+    parent: 'serializer.normalizer.relationship.jsonapi'
+    calls:
+      - [setEventDispatcher, ['@event_dispatcher']]
+      - [setRenderer, ['@renderer']]
+
+  commerce_api.response_vary_subscriber:
+    class: Drupal\commerce_api\EventSubscriber\ResponseVarySubscriber
+    tags:
+      - { name: event_subscriber }
+
+  commerce_api.resource_type_build_subscriber:
+    class: Drupal\commerce_api\EventSubscriber\ResourceTypeBuildSubscriber
+    tags:
+      - { name: event_subscriber }
+
+  # @todo remove after https://www.drupal.org/project/drupal/issues/3105318
+  commerce_api.resource_type.repository:
+    public: false
+    class: Drupal\commerce_api\ResourceType\RenamableResourceTypeRepository
+    decorates: jsonapi.resource_type.repository
+    decoration_priority: 5
+    parent: jsonapi.resource_type.repository
+
+  serializer.normalizer.address:
+    class: Drupal\commerce_api\Normalizer\AddressNormalizer
+    tags:
+      # Priority must be higher than serializer.normalizer.primitive_data.
+      - { name: normalizer, priority: 20 }
+
+  paramconverter.commerce_api.entity_uuid:
+    parent: paramconverter.entity
+    class: Drupal\commerce_api\ParamConverter\EntityUuidConverter
+    tags:
+      - { name: paramconverter, priority: 10 }

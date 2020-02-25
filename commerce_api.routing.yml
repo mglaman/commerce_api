@@ -1,0 +1,37 @@
+route_callbacks:
+  - '\Drupal\commerce_api\Routing\Routes::routes'
+commerce_api.current_store:
+  path: '/%jsonapi%/current-store'
+  defaults:
+    _jsonapi_resource: Drupal\commerce_api\Resource\CurrentStoreResource
+    # @todo this may have a different bundle.
+    _jsonapi_resource_types: ['store--online']
+    # @todo defined for openapi definition.
+    resource_type: 'store--online'
+  options:
+    # @todo add a response policy based on this route alone, so dynamic page cache is allowed but not page_cache
+    no_cache: 'TRUE'
+    # @todo defined for openapi definition.
+    parameters:
+      resource_type:
+        type: jsonapi_resource_type
+  requirements:
+    _access: 'TRUE'
+
+commerce_api.webhook_order_fulfillment:
+  path: '/webhooks/fulfillment/{commerce_order}'
+  defaults:
+    _controller: Drupal\commerce_api\Controller\WebhookController::orderFulfillment
+  options:
+    no_cache: 'TRUE'
+  requirements:
+    _entity_access: 'commerce_order.update'
+
+# Prevent JSON:API Schema from crashing on the checkout resource
+# @todo remove after https://www.drupal.org/project/jsonapi_resources/issues/3106977 lands.
+jsonapi_schema.checkout_order--checkout_order.type:
+  path: '/jsonapi/cart/checkout/schema'
+  defaults:
+    _controller: Drupal\commerce_api\Controller\StubJsonApiSchemaController::noop
+  requirements:
+    _access: 'TRUE'
