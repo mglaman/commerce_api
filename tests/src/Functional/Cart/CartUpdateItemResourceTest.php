@@ -30,7 +30,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
     ]);
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
-        'type' => 'order-items--default',
+        'type' => 'order-item--default',
         'id' => $uuid_generator->generate(),
         'attributes' => [
           'quantity' => 5,
@@ -60,7 +60,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
     ]);
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
-        'type' => 'order-items--default',
+        'type' => 'order-item--default',
         'id' => $non_existent_order_item_uuid,
         'attributes' => [
           'quantity' => 5,
@@ -127,7 +127,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
 
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
-        'type' => 'order-items--default',
+        'type' => 'order-item--default',
         'id' => $order_item->uuid(),
         'attributes' => [
           'quantity' => 5,
@@ -159,7 +159,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
 
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
-        'type' => 'order-items--default',
+        'type' => 'order-item--default',
         'id' => $order_item->uuid(),
         'attributes' => [
           'quantity' => 5,
@@ -185,7 +185,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
           'detail' => 'The current user is not allowed to PATCH the selected field (title).',
           'links' => [
             'info' => ['href' => HttpExceptionNormalizer::getInfoUrl(403)],
-            'via' => ['href' => Url::fromRoute('jsonapi.order-items--default.individual', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
+            'via' => ['href' => Url::fromRoute('jsonapi.order-item--default.individual', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
           ],
           'source' => [
             'pointer' => '/data/attributes/title',
@@ -196,7 +196,7 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
 
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
-        'type' => 'order-items--default',
+        'type' => 'order-item--default',
         'id' => $order_item->uuid(),
         'attributes' => [
           'quantity' => -1,
@@ -287,11 +287,11 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
         ],
       ],
       'data' => [
-        'type' => 'order-items--default',
+        'type' => 'order-item--default',
         'id' => $order_item_2->uuid(),
         'links' => [
           'self' => [
-            'href' => Url::fromRoute('jsonapi.order-items--default.individual', ['entity' => $order_item_2->uuid()])->setAbsolute()->toString(),
+            'href' => Url::fromRoute('jsonapi.order-item--default.individual', ['entity' => $order_item_2->uuid()])->setAbsolute()->toString(),
           ],
         ],
         'attributes' => [
@@ -311,29 +311,29 @@ final class CartUpdateItemResourceTest extends CartResourceTestBase {
         'relationships' => [
           'order_id' => [
             'data' => [
-              'type' => 'orders--default',
+              'type' => 'order--default',
               'id' => $cart->uuid(),
             ],
             'links' => [
               'related' => [
-                'href' => Url::fromRoute('jsonapi.order-items--default.order_id.related', ['entity' => $order_item_2->uuid()])->setAbsolute()->toString(),
+                'href' => Url::fromRoute('jsonapi.order-item--default.order_id.related', ['entity' => $order_item_2->uuid()])->setAbsolute()->toString(),
               ],
               'self' => [
-                'href' => Url::fromRoute('jsonapi.order-items--default.order_id.relationship.get', ['entity' => $order_item_2->uuid()])->setAbsolute()->toString(),
+                'href' => Url::fromRoute('jsonapi.order-item--default.order_id.relationship.get', ['entity' => $order_item_2->uuid()])->setAbsolute()->toString(),
               ],
             ],
           ],
           'purchased_entity' => [
             'data' => [
-              'type' => 'product-variations--default',
+              'type' => 'product-variation--default',
               'id' => $this->variation2->uuid(),
             ],
             'links' => [
               'related' => [
-                'href' => Url::fromRoute('jsonapi.order-items--default.purchased_entity.related', ['entity' => $order_item_2->uuid()])->setAbsolute()->toString(),
+                'href' => Url::fromRoute('jsonapi.order-item--default.purchased_entity.related', ['entity' => $order_item_2->uuid()])->setAbsolute()->toString(),
               ],
               'self' => [
-                'href' => Url::fromRoute('jsonapi.order-items--default.purchased_entity.relationship.get', ['entity' => $order_item_2->uuid()])->setAbsolute()->toString(),
+                'href' => Url::fromRoute('jsonapi.order-item--default.purchased_entity.relationship.get', ['entity' => $order_item_2->uuid()])->setAbsolute()->toString(),
               ],
             ],
           ],

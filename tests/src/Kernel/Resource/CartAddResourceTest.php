@@ -38,10 +38,10 @@ final class CartAddResourceTest extends KernelTestBase {
     ]));
 
     $this->expectException(BadRequestHttpException::class);
-    $this->expectExceptionMessage('The provided type (entity_test--entity_test) does not mach the destination resource types (product-variations--default).');
+    $this->expectExceptionMessage('The provided type (entity_test--entity_test) does not mach the destination resource types (product-variation--default).');
 
     $controller = $this->getController();
-    $controller->process($request->reveal(), ['product-variations--default']);
+    $controller->process($request->reveal(), ['product-variation--default']);
   }
 
   /**
@@ -61,7 +61,7 @@ final class CartAddResourceTest extends KernelTestBase {
     $this->expectExceptionMessage('The given entity is not assigned to any store.');
 
     $controller = $this->getController();
-    $controller->process($request->reveal(), ['product-variations--default']);
+    $controller->process($request->reveal(), ['product-variation--default']);
   }
 
   /**
@@ -86,7 +86,7 @@ final class CartAddResourceTest extends KernelTestBase {
     $this->expectExceptionMessage("The given entity can't be purchased from the current store.");
 
     $controller = $this->getController();
-    $controller->process($request->reveal(), ['product-variations--default']);
+    $controller->process($request->reveal(), ['product-variation--default']);
   }
 
   /**
@@ -116,12 +116,12 @@ final class CartAddResourceTest extends KernelTestBase {
     ]));
 
     $controller = $this->getController();
-    $response = $controller->process($request, ['product-variations--default']);
+    $response = $controller->process($request, ['product-variation--default']);
     $this->assertInstanceOf(JsonApiDocumentTopLevel::class, $response->getResponseData());
     $this->assertCount(1, $response->getResponseData()->getData()->getIterator());
     $resource_object = $response->getResponseData()->getData()->getIterator()->offsetGet(0);
     assert($resource_object instanceof ResourceObject);
-    $this->assertEquals('order-items--default', $resource_object->getTypeName());
+    $this->assertEquals('order-item--default', $resource_object->getTypeName());
     $purchased_entity = $resource_object->getField('purchased_entity');
     $this->assertEquals($product_variation->id(), $purchased_entity->target_id);
     $this->assertEquals(1, $resource_object->getField('quantity')->value);
@@ -131,7 +131,7 @@ final class CartAddResourceTest extends KernelTestBase {
         $this->createJsonapiData($product_variation, 1),
       ],
     ]));
-    $response = $controller->process($request, ['product-variations--default']);
+    $response = $controller->process($request, ['product-variation--default']);
     $this->assertCount(1, $response->getResponseData()->getData()->getIterator());
     $resource_object = $response->getResponseData()->getData()->getIterator()->offsetGet(0);
     $this->assertEquals(2, $resource_object->getField('quantity')->value);
@@ -170,7 +170,7 @@ final class CartAddResourceTest extends KernelTestBase {
         $arity1,
       ],
     ]));
-    $response = $controller->process($request, ['product-variations--default']);
+    $response = $controller->process($request, ['product-variation--default']);
     $this->assertCount(2, $response->getResponseData()->getData()->getIterator());
     $resource_object = $response->getResponseData()->getData()->getIterator()->offsetGet(0);
     $this->assertEquals(2, $resource_object->getField('quantity')->value);
@@ -198,11 +198,11 @@ final class CartAddResourceTest extends KernelTestBase {
     ]));
 
     $controller = $this->getController();
-    $response = $controller->process($request, ['product-variations--default']);
+    $response = $controller->process($request, ['product-variation--default']);
 
     $resource_object = $response->getResponseData()->getData()->getIterator()->offsetGet(0);
     assert($resource_object instanceof ResourceObject);
-    $this->assertEquals('order-items--default', $resource_object->getTypeName());
+    $this->assertEquals('order-item--default', $resource_object->getTypeName());
     $purchased_entity = $resource_object->getField('purchased_entity');
     $this->assertEquals($product_variation->id(), $purchased_entity->target_id);
     $this->assertEquals(1, $resource_object->getField('quantity')->value);

@@ -11,6 +11,8 @@ use Drupal\jsonapi\ResourceType\ResourceType;
  */
 final class RenamableResourceType extends ResourceType {
 
+  private $customPath;
+
   /**
    * Instantiates a ResourceType object.
    *
@@ -22,6 +24,8 @@ final class RenamableResourceType extends ResourceType {
    *   The deserialization target class.
    * @param string $type_name
    *   (optional) The resource type name.
+   * @param string $customPath
+   *   (optional) The resource path.
    * @param bool $internal
    *   (optional) Whether the resource type should be internal.
    * @param bool $is_locatable
@@ -33,10 +37,13 @@ final class RenamableResourceType extends ResourceType {
    * @param \Drupal\jsonapi\ResourceType\ResourceTypeField[] $fields
    *   (optional) The resource type fields, keyed by internal field name.
    */
-  public function __construct($entity_type_id, $bundle, $deserialization_target_class, $type_name = NULL, $internal = FALSE, $is_locatable = TRUE, $is_mutable = TRUE, $is_versionable = FALSE, array $fields = []) {
+  public function __construct($entity_type_id, $bundle, $deserialization_target_class, $type_name = NULL, $customPath = NULL, $internal = FALSE, $is_locatable = TRUE, $is_mutable = TRUE, $is_versionable = FALSE, array $fields = []) {
     parent::__construct($entity_type_id, $bundle, $deserialization_target_class, $internal, $is_locatable, $is_mutable, $is_versionable, $fields);
     if ($type_name !== NULL) {
       $this->typeName = $type_name;
+    }
+    if ($customPath !== NULL) {
+      $this->customPath = $customPath;
     }
   }
 
@@ -45,8 +52,11 @@ final class RenamableResourceType extends ResourceType {
    *
    * @todo add a test for resource type paths
    */
-  public function getPath() {
-    return '/' . implode('/', explode('--', $this->typeName));
+  public function getPath(): string {
+    if ($this->customPath === NULL) {
+      return '/' . implode('/', explode('--', $this->typeName));
+    }
+    return $this->customPath;
   }
 
 }

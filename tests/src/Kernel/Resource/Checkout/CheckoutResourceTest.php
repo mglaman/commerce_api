@@ -28,7 +28,7 @@ final class CheckoutResourceTest extends CheckoutResourceTestBase {
   public function testRequestAndResponse(array $test_document, array $expected_document) {
     $controller = $this->getCheckoutResource();
     $document['data'] = [
-      'type' => 'orders--default',
+      'type' => 'order--default',
       'id' => self::TEST_ORDER_UUID,
       'attributes' => $test_document['attributes'] ?? [],
       'relationships' => $test_document['relationships'] ?? [],

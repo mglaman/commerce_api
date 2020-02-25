@@ -8,6 +8,9 @@ use Symfony\Component\Routing\Route;
 
 final class EntityUuidConverter extends EntityConverter {
 
+  /**
+   * {@inheritdoc}
+   */
   public function convert($value, $definition, $name, array $defaults) {
     $entity_type_id = $this->getEntityTypeFromDefaults($definition, $name, $defaults);
     if (Uuid::isValid($value)) {
@@ -23,6 +26,9 @@ final class EntityUuidConverter extends EntityConverter {
     return $this->entityRepository->getCanonical($entity_type_id, $entity_id);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function applies($definition, $name, Route $route) {
     return strpos($name, 'commerce_') === 0;
   }

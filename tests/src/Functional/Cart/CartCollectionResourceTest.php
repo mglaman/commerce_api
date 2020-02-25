@@ -53,10 +53,10 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
     $this->assertEquals([
       'data' => [
         [
-          'type' => 'orders--default',
+          'type' => 'order--default',
           'id' => $cart->uuid(),
           'links' => [
-            'self' => ['href' => Url::fromRoute('jsonapi.orders--default.individual', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
+            'self' => ['href' => Url::fromRoute('jsonapi.order--default.individual', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
           ],
           'attributes' => [
             'order_number' => NULL,
@@ -88,30 +88,30 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
           'relationships' => [
             'store_id' => [
               'data' => [
-                'type' => 'stores--online',
+                'type' => 'store--online',
                 'id' => $this->store->uuid(),
               ],
               'links' => [
-                'self' => ['href' => Url::fromRoute('jsonapi.orders--default.store_id.relationship.get', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
-                'related' => ['href' => Url::fromRoute('jsonapi.orders--default.store_id.related', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
+                'self' => ['href' => Url::fromRoute('jsonapi.order--default.store_id.relationship.get', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
+                'related' => ['href' => Url::fromRoute('jsonapi.order--default.store_id.related', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
               ],
             ],
             'order_items' => [
               'data' => [
                 [
-                  'type' => 'order-items--default',
+                  'type' => 'order-item--default',
                   'id' => $order_item->uuid(),
                 ],
               ],
               'links' => [
-                'self' => ['href' => Url::fromRoute('jsonapi.orders--default.order_items.relationship.get', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
-                'related' => ['href' => Url::fromRoute('jsonapi.orders--default.order_items.related', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
+                'self' => ['href' => Url::fromRoute('jsonapi.order--default.order_items.relationship.get', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
+                'related' => ['href' => Url::fromRoute('jsonapi.order--default.order_items.related', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
               ],
             ],
             'coupons' => [
               'links' => [
-                'self' => ['href' => Url::fromRoute('jsonapi.orders--default.coupons.relationship.get', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
-                'related' => ['href' => Url::fromRoute('jsonapi.orders--default.coupons.related', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
+                'self' => ['href' => Url::fromRoute('jsonapi.order--default.coupons.relationship.get', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
+                'related' => ['href' => Url::fromRoute('jsonapi.order--default.coupons.related', ['entity' => $cart->uuid()])->setAbsolute()->toString()],
               ],
             ],
           ],
@@ -146,10 +146,10 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
       ],
       'included' => [
         [
-          'type' => 'order-items--default',
+          'type' => 'order-item--default',
           'id' => $order_item->uuid(),
           'links' => [
-            'self' => ['href' => Url::fromRoute('jsonapi.order-items--default.individual', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
+            'self' => ['href' => Url::fromRoute('jsonapi.order-item--default.individual', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
           ],
           'attributes' => [
             'title' => $order_item->label(),
@@ -168,31 +168,31 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
           'relationships' => [
             'order_id' => [
               'data' => [
-                'type' => 'orders--default',
+                'type' => 'order--default',
                 'id' => $cart->uuid(),
               ],
               'links' => [
-                'self' => ['href' => Url::fromRoute('jsonapi.order-items--default.order_id.relationship.get', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
-                'related' => ['href' => Url::fromRoute('jsonapi.order-items--default.order_id.related', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
+                'self' => ['href' => Url::fromRoute('jsonapi.order-item--default.order_id.relationship.get', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
+                'related' => ['href' => Url::fromRoute('jsonapi.order-item--default.order_id.related', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
               ],
             ],
             'purchased_entity' => [
               'data' => [
-                'type' => 'product-variations--default',
+                'type' => 'product-variation--default',
                 'id' => $this->variation->uuid(),
               ],
               'links' => [
-                'self' => ['href' => Url::fromRoute('jsonapi.order-items--default.purchased_entity.relationship.get', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
-                'related' => ['href' => Url::fromRoute('jsonapi.order-items--default.purchased_entity.related', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
+                'self' => ['href' => Url::fromRoute('jsonapi.order-item--default.purchased_entity.relationship.get', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
+                'related' => ['href' => Url::fromRoute('jsonapi.order-item--default.purchased_entity.related', ['entity' => $order_item->uuid()])->setAbsolute()->toString()],
               ],
             ],
           ],
         ],
         [
-          'type' => 'product-variations--default',
+          'type' => 'product-variation--default',
           'id' => $this->variation->uuid(),
           'links' => [
-            'self' => ['href' => Url::fromRoute('jsonapi.product-variations--default.individual', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
+            'self' => ['href' => Url::fromRoute('jsonapi.product-variation--default.individual', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
           ],
           'attributes' => [
             'sku' => $this->variation->getSku(),
@@ -205,22 +205,22 @@ final class CartCollectionResourceTest extends CartResourceTestBase {
           'relationships' => [
             'product_variation_type' => [
               'data' => [
-                'type' => 'product-variation-types',
+                'type' => 'product-variation-type',
                 'id' => $product_variation_type->uuid(),
               ],
               'links' => [
-                'self' => ['href' => Url::fromRoute('jsonapi.product-variations--default.product_variation_type.relationship.get', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
-                'related' => ['href' => Url::fromRoute('jsonapi.product-variations--default.product_variation_type.related', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
+                'self' => ['href' => Url::fromRoute('jsonapi.product-variation--default.product_variation_type.relationship.get', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
+                'related' => ['href' => Url::fromRoute('jsonapi.product-variation--default.product_variation_type.related', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
               ],
             ],
             'product_id' => [
               'data' => [
-                'type' => 'products--default',
+                'type' => 'product--default',
                 'id' => $this->variation->getProduct()->uuid(),
               ],
               'links' => [
-                'self' => ['href' => Url::fromRoute('jsonapi.product-variations--default.product_id.relationship.get', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
-                'related' => ['href' => Url::fromRoute('jsonapi.product-variations--default.product_id.related', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
+                'self' => ['href' => Url::fromRoute('jsonapi.product-variation--default.product_id.relationship.get', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
+                'related' => ['href' => Url::fromRoute('jsonapi.product-variation--default.product_id.related', ['entity' => $this->variation->uuid()])->setAbsolute()->toString()],
               ],
             ],
           ],

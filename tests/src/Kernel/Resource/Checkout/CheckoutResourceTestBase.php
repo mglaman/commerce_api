@@ -289,7 +289,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
       ],
       'data' => [
         'id' => self::TEST_ORDER_UUID,
-        'type' => 'orders--default',
+        'type' => 'order--default',
         'attributes' => $attributes + ['order_number' => NULL],
         'relationships' => [
           'coupons' => [
@@ -306,7 +306,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
             'data' => [
               [
                 'id' => self::TEST_ORDER_ITEM_UUID,
-                'type' => 'order-items--default',
+                'type' => 'order-item--default',
               ],
             ],
             'links' => [
@@ -322,7 +322,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
             'data' => [
               // Replaced before assertion.
               'id' => NULL,
-              'type' => 'stores--online',
+              'type' => 'store--online',
             ],
             'links' => [
               'self' => [

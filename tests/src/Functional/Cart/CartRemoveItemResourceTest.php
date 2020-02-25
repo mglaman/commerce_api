@@ -68,7 +68,7 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
         [
-          'type' => 'order-items--default',
+          'type' => 'order-item--default',
           'id' => $not_my_order_item->uuid(),
         ],
       ],
@@ -112,7 +112,7 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
         [
-          'type' => 'order-items--default',
+          'type' => 'order-item--default',
           'id' => $not_my_order_item->uuid(),
         ],
       ],
@@ -154,7 +154,7 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
         [
-          'type' => 'order-items--default',
+          'type' => 'order-item--default',
           'id' => $order_item2->uuid(),
         ],
       ],
@@ -177,7 +177,7 @@ final class CartRemoveItemResourceTest extends CartResourceTestBase {
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
         [
-          'type' => 'order-items--default',
+          'type' => 'order-item--default',
           'id' => $remaining_order_item->uuid(),
         ],
       ],

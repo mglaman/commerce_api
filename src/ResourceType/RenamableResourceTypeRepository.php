@@ -25,18 +25,21 @@ class RenamableResourceTypeRepository extends ResourceTypeRepository {
     $internalize_resource_type = $entity_type->isInternal();
     $fields = $this->getFields($raw_fields, $entity_type, $bundle);
     $type_name = NULL;
+    $custom_path = NULL;
     if (!$internalize_resource_type) {
       $event = RenamableResourceTypeBuildEvent::createFromEntityTypeAndBundle($entity_type, $bundle, $fields);
       $this->eventDispatcher->dispatch(ResourceTypeBuildEvents::BUILD, $event);
       $internalize_resource_type = $event->resourceTypeShouldBeDisabled();
       $fields = $event->getFields();
       $type_name = $event->getResourceTypeName();
+      $custom_path = $event->getCustomPath();
     }
     return new RenamableResourceType(
       $entity_type->id(),
       $bundle,
       $entity_type->getClass(),
       $type_name,
+      $custom_path,
       $internalize_resource_type,
       static::isLocatableResourceType($entity_type, $bundle),
       static::isMutableResourceType($entity_type, $bundle),

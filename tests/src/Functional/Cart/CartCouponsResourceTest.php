@@ -64,7 +64,7 @@ class CartCouponsResourceTest extends CartResourceTestBase {
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
         [
-          'type' => 'promotion-coupons',
+          'type' => 'promotion-coupon',
           'id' => $coupon->getCode(),
         ],
       ],
@@ -120,7 +120,7 @@ class CartCouponsResourceTest extends CartResourceTestBase {
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
         [
-          'type' => 'promotion-coupons',
+          'type' => 'promotion-coupon',
           'id' => '12232',
         ],
       ],
@@ -157,7 +157,7 @@ class CartCouponsResourceTest extends CartResourceTestBase {
     $request_options[RequestOptions::BODY] = Json::encode([
       'data' => [
         [
-          'type' => 'promotion-coupons',
+          'type' => 'promotion-coupon',
           'id' => $coupon->getCode(),
         ],
       ],
