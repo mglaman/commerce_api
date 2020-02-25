@@ -10,4 +10,5 @@ final class JsonapiEvents {
   const COLLECT_RESOURCE_OBJECT_META = 'jsonapi.collect_resource_object_meta';
   const COLLECT_RELATIONSHIP_META = 'jsonapi.collect_relationship_meta';
 
+  const CROSS_BUNDLES_GET_FIELDS = 'jsonapi_cross_bundles.get_fields';
 }

@@ -3,6 +3,8 @@
 namespace Drupal\commerce_api\EventSubscriber;
 
 use Doctrine\Common\Inflector\Inflector;
+use Drupal\commerce_api\Events\CrossBundlesGetFieldsEvent;
+use Drupal\commerce_api\Events\JsonapiEvents;
 use Drupal\commerce_api\Events\RenamableResourceTypeBuildEvent;
 use Drupal\jsonapi\ResourceType\ResourceTypeBuildEvent;
 use Drupal\jsonapi\ResourceType\ResourceTypeBuildEvents;
@@ -19,7 +21,27 @@ final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
   public static function getSubscribedEvents() {
     return [
       ResourceTypeBuildEvents::BUILD => 'onResourceTypeBuild',
+      JsonapiEvents::CROSS_BUNDLES_GET_FIELDS => 'onCrossBundlesFields',
     ];
+  }
+
+  /**
+   * Fix broken `type` field renames in Cross Bundles module.
+   *
+   * @param \Drupal\commerce_api\Events\CrossBundlesGetFieldsEvent $event
+   *   The event.
+   */
+  public function onCrossBundlesFields(CrossBundlesGetFieldsEvent $event) {
+    $entity_type_id = $event->getEntityType()->id();
+    if (strpos($entity_type_id, 'commerce_') === 0) {
+      $fields = $event->getFields();
+      foreach ($fields as $field_name => $field) {
+        if ($field->getPublicName() === $entity_type_id . '_type') {
+          $fields[$field_name] = $field->withPublicName(str_replace('commerce_', '', $field->getPublicName()));
+        }
+      }
+      $event->setFields($fields);
+    }
   }
 
   /**
@@ -37,7 +59,7 @@ final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
       return;
     }
     // Remove commerce_ prefix and pluralize.
-    list($entity_type_id, $bundle) = explode('--', $event->getResourceTypeName());
+    [$entity_type_id, $bundle] = explode('--', $event->getResourceTypeName());
     $resource_type_name_base = Inflector::pluralize(str_replace('commerce_', '', $entity_type_id));
     if ($entity_type_id !== $bundle) {
       $resource_type_bundle = str_replace('commerce_', '', $bundle);

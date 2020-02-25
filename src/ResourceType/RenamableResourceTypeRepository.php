@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Exception\PreconditionFailedHttpException;
  * @todo remove after https://www.drupal.org/project/drupal/issues/3105318
  * @todo add integration test coverage with jsonapi_cross_bundles
  */
-final class RenamableResourceTypeRepository extends ResourceTypeRepository {
+class RenamableResourceTypeRepository extends ResourceTypeRepository {
 
   /**
    * {@inheritdoc}
@@ -47,6 +47,8 @@ final class RenamableResourceTypeRepository extends ResourceTypeRepository {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo fix regression from https://www.drupal.org/project/drupal/issues/3034786
    */
   public function getByTypeName($type_name) {
     $resource_types = $this->all();
@@ -55,6 +57,8 @@ final class RenamableResourceTypeRepository extends ResourceTypeRepository {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo fix regression from https://www.drupal.org/project/drupal/issues/3034786
    */
   public function get($entity_type_id, $bundle) {
     assert(is_string($bundle) && !empty($bundle), 'A bundle ID is required. Bundleless entity types should pass the entity type ID again.');

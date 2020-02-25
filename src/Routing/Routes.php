@@ -45,7 +45,7 @@ class Routes extends RouteProviderBase {
     }
     // Set a resource type so entity UUID parameter conversion works.
     // This also will upcast the resource type and allow for OpenAPI support.
-    $routes->addDefaults([JsonapiRoutes::RESOURCE_TYPE_KEY => 'commerce_order--virtual']);
+    $routes->addDefaults([JsonapiRoutes::RESOURCE_TYPE_KEY => 'orders--virtual']);
   }
 
   /**
