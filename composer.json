@@ -10,7 +10,7 @@
     "minimum-stability": "dev",
     "support": {
         "issues": "https://www.drupal.org/project/issues/commerce_api",
-        "source": "http://cgit.drupalcode.org/commerce_api"
+        "source": "https://git.drupalcode.org/project/commerce_api"
     },
     "require": {
         "drupal/commerce": "2.x-dev",
