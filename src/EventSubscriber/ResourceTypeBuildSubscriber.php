@@ -71,7 +71,7 @@ final class ResourceTypeBuildSubscriber implements EventSubscriberInterface {
       $resource_custom_path = Inflector::pluralize($resource_type_name_base);
     }
     $event->setResourceTypeName(str_replace('_', '-', $resource_type_name));
-    $event->setCustomPath('/' . $resource_custom_path);
+    $event->setCustomPath('/' . str_replace('_', '-', $resource_custom_path));
 
     foreach ($event->getFields() as $field) {
       // Disable the internal Drupal identifiers.

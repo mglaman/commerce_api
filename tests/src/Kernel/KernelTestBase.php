@@ -27,6 +27,7 @@ abstract class KernelTestBase extends CommerceKernelTestBase {
     'path',
     'physical',
     'commerce_shipping',
+    'commerce_payment',
     'commerce_promotion',
     'commerce_product',
     'commerce_cart',
