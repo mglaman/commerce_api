@@ -26,12 +26,3 @@ commerce_api.webhook_order_fulfillment:
     no_cache: 'TRUE'
   requirements:
     _entity_access: 'commerce_order.update'
-
-# Prevent JSON:API Schema from crashing on the checkout resource
-# @todo remove after https://www.drupal.org/project/jsonapi_resources/issues/3106977 lands.
-jsonapi_schema.checkout_order--checkout_order.type:
-  path: '/jsonapi/cart/checkout/schema'
-  defaults:
-    _controller: Drupal\commerce_api\Controller\StubJsonApiSchemaController::noop
-  requirements:
-    _access: 'TRUE'
