@@ -2,12 +2,13 @@
 
 namespace Drupal\commerce_api\Plugin\Field\FieldType;
 
+use Drupal\commerce_api\TypedData\AddressDataDefinition;
+use Drupal\commerce_api\TypedData\TaxNumberDataDefinition;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\TypedData\EntityDataDefinition;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\DataReferenceDefinition;
 
 /**
@@ -41,11 +42,11 @@ final class OrderProfile extends FieldItemBase {
     $fields = $entity_field_manager->getFieldDefinitions('profile', $profile_type);
     foreach ($fields as $field) {
       if ($field->getType() === 'address') {
-        $data_definition = DataDefinition::create('address')
+        $data_definition = AddressDataDefinition::create('address')
           ->setLabel(t('Address'));
       }
       elseif ($field->getType() === 'commerce_tax_number') {
-        $data_definition = DataDefinition::create('tax_number')
+        $data_definition = TaxNumberDataDefinition::create('tax_number')
           ->setLabel(t('Tax number'));
       }
       else {

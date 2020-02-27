@@ -6,13 +6,13 @@ use Drupal\Core\TypedData\Plugin\DataType\Map;
 
 /**
  * @DataType(
- *   id = "address",
- *   label = @Translation("Address"),
- *   description = @Translation("An address."),
- *   definition_class = "\Drupal\commerce_api\TypedData\AddressDataDefinition"
+ *   id = "adjustment",
+ *   label = @Translation("Adjustment"),
+ *   description = @Translation("Adjustment."),
+ *   definition_class = "\Drupal\commerce_api\TypedData\AdjustmentDataDefinition"
  * )
  */
-final class Address extends Map {
+final class Adjustment extends Map {
 
   /**
    * The value.

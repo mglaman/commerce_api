@@ -5,7 +5,7 @@
  * Provides hooks.
  */
 
-use Drupal\commerce_api\Plugin\Field\ComputedOrderTotal;
+use Drupal\commerce_api\Plugin\DataType\FormattedPrice;
 use Drupal\commerce_api\Plugin\Field\ComputedResolvedPrice;
 use Drupal\commerce_api\Plugin\openapi\OpenApiGenerator\AdjustedJsonApiGenerator;
 use Drupal\commerce_cart\CartSessionInterface;
@@ -112,12 +112,9 @@ function commerce_api_entity_base_field_info(EntityTypeInterface $entity_type) {
     $fields['payment_gateway_id'] = BaseFieldDefinition::create('payment_gateway_id')
       ->setLabel(t('Payment method'))
       ->setComputed(TRUE);
-    $fields['order_total'] = BaseFieldDefinition::create('map')
+    $fields['order_total'] = BaseFieldDefinition::create('order_total')
       ->setLabel(t('Order total'))
-      ->setReadOnly(TRUE)
-      ->setComputed(TRUE)
-      ->setCardinality(1)
-      ->setClass(ComputedOrderTotal::class);
+      ->setComputed(TRUE);
     return $fields;
   }
   if ($entity_type->id() === 'commerce_product_variation') {
@@ -142,5 +139,14 @@ function commerce_api_entity_base_field_info(EntityTypeInterface $entity_type) {
 function commerce_api_openapi_generator_alter(array &$definitions) {
   if (isset($definitions['jsonapi'])) {
     $definitions['jsonapi']['class'] = AdjustedJsonApiGenerator::class;
+  }
+}
+
+/**
+ * Implements hook_data_type_info_alter().
+ */
+function commerce_api_data_type_info_alter(&$data_types) {
+  if (isset($data_types['formatted_price'])) {
+    $data_types['formatted_price']['class'] = FormattedPrice::class;
   }
 }

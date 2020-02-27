@@ -3,6 +3,8 @@
 namespace Drupal\Tests\commerce_api\Functional;
 
 use Drupal\commerce_order\Entity\OrderType;
+use Drupal\commerce_price\Comparator\NumberComparator;
+use Drupal\commerce_price\Comparator\PriceComparator;
 use Drupal\commerce_product\Entity\ProductVariationType;
 use Drupal\commerce_store\StoreCreationTrait;
 use Drupal\Component\Serialization\Json;
@@ -10,6 +12,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\jsonapi\Functional\JsonApiRequestTestTrait;
 use Psr\Http\Message\ResponseInterface;
+use SebastianBergmann\Comparator\Factory as PhpUnitComparatorFactory;
 
 abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
 
@@ -66,6 +69,11 @@ abstract class CheckoutApiResourceTestBase extends BrowserTestBase {
    */
   protected function setUp() {
     parent::setUp();
+
+    $factory = PhpUnitComparatorFactory::getInstance();
+    $factory->register(new NumberComparator());
+    $factory->register(new PriceComparator());
+
     $this->store = $this->createStore();
 
     /** @var \Drupal\commerce_product\Entity\ProductVariationTypeInterface $product_variation_type */

@@ -13,10 +13,12 @@ build:
       run_tests.standard:
         types: 'PHPUnit-Unit,PHPUnit-Kernel,PHPUnit-Functional'
         testgroups: '--all'
-        suppress-deprecations: false
+        # @todo put to `false` after https://www.drupal.org/project/jsonapi_hypermedia/issues/3111905
+        suppress-deprecations: true
       run_tests.javascript:
         concurrency: 15
         types: 'PHPUnit-FunctionalJavascript'
         testgroups: '--all'
-        suppress-deprecations: false
+        # @todo put to `false` after https://www.drupal.org/project/jsonapi_hypermedia/issues/3111905
+        suppress-deprecations: true
         halt-on-fail: false

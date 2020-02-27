@@ -65,21 +65,35 @@ final class ComputedOrderTotalTest extends KernelTestBase {
     assert($order instanceof Order);
 
     $currency_formatter = $this->container->get('commerce_price.currency_formatter');
+    assert($currency_formatter !== NULL);
+
     $computed_order_total = $order->get('order_total')->first();
+    $computed_order_total_value = $computed_order_total->getValue();
     $this->assertEquals([
       'subtotal' => $price,
-      'adjustments' => array_map(static function (Adjustment $adjustment) use ($currency_formatter) {
-        $adjustment_amount = $adjustment->getAmount();
+      'adjustments' => array_map(static function (Adjustment $adjustment) {
         $data = $adjustment->toArray();
         $data['amount'] = $data['amount']->toArray();
-        $data['amount']['formatted'] = $currency_formatter->format(
-          $adjustment_amount->getNumber(), $adjustment_amount->getCurrencyCode()
-        );
         $data['total'] = $data['amount'];
         return $data;
       }, $expected_adjustments),
       'total' => $expected_total_price,
-    ], $computed_order_total->getValue());
+    ], $computed_order_total_value);
+
+    $serializer = $this->container->get('serializer');
+    $normalized = $serializer->normalize($computed_order_total);
+    $expected_normalized = [
+      'subtotal' => $price + ['formatted' => $currency_formatter->format($price['number'], $price['currency_code'])],
+      'adjustments' => array_map(static function (Adjustment $adjustment) use ($currency_formatter) {
+        $data = $adjustment->toArray();
+        $data['amount'] = $data['amount']->toArray();
+        $data['amount']['formatted'] = $currency_formatter->format($data['amount']['number'], $data['amount']['currency_code']);
+        $data['total'] = $data['amount'];
+        return $data;
+      }, $expected_adjustments),
+      'total' => $expected_total_price + ['formatted' => $currency_formatter->format($expected_total_price['number'], $expected_total_price['currency_code'])],
+    ];
+    $this->assertEquals($expected_normalized, $normalized);
   }
 
   /**
@@ -99,13 +113,13 @@ final class ComputedOrderTotalTest extends KernelTestBase {
 
     yield [
       'JSONAPI_SKU',
-      ['number' => '10.0', 'currency_code' => 'USD', 'formatted' => '$10.00'],
+      ['number' => '10.0', 'currency_code' => 'USD'],
       [],
-      ['number' => '10.0', 'currency_code' => 'USD', 'formatted' => '$10.00'],
+      ['number' => '10.0', 'currency_code' => 'USD'],
     ];
     yield [
       'JSONAPI_SKU',
-      ['number' => '10.0', 'currency_code' => 'USD', 'formatted' => '$10.00'],
+      ['number' => '10.0', 'currency_code' => 'USD'],
       [
         new Adjustment([
           'type' => 'custom',
@@ -113,7 +127,7 @@ final class ComputedOrderTotalTest extends KernelTestBase {
           'amount' => new Price('-3.00', 'USD'),
         ]),
       ],
-      ['number' => '7.0', 'currency_code' => 'USD', 'formatted' => '$7.00'],
+      ['number' => '7.0', 'currency_code' => 'USD'],
     ];
   }
 
