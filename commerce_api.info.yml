@@ -1,7 +1,7 @@
 name: 'Commerce API'
 type: module
 description: 'Provides an HTTP interface to interact with Drupal Commerce.'
-core: 8.x
+core_version_requirement: ^8.8 || ^9
 package: 'Commerce (web services)'
 dependencies:
   - commerce:commerce
