@@ -62,7 +62,7 @@ final class CartTokenSubscriber implements EventSubscriberInterface {
     // access to CheckoutController.
     $events[KernelEvents::REQUEST][] = ['onRequest', 100];
 
-    $events[KernelEvents::RESPONSE][] = ['onResponse'];
+    $events[KernelEvents::RESPONSE][] = ['onResponse', -10];
     return $events;
   }
 
@@ -99,9 +99,11 @@ final class CartTokenSubscriber implements EventSubscriberInterface {
     $request = $event->getRequest();
     if ($request->headers->has(CartTokenSession::HEADER_NAME)) {
       $response = $event->getResponse();
-      if ($response->isCacheable()) {
-        $response->setVary(CartTokenSession::HEADER_NAME, FALSE);
-      }
+      // The Vary header gets mangled with CORS.
+      // @see https://www.drupal.org/project/commerce_api/issues/3116590
+      $vary = array_filter($response->getVary());
+      $vary[] = CartTokenSession::HEADER_NAME;
+      $response->setVary(implode(', ', $vary));
     }
   }
 
