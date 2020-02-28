@@ -12,8 +12,16 @@ use GuzzleHttp\RequestOptions;
  * Tests the Checkout resource.
  *
  * @group commerce_api
+ * @requires module jsonapi_schema
  */
 final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected static $modules = [
+    'jsonapi_schema',
+  ];
 
   /**
    * Test the checkout response.
@@ -123,6 +131,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
           'href' => Url::fromRoute('commerce_api.checkout.shipping_methods', ['commerce_order' => $test_cart_id])->setAbsolute()->toString(),
         ],
         'self' => ['href' => Url::fromRoute('jsonapi.order--default.individual', ['entity' => $test_cart_id])->setAbsolute()->toString()],
+        'describedby' => ['href' => Url::fromRoute('jsonapi_schema.order--default.type')->setAbsolute()->toString()],
       ],
     ], $checkout_body['data']);
 
@@ -143,43 +152,7 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
     ]);
     $checkout_body = Json::decode((string) $response->getBody());
     $this->assertSame(200, $response->getStatusCode(), var_export($checkout_body, TRUE));
-
-    $url = Url::fromRoute('commerce_api.checkout.shipping_methods', ['commerce_order' => $test_cart_id]);
-    $response = $this->performRequest('GET', $url);
-    $shipping_methods_body = Json::decode((string) $response->getBody());
-    $this->assertSame(200, $response->getStatusCode(), var_export($shipping_methods_body, TRUE));
-    $this->assertEquals([
-      [
-        'id' => '2--default',
-        'type' => 'shipping-rate-option',
-        'attributes' => [
-          'label' => 'Flat rate',
-          'methodId' => '2',
-          'serviceId' => 'default',
-          'amount' => [
-            'number' => '20',
-            'currency_code' => 'USD',
-          ],
-          'deliveryDate' => NULL,
-          'description' => NULL,
-        ],
-      ],
-      [
-        'id' => '1--default',
-        'type' => 'shipping-rate-option',
-        'attributes' => [
-          'label' => 'Flat rate',
-          'methodId' => '1',
-          'serviceId' => 'default',
-          'amount' => [
-            'number' => '5',
-            'currency_code' => 'USD',
-          ],
-          'deliveryDate' => NULL,
-          'description' => NULL,
-        ],
-      ],
-    ], $shipping_methods_body['data']);
+    $this->assertEquals(self::getShippingMethodsRelationship(), $checkout_body['data']['meta']['shipping_rates']);
 
     $url = Url::fromRoute('commerce_api.checkout', ['commerce_order' => $test_cart_id]);
     $response = $this->performRequest('PATCH', $url, [
@@ -286,36 +259,12 @@ final class CheckoutResourceTest extends CheckoutApiResourceTestBase {
             ],
           ],
         ],
-        'shipping_rates' => [
-          [
-            'id' => '2--default',
-            'label' => 'Flat rate',
-            'methodId' => '2',
-            'serviceId' => 'default',
-            'amount' => [
-              'number' => '20',
-              'currency_code' => 'USD',
-            ],
-            'deliveryDate' => NULL,
-            'description' => NULL,
-          ],
-          [
-            'id' => '1--default',
-            'label' => 'Flat rate',
-            'methodId' => '1',
-            'serviceId' => 'default',
-            'amount' => [
-              'number' => '5',
-              'currency_code' => 'USD',
-            ],
-            'deliveryDate' => NULL,
-            'description' => NULL,
-          ],
-        ],
+        'shipping_rates' => self::getShippingMethodsRelationship(),
       ],
       'links' => [
         'shipping-methods' => ['href' => Url::fromRoute('commerce_api.checkout.shipping_methods', ['commerce_order' => $test_cart_id])->setAbsolute()->toString()],
         'self' => ['href' => Url::fromRoute('jsonapi.order--default.individual', ['entity' => $test_cart_id])->setAbsolute()->toString()],
+        'describedby' => ['href' => Url::fromRoute('jsonapi_schema.order--default.type')->setAbsolute()->toString()],
       ],
     ], $checkout_body['data']);
 

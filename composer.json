@@ -19,6 +19,7 @@
         "drupal/core": "^8.8 || ^9.0"
     },
     "require-dev": {
-        "drupal/commerce_shipping": "2.x-dev"
+        "drupal/commerce_shipping": "2.x-dev",
+        "drupal/jsonapi_schema": "^1.0@alpha"
     }
 }
