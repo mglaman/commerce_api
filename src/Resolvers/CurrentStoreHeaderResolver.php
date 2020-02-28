@@ -43,8 +43,7 @@ final class CurrentStoreHeaderResolver implements StoreResolverInterface {
     $request = $this->requestStack->getCurrentRequest();
     if ($request && $request->headers->has('Commerce-Current-Store')) {
       $current_store_uuid = $request->headers->get('Commerce-Current-Store');
-      $current_store = $this->entityRepository->loadEntityByUuid('commerce_store',
-        $current_store_uuid);
+      $current_store = $this->entityRepository->loadEntityByUuid('commerce_store', $current_store_uuid);
       if ($current_store instanceof StoreInterface) {
         return $current_store;
       }

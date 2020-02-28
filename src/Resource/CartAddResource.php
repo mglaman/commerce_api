@@ -225,19 +225,14 @@ final class CartAddResource extends CartResourceBase {
    */
   private function selectStore(PurchasableEntityInterface $entity): StoreInterface {
     $stores = $entity->getStores();
-    if (count($stores) === 1) {
-      $store = reset($stores);
-    }
-    elseif (count($stores) === 0) {
+    if (count($stores) === 0) {
       // Malformed entity.
       throw new UnprocessableEntityHttpException('The given entity is not assigned to any store.');
     }
-    else {
-      $store = $this->currentStore->getStore();
-      if (!in_array($store, $stores, TRUE)) {
-        // Indicates that the site listings are not filtered properly.
-        throw new UnprocessableEntityHttpException("The given entity can't be purchased from the current store.");
-      }
+    $store = $this->currentStore->getStore();
+    if (!in_array($store, $stores, TRUE)) {
+      // Indicates that the site listings are not filtered properly.
+      throw new UnprocessableEntityHttpException("The given entity can't be purchased from the current store.");
     }
 
     return $store;
