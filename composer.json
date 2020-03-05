@@ -20,7 +20,7 @@
         "symfony/inflector": "^4.3"
     },
     "require-dev": {
-        "drupal/commerce_shipping": "2.x-dev",
+        "drupal/commerce_shipping": "^2.0@rc",
         "drupal/jsonapi_schema": "^1.0@alpha"
     }
 }
