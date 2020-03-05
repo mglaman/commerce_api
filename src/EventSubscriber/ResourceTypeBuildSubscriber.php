@@ -2,13 +2,13 @@
 
 namespace Drupal\commerce_api\EventSubscriber;
 
-use Doctrine\Common\Inflector\Inflector;
 use Drupal\commerce_api\Events\CrossBundlesGetFieldsEvent;
 use Drupal\commerce_api\Events\JsonapiEvents;
 use Drupal\commerce_api\Events\RenamableResourceTypeBuildEvent;
 use Drupal\jsonapi\ResourceType\ResourceTypeBuildEvent;
 use Drupal\jsonapi\ResourceType\ResourceTypeBuildEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Inflector\Inflector;
 
 /**
  * Modifies the Commerce resource types to be less Drupaly.

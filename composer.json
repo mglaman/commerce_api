@@ -16,7 +16,8 @@
         "drupal/commerce": "^2.17",
         "drupal/jsonapi_hypermedia": "^1.0",
         "drupal/jsonapi_resources": "^1.0@beta",
-        "drupal/core": "^8.8 || ^9.0"
+        "drupal/core": "^8.8 || ^9.0",
+        "symfony/inflector": "~3.4.0"
     },
     "require-dev": {
         "drupal/commerce_shipping": "2.x-dev",
