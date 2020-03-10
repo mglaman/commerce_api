@@ -19,7 +19,6 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\jsonapi\Entity\EntityValidationTrait;
 use Drupal\jsonapi\JsonApiResource\ResourceIdentifier;
-use Drupal\jsonapi\JsonApiResource\ResourceIdentifierInterface;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Drupal\jsonapi\JsonApiResource\ResourceObjectData;
 use Drupal\jsonapi\ResourceResponse;
@@ -30,6 +29,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 final class CartAddResource extends CartResourceBase {
 
   use EntityValidationTrait;
+  use ResourceTypeHelperTrait;
 
   /**
    * The JSON:API controller.
@@ -51,13 +51,6 @@ final class CartAddResource extends CartResourceBase {
    * @var \Drupal\commerce_order\Resolver\ChainOrderTypeResolverInterface
    */
   private $chainOrderTypeResolver;
-
-  /**
-   * The entity type repository.
-   *
-   * @var \Drupal\Core\Entity\EntityRepositoryInterface
-   */
-  private $entityRepository;
 
   /**
    * The renderer.
@@ -140,7 +133,10 @@ final class CartAddResource extends CartResourceBase {
       assert($order_item_storage instanceof OrderItemStorageInterface);
       foreach ($resource_identifiers as $resource_identifier) {
         $meta = $resource_identifier->getMeta();
-        $purchased_entity = $this->getPurchasableEntityFromResourceIdentifier($resource_identifier);
+        $purchased_entity = $this->getEntityFromResourceIdentifier($resource_identifier, PurchasableEntityInterface::class);
+        if (!$purchased_entity instanceof PurchasableEntityInterface) {
+          throw new UnprocessableEntityHttpException(sprintf('The entity %s does not exist.', $resource_identifier->getId()));
+        }
         $store = $this->selectStore($purchased_entity);
         $order_item = $order_item_storage->createFromPurchasableEntity($purchased_entity, ['quantity' => $meta['quantity'] ?? 1]);
         // @todo If processing multiple items, this could fail halfway through.
@@ -161,30 +157,6 @@ final class CartAddResource extends CartResourceBase {
 
     $primary_data = new ResourceObjectData($order_items);
     return $this->createJsonapiResponse($primary_data, $request);
-  }
-
-  /**
-   * Get the purchasable entity from a resource identifier.
-   *
-   * @param \Drupal\jsonapi\JsonApiResource\ResourceIdentifierInterface $resource_identifier
-   *   The resource identifier.
-   *
-   * @return \Drupal\commerce\PurchasableEntityInterface
-   *   The purchasable entity.
-   *
-   * @throws \Drupal\Core\Entity\EntityStorageException
-   */
-  private function getPurchasableEntityFromResourceIdentifier(ResourceIdentifierInterface $resource_identifier) {
-    $purchased_entity = $this->entityRepository->loadEntityByUuid(
-      $resource_identifier->getResourceType()->getEntityTypeId(),
-      $resource_identifier->getId()
-    );
-    if (!$purchased_entity || !$purchased_entity instanceof PurchasableEntityInterface) {
-      throw new UnprocessableEntityHttpException(sprintf('The purchasable entity %s does not exist.', $resource_identifier->getId()));
-    }
-    $purchased_entity = $this->entityRepository->getTranslationFromContext($purchased_entity, NULL, ['operation' => 'entity_upcast']);
-    assert($purchased_entity instanceof PurchasableEntityInterface);
-    return $purchased_entity;
   }
 
   /**
