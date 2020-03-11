@@ -1,5 +1,6 @@
 route_callbacks:
   - '\Drupal\commerce_api\Routing\Routes::routes'
+  - '\Drupal\commerce_api\Routing\WishlistIntegrationRoutes::routes'
 commerce_api.current_store:
   path: '/%jsonapi%/current-store'
   defaults:

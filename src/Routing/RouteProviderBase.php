@@ -139,6 +139,25 @@ abstract class RouteProviderBase implements ContainerInjectionInterface {
   }
 
   /**
+   * Get resource types with an entity interface implementation.
+   *
+   * @param string $interface
+   *   The implemented interface.
+   *
+   * @return \Drupal\jsonapi\ResourceType\ResourceType[]
+   *   The resource types.
+   */
+  protected function getResourceTypeForClassImplementation(string $interface): array {
+    if (!isset($this->entityTypeResourceTypes[$interface])) {
+      $this->entityTypeResourceTypes[$interface] = array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) use ($interface) {
+        $entity_type = $this->entityTypeManager->getDefinition($resource_type->getEntityTypeId());
+        return $entity_type->entityClassImplements($interface);
+      });
+    }
+    return $this->entityTypeResourceTypes[$interface];
+  }
+
+  /**
    * Get the resource type names from an array of resource types.
    *
    * @param array $resource_types

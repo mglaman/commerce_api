@@ -14,7 +14,6 @@ use Drupal\commerce_api\Resource\CartUpdateItemResource;
 use Drupal\commerce_api\Resource\CheckoutResource;
 use Drupal\commerce_api\Resource\PaymentGateway\OnReturnResource;
 use Drupal\commerce_api\Resource\ShippingMethodsResource;
-use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\jsonapi\Routing\Routes as JsonapiRoutes;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -108,10 +107,7 @@ class Routes extends RouteProviderBase {
    *   The route.
    */
   protected function cartAdd() {
-    $purchasable_entity_resource_types = array_filter($this->resourceTypeRepository->all(), function (ResourceType $resource_type) {
-      $entity_type = $this->entityTypeManager->getDefinition($resource_type->getEntityTypeId());
-      return $entity_type->entityClassImplements(PurchasableEntityInterface::class);
-    });
+    $purchasable_entity_resource_types = $this->getResourceTypeForClassImplementation(PurchasableEntityInterface::class);
     $order_item_resource_types = $this->getResourceTypesForEntityType('commerce_order_item');
 
     $route = new Route('/cart/add');
