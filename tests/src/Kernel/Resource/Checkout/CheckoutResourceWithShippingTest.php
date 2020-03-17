@@ -112,6 +112,10 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
             'label' => 'Flat rate',
             'methodId' => '2',
             'serviceId' => 'default',
+            'originalAmount' => [
+              'number' => '20',
+              'currency_code' => 'USD',
+            ],
             'amount' => [
               'number' => '20',
               'currency_code' => 'USD',
@@ -127,6 +131,10 @@ final class CheckoutResourceWithShippingTest extends CheckoutResourceTestBase {
             'label' => 'Flat rate',
             'methodId' => '1',
             'serviceId' => 'default',
+            'originalAmount' => [
+              'number' => '5',
+              'currency_code' => 'USD',
+            ],
             'amount' => [
               'number' => '5',
               'currency_code' => 'USD',

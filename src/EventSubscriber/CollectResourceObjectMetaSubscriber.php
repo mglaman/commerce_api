@@ -131,6 +131,7 @@ class CollectResourceObjectMetaSubscriber implements EventSubscriberInterface {
             'label' => $service->getLabel(),
             'methodId' => $shipping_method_id,
             'serviceId' => $service->getId(),
+            'originalAmount' => $rate->getOriginalAmount()->toArray(),
             'amount' => $rate->getAmount()->toArray(),
             'deliveryDate' => $delivery_date ? $delivery_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT) : NULL,
             'description' => $rate->getDescription(),
