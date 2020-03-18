@@ -8,7 +8,6 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
-use Symfony\Component\DependencyInjection\Container;
 
 class FieldAccess implements FieldAccessInterface {
 
@@ -40,12 +39,15 @@ class FieldAccess implements FieldAccessInterface {
     }
 
     $entity_type_id = $field_definition->getTargetEntityTypeId();
-    $method = 'check' . Container::camelize("{$entity_type_id}_field_access");
-
-    if (method_exists($this, $method)) {
-      return $this->{$method}($operation, $field_definition, $account, $items) ?: AccessResult::neutral();
+    if ($operation === 'edit') {
+      $disallowed = $this->getProtectedEditFieldNames($entity_type_id);
+      return AccessResult::forbiddenIf(in_array($field_definition->getName(), $disallowed, TRUE));
     }
     if ($operation === 'view') {
+      $allowed = $this->getAllowedViewFieldNames($entity_type_id);
+      if (!empty($allowed)) {
+        return AccessResult::forbiddenIf(!in_array($field_definition->getName(), $allowed, TRUE));
+      }
       // Disallow access to generic entity fields for any other entity which
       // has been normalized and being returns (like purchasable entities.)
       $disallowed_fields = [
@@ -63,36 +65,47 @@ class FieldAccess implements FieldAccessInterface {
   }
 
   /**
-   * Allowed commerce_order fields.
+   * Gets protected fields that cannot be edited for an entity type.
    *
-   * @param string $operation
-   *   The operation to be performed.
-   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
-   *   The field definition.
-   * @param \Drupal\Core\Session\AccountInterface $account
-   *   The user account to check.
-   * @param \Drupal\Core\Field\FieldItemListInterface $items
-   *   (optional) The entity field object for which to check access, or NULL if
-   *   access is checked for the field definition, without any specific value
-   *   available. Defaults to NULL.
+   * @param string $entity_type_id
+   *   The entity type ID.
    *
-   * @return \Drupal\Core\Access\AccessResultInterface
-   *   The allowed fields.
+   * @return array
+   *   The array of field names.
    */
-  protected function checkCommerceOrderFieldAccess($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
-    if ($operation === 'edit') {
-      $disallowed = [
+  protected function getProtectedEditFieldNames(string $entity_type_id): array {
+    $field_names = [
+      'commerce_order' => [
         'order_number',
         'store_id',
         'adjustments',
         'coupons',
         'order_total',
         'total_price',
-      ];
-      return AccessResult::forbiddenIf(in_array($field_definition->getName(), $disallowed, TRUE));
-    }
-    if ($operation === 'view') {
-      $allowed = [
+      ],
+      'commerce_order_item' => [
+        'purchased_entity',
+        'title',
+        'adjustments',
+        'unit_price',
+        'total_price',
+      ],
+    ];
+    return $field_names[$entity_type_id] ?? [];
+  }
+
+  /**
+   * Get allowed fields to be displayed for an entity type.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID.
+   *
+   * @return array
+   *   The array of field names.
+   */
+  protected function getAllowedViewFieldNames(string $entity_type_id): array {
+    $field_names = [
+      'commerce_order' => [
         'order_id',
         'uuid',
         'order_number',
@@ -109,43 +122,8 @@ class FieldAccess implements FieldAccessInterface {
         'order_total',
         'total_price',
         'order_items',
-      ];
-      return AccessResult::forbiddenIf(!in_array($field_definition->getName(), $allowed, TRUE));
-    }
-
-    return AccessResult::neutral();
-  }
-
-  /**
-   * Allowed commerce_order_item fields.
-   *
-   * @param string $operation
-   *   The operation to be performed.
-   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
-   *   The field definition.
-   * @param \Drupal\Core\Session\AccountInterface $account
-   *   The user account to check.
-   * @param \Drupal\Core\Field\FieldItemListInterface $items
-   *   (optional) The entity field object for which to check access, or NULL if
-   *   access is checked for the field definition, without any specific value
-   *   available. Defaults to NULL.
-   *
-   * @return \Drupal\Core\Access\AccessResultInterface
-   *   The allowed fields.
-   */
-  protected function checkCommerceOrderItemFieldAccess($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
-    if ($operation === 'edit') {
-      $disallowed = [
-        'purchased_entity',
-        'title',
-        'adjustments',
-        'unit_price',
-        'total_price',
-      ];
-      return AccessResult::forbiddenIf(in_array($field_definition->getName(), $disallowed, TRUE));
-    }
-    if ($operation === 'view') {
-      $allowed = [
+      ],
+      'commerce_order_item' => [
         'order_id',
         'order_item_id',
         'uuid',
@@ -157,11 +135,9 @@ class FieldAccess implements FieldAccessInterface {
         'order_total',
         'unit_price',
         'total_price',
-      ];
-      return AccessResult::forbiddenIf(!in_array($field_definition->getName(), $allowed, TRUE));
-    }
-
-    return AccessResult::neutral();
+      ],
+    ];
+    return $field_names[$entity_type_id] ?? [];
   }
 
 }
