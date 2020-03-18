@@ -4,9 +4,6 @@ namespace Drupal\commerce_api\Resource;
 
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Event\OrderEvent;
-use Drupal\commerce_shipping\Entity\ShipmentInterface;
-use Drupal\commerce_shipping\ShipmentManagerInterface;
-use Drupal\commerce_shipping\ShippingOrderManagerInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\jsonapi\Entity\EntityValidationTrait;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
@@ -16,26 +13,11 @@ use Drupal\jsonapi_resources\Resource\EntityResourceBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class CheckoutResource extends EntityResourceBase implements ContainerInjectionInterface {
 
   use EntityValidationTrait;
-
-  /**
-   * The shipment manager.
-   *
-   * @var \Drupal\commerce_shipping\ShipmentManagerInterface
-   */
-  private $shipmentManager;
-
-  /**
-   * The shipping order manager.
-   *
-   * @var \Drupal\commerce_shipping\ShippingOrderManagerInterface
-   */
-  private $shippingOrderManager;
 
   /**
    * The event dispatcher.
@@ -47,16 +29,10 @@ final class CheckoutResource extends EntityResourceBase implements ContainerInje
   /**
    * Constructs a new CheckoutResource object.
    *
-   * @param \Drupal\commerce_shipping\ShipmentManagerInterface $shipment_manager
-   *   The shipment manager.
-   * @param \Drupal\commerce_shipping\ShippingOrderManagerInterface $shipping_order_manager
-   *   The shipping order manager.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
    */
-  public function __construct(ShipmentManagerInterface $shipment_manager, ShippingOrderManagerInterface $shipping_order_manager, EventDispatcherInterface $event_dispatcher) {
-    $this->shipmentManager = $shipment_manager;
-    $this->shippingOrderManager = $shipping_order_manager;
+  public function __construct(EventDispatcherInterface $event_dispatcher) {
     $this->eventDispatcher = $event_dispatcher;
   }
 
@@ -65,8 +41,6 @@ final class CheckoutResource extends EntityResourceBase implements ContainerInje
    */
   public static function create(ContainerInterface $container) {
     return new self(
-      $container->get('commerce_shipping.shipment_manager'),
-      $container->get('commerce_shipping.order_manager'),
       $container->get('event_dispatcher')
     );
   }
@@ -126,13 +100,11 @@ final class CheckoutResource extends EntityResourceBase implements ContainerInje
         );
       }
 
-      // Again this is 😱.
       if ($resource_object->hasField('shipping_method')) {
         $field_names[] = 'shipments';
-        $shipping_method_rate_option_id = $resource_object->getField('shipping_method');
-        assert(is_string($shipping_method_rate_option_id));
-        $commerce_order->set('shipping_method', $shipping_method_rate_option_id);
-        $this->applyShippingRateToShipments($commerce_order, $shipping_method_rate_option_id);
+        $rate_id = $resource_object->getField('shipping_method');
+        assert(is_string($rate_id));
+        $commerce_order->set('shipping_method', $rate_id);
       }
 
       if ($resource_object->hasField('payment_gateway_id')) {
@@ -166,53 +138,6 @@ final class CheckoutResource extends EntityResourceBase implements ContainerInje
 
     $primary_data = $this->createIndividualDataFromEntity($commerce_order);
     return $this->createJsonapiResponse($primary_data, $request);
-  }
-
-  /**
-   * Apply a shipping rate to an order's shipments.
-   *
-   * @param \Drupal\commerce_order\Entity\OrderInterface $order
-   *   The order.
-   * @param string $rate_id
-   *   The shipping rate ID.
-   *
-   * @throws \Drupal\Core\Entity\EntityStorageException
-   */
-  private function applyShippingRateToShipments(OrderInterface $order, string $rate_id) {
-    $shipments = $this->getOrderShipments($order);
-
-    foreach ($shipments as $shipment) {
-      assert($shipment instanceof ShipmentInterface);
-      $rates = $this->shipmentManager->calculateRates($shipment);
-      // Skip applying the rate if not available.
-      if (!isset($rates[$rate_id])) {
-        throw new HttpException(422, sprintf('The specified rate "%s" is not available.', $rate_id));
-      }
-      $this->shipmentManager->applyRate($shipment, $rates[$rate_id]);
-      $shipment->save();
-    }
-    $order->set('shipments', $shipments);
-  }
-
-  /**
-   * Get the shipments for an order.
-   *
-   * The shipments may or may not be saved.
-   *
-   * @param \Drupal\commerce_order\Entity\OrderInterface $order
-   *   The order.
-   *
-   * @return array
-   *   The array of shipments.
-   */
-  private function getOrderShipments(OrderInterface $order): array {
-    /** @var \Drupal\commerce_shipping\Entity\ShipmentInterface[] $shipments */
-    $shipments = $order->get('shipments')->referencedEntities();
-    if (empty($shipments)) {
-      $shipping_profile = $order->get('shipping_information')->entity;
-      $shipments = $this->shippingOrderManager->pack($order, $shipping_profile);
-    }
-    return $shipments;
   }
 
 }

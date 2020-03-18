@@ -2,7 +2,6 @@
 
 namespace Drupal\commerce_api\Plugin\Field\FieldType;
 
-use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -24,7 +23,7 @@ final class ShippingMethod extends FieldItemBase {
    * {@inheritdoc}
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
-    // @todo should this be a two propert field: method ID + service ID?
+    // @todo should this be a two property field: method ID + service ID?
     $properties['value'] = DataDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Shipping rate option'))
       ->setRequired(TRUE);
@@ -37,15 +36,6 @@ final class ShippingMethod extends FieldItemBase {
    */
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
     return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function preSave() {
-    $order = $this->getEntity();
-    assert($order instanceof OrderInterface);
-    $order->setData('shipping_method_rate_option', $this->value);
   }
 
 }

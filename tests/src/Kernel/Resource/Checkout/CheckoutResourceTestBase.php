@@ -155,8 +155,6 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
    */
   protected function getCheckoutResource(): CheckoutResource {
     $controller = new CheckoutResource(
-      $this->container->get('commerce_shipping.shipment_manager'),
-      $this->container->get('commerce_shipping.order_manager'),
       $this->container->get('event_dispatcher')
     );
     $controller->setEntityTypeManager($this->container->get('entity_type.manager'));
