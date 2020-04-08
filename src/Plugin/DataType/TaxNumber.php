@@ -2,7 +2,7 @@
 
 namespace Drupal\commerce_api\Plugin\DataType;
 
-use Drupal\Core\TypedData\TypedData;
+use Drupal\Core\TypedData\Plugin\DataType\Map;
 
 /**
  * @DataType(
@@ -12,7 +12,7 @@ use Drupal\Core\TypedData\TypedData;
  *   definition_class = "\Drupal\commerce_api\TypedData\TaxNumberDataDefinition"
  * )
  */
-final class TaxNumber extends TypedData {
+final class TaxNumber extends Map {
 
   /**
    * The value.
