@@ -9,7 +9,7 @@ use Drupal\Component\Serialization\Json;
  *
  * @group commerce_api
  *
- * @requires commerce_shipping
+ * @requires module commerce_shipping
  */
 final class CheckoutResourceTest extends CheckoutResourceTestBase {
 

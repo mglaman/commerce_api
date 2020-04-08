@@ -13,6 +13,8 @@ use GuzzleHttp\RequestOptions;
  * Tests the add to wishlist resource.
  *
  * @group commerce_api
+ *
+ * @requires module commerce_wishlist
  */
 final class WishlistAddResourceTest extends CheckoutApiResourceTestBase {
 
