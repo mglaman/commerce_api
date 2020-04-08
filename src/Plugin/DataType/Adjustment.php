@@ -2,6 +2,7 @@
 
 namespace Drupal\commerce_api\Plugin\DataType;
 
+use Drupal\commerce_price\Price as PriceValueObject;
 use Drupal\Core\TypedData\Plugin\DataType\Map;
 
 /**
@@ -22,5 +23,20 @@ final class Adjustment extends Map {
    * @note ::getValue() assumes the `value` property, but it doesn't exist.
    */
   protected $value = [];
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setValue($values, $notify = TRUE) {
+    foreach ($values as $key => $value) {
+      if ($value instanceof PriceValueObject) {
+        $values[$key] = $value->toArray();
+      }
+    }
+    if (!isset($values['total'])) {
+      $values['total'] = $values['amount'];
+    }
+    parent::setValue($values, $notify);
+  }
 
 }
