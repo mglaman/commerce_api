@@ -13,7 +13,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 /**
  * @todo remove after https://www.drupal.org/project/drupal/issues/3100732
  */
-final class MetaResourceObjectNormalizer extends ResourceObjectNormalizer {
+final class EnhancedResourceObjectNormalizer extends ResourceObjectNormalizer {
 
   /**
    * The event dispatcher.

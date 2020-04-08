@@ -39,7 +39,7 @@ services:
 
   # @todo remove after https://www.drupal.org/project/drupal/issues/3100732
   commerce_api.normalizer.resource_object.jsonapi:
-    class: Drupal\jsonapi\Normalizer\CommerceApiImposter\MetaResourceObjectNormalizer
+    class: Drupal\jsonapi\Normalizer\CommerceApiImposter\EnhancedResourceObjectNormalizer
     decorates: 'serializer.normalizer.resource_object.jsonapi'
     parent: 'serializer.normalizer.resource_object.jsonapi'
     calls:
