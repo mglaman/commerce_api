@@ -8,7 +8,6 @@ use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Entity\OrderItem;
 use Drupal\commerce_price\Price;
-use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\commerce_promotion\Entity\Coupon;
 use Drupal\commerce_promotion\Entity\CouponInterface;
 use Drupal\commerce_promotion\Entity\Promotion;
@@ -51,14 +50,12 @@ final class CartCouponAddResourceTest extends KernelTestBase {
 
     $controller = $this->getController();
 
-    /** @var \Drupal\commerce_product\Entity\ProductVariation $product_variation */
-    $product_variation = ProductVariation::create([
+    $product_variation = $this->createTestProductVariation([], [
       'type' => 'default',
       'sku' => 'JSONAPI_SKU',
       'status' => 1,
       'price' => new Price('4.00', 'USD'),
     ]);
-    $product_variation->save();
     $order_item = OrderItem::create([
       'type' => 'default',
       'quantity' => '1',

@@ -26,8 +26,8 @@ services:
       - { name: event_subscriber }
 
   # @todo remove after https://www.drupal.org/project/commerce/issues/3088598
-  commerce_api.published_availability_checker:
-    class: Drupal\commerce_api\AvailabilityChecker\PublishedAvailabilityChecker
+  commerce_api.entity_accessible_availability_checker:
+    class: Drupal\commerce_api\AvailabilityChecker\EntityAccessibleAvailabilityManager
     tags:
       - { name: commerce.availability_checker }
 

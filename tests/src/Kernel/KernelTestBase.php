@@ -7,6 +7,7 @@ use Drupal\commerce_product\Entity\Product;
 use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\commerce_product\Entity\ProductVariationType;
 use Drupal\Core\Entity\Entity\EntityFormMode;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
 
 abstract class KernelTestBase extends CommerceKernelTestBase {
@@ -39,6 +40,10 @@ abstract class KernelTestBase extends CommerceKernelTestBase {
    */
   protected function setUp() {
     parent::setUp();
+    $this->installConfig(['user']);
+    user_role_grant_permissions(AccountInterface::ANONYMOUS_ROLE, ['view commerce_product']);
+    user_role_grant_permissions(AccountInterface::AUTHENTICATED_ROLE, ['view commerce_product']);
+
     $this->installEntitySchema('profile');
     $this->installEntitySchema('commerce_order');
     $this->installEntitySchema('commerce_order_item');

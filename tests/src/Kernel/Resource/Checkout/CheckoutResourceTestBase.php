@@ -7,7 +7,6 @@ use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderItem;
 use Drupal\commerce_payment\Entity\PaymentGateway;
 use Drupal\commerce_price\Price;
-use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\commerce_shipping\Entity\ShippingMethod;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -77,8 +76,7 @@ abstract class CheckoutResourceTestBase extends KernelTestBase implements Servic
     ]);
     $onsite_gateway->save();
 
-    /** @var \Drupal\commerce_product\Entity\ProductVariation $product_variation */
-    $product_variation = ProductVariation::create([
+    $product_variation = $this->createTestProductVariation([], [
       'type' => 'default',
       'sku' => 'JSONAPI_SKU',
       'status' => 1,
