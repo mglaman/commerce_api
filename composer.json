@@ -21,7 +21,7 @@
     },
     "require-dev": {
         "drupal/commerce_shipping": "^2.0@rc",
-        "drupal/commerce_wishlist": "3.x-dev",
+        "drupal/commerce_wishlist": "^3.0@beta",
         "drupal/jsonapi_schema": "^1.0@alpha"
     }
 }

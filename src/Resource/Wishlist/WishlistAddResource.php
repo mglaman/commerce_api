@@ -9,8 +9,6 @@ use Drupal\commerce_wishlist\WishlistItemStorageInterface;
 use Drupal\commerce_wishlist\WishlistManagerInterface;
 use Drupal\commerce_wishlist\WishlistProviderInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
@@ -19,14 +17,11 @@ use Drupal\jsonapi\JsonApiResource\ResourceIdentifier;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Drupal\jsonapi\JsonApiResource\ResourceObjectData;
 use Drupal\jsonapi\ResourceResponse;
-use Drupal\jsonapi\ResourceType\ResourceType;
-use Drupal\jsonapi\ResourceType\ResourceTypeRelationship;
-use Drupal\jsonapi_resources\Resource\EntityResourceBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
-final class WishlistAddResource extends EntityResourceBase implements ContainerInjectionInterface {
+final class WishlistAddResource extends WishlistResourceBase {
 
   use EntityValidationTrait;
   use ResourceTypeHelperTrait;
@@ -39,56 +34,34 @@ final class WishlistAddResource extends EntityResourceBase implements ContainerI
   protected $configFactory;
 
   /**
-   * The JSON:API controller.
-   *
-   * @var \Drupal\commerce_api\EntityResourceShim
-   */
-  private $inner;
-
-  /**
    * The renderer.
    *
    * @var \Drupal\Core\Render\Renderer|object|null
    */
-  private $renderer;
-
-  /**
-   * The wishlist manager.
-   *
-   * @var \Drupal\commerce_wishlist\WishlistManagerInterface
-   */
-  protected $wishlistManager;
-
-  /**
-   * The wishlist provider.
-   *
-   * @var \Drupal\commerce_wishlist\WishlistProviderInterface
-   */
-  protected $wishlistProvider;
+  protected $renderer;
 
   /**
    * Constructs a new WishlistAddResource object.
    *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The config factory.
-   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
-   *   The entity repository.
-   * @param \Drupal\commerce_api\EntityResourceShim $jsonapi_controller
-   *   The JSON:API controller shim.
-   * @param \Drupal\Core\Render\RendererInterface $renderer
-   *   The renderer.
    * @param \Drupal\commerce_wishlist\WishlistManagerInterface $wishlist_manager
    *   The wishlist manager.
    * @param \Drupal\commerce_wishlist\WishlistProviderInterface $wishlist_provider
    *   The wishlist provider.
+   * @param \Drupal\commerce_api\EntityResourceShim $jsonapi_controller
+   *   The JSON:API controller shim.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *   The entity repository.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityRepositoryInterface $entity_repository, EntityResourceShim $jsonapi_controller, RendererInterface $renderer, WishlistManagerInterface $wishlist_manager, WishlistProviderInterface $wishlist_provider) {
+  public function __construct(WishlistManagerInterface $wishlist_manager, WishlistProviderInterface $wishlist_provider, EntityResourceShim $jsonapi_controller, ConfigFactoryInterface $config_factory, EntityRepositoryInterface $entity_repository, RendererInterface $renderer) {
+    parent::__construct($wishlist_manager, $wishlist_provider, $jsonapi_controller);
+
     $this->configFactory = $config_factory;
     $this->entityRepository = $entity_repository;
-    $this->inner = $jsonapi_controller;
     $this->renderer = $renderer;
-    $this->wishlistManager = $wishlist_manager;
-    $this->wishlistProvider = $wishlist_provider;
   }
 
   /**
@@ -96,12 +69,12 @@ final class WishlistAddResource extends EntityResourceBase implements ContainerI
    */
   public static function create(ContainerInterface $container) {
     return new static(
+      $container->get('commerce_wishlist.wishlist_manager'),
+      $container->get('commerce_wishlist.wishlist_provider'),
+      $container->get('commerce_api.jsonapi_controller_shim'),
       $container->get('config.factory'),
       $container->get('entity.repository'),
-      $container->get('commerce_api.jsonapi_controller_shim'),
-      $container->get('renderer'),
-      $container->get('commerce_wishlist.wishlist_manager'),
-      $container->get('commerce_wishlist.wishlist_provider')
+      $container->get('renderer')
     );
   }
 
@@ -152,36 +125,6 @@ final class WishlistAddResource extends EntityResourceBase implements ContainerI
 
     $primary_data = new ResourceObjectData($wishlist_items);
     return $this->createJsonapiResponse($primary_data, $request);
-  }
-
-  /**
-   * Gets a generalized wishlist resource type.
-   *
-   * @param \Drupal\jsonapi\ResourceType\ResourceType[] $relatable_resource_types
-   *   The relatable resource types.
-   *
-   * @return \Drupal\jsonapi\ResourceType\ResourceType
-   *   The resource type.
-   *
-   * @see https://www.drupal.org/project/commerce/issues/3002939
-   */
-  protected function getGeneralizedWishlistResourceType(array $relatable_resource_types) {
-    $resource_type = new ResourceType('commerce_wishlist', 'virtual', EntityInterface::class, FALSE, TRUE, FALSE, FALSE,
-      [
-        'wishlist_items' => new ResourceTypeRelationship('wishlist_items', 'wishlist_items', TRUE, FALSE),
-      ]
-    );
-    assert($resource_type->getInternalName('wishlist_items') === 'wishlist_items');
-    $resource_type->setRelatableResourceTypes([
-      'wishlist_items' => array_map(function ($resource_type_name) {
-        $resource_type = $this->resourceTypeRepository->getByTypeName($resource_type_name);
-        if ($resource_type === NULL) {
-          throw new \RuntimeException("$resource_type_name is not a valid resource type");
-        }
-        return $resource_type;
-      }, $relatable_resource_types),
-    ]);
-    return $resource_type;
   }
 
 }

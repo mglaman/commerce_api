@@ -6,7 +6,6 @@ use Drupal\commerce_wishlist\Entity\WishlistInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Url;
-use Drupal\Tests\commerce_api\Functional\CheckoutApiResourceTestBase;
 use GuzzleHttp\RequestOptions;
 
 /**
@@ -16,12 +15,7 @@ use GuzzleHttp\RequestOptions;
  *
  * @requires module commerce_wishlist
  */
-final class WishlistAddResourceTest extends CheckoutApiResourceTestBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static $modules = ['commerce_wishlist'];
+final class WishlistAddResourceTest extends WishlistResourceTestBase {
 
   /**
    * Test add to wishlist.
