@@ -8,6 +8,7 @@ use Drupal\commerce_api\EntityResourceShim;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Entity\OrderItemInterface;
 use Drupal\commerce_order\OrderItemStorageInterface;
+use Drupal\jsonapi\Exception\UnprocessableHttpEntityException;
 use Drupal\jsonapi\JsonApiResource\ResourceIdentifier;
 use Drupal\jsonapi\ResourceResponse;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -72,13 +73,21 @@ final class CartRemoveItemResource extends CartResourceBase {
 
     /* @var \Drupal\jsonapi\JsonApiResource\ResourceIdentifier[] $resource_identifiers */
     $resource_identifiers = $this->inner->deserialize($resource_type, $request, ResourceIdentifier::class, 'order_items');
-    foreach ($resource_identifiers as $resource_identifier) {
-      $order_item = $order_item_storage->loadByProperties(['uuid' => $resource_identifier->getId()]);
-      $order_item = reset($order_item);
-      if (!$order_item instanceof OrderItemInterface || !$commerce_order->hasItem($order_item)) {
-        throw new UnprocessableEntityHttpException("Order item {$resource_identifier->getId()} does not exist for order {$commerce_order->uuid()}.");
+    try {
+      foreach ($resource_identifiers as $resource_identifier) {
+        $order_item = $order_item_storage->loadByProperties(['uuid' => $resource_identifier->getId()]);
+        $order_item = reset($order_item);
+        if (!$order_item instanceof OrderItemInterface || !$commerce_order->hasItem($order_item)) {
+          throw new UnprocessableEntityHttpException("Order item {$resource_identifier->getId()} does not exist for order {$commerce_order->uuid()}.");
+        }
+        $this->cartManager->removeOrderItem($commerce_order, $order_item, FALSE);
       }
-      $this->cartManager->removeOrderItem($commerce_order, $order_item);
+    }
+    catch (UnprocessableHttpEntityException $e) {
+      throw $e;
+    }
+    finally {
+      $commerce_order->save();
     }
 
     return new ResourceResponse(NULL, 204);
