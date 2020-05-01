@@ -45,6 +45,9 @@ final class ShippingMethodItemList extends FieldItemList {
   protected function computeValue() {
     $order = $this->getEntity();
     assert($order instanceof OrderInterface);
+    if (!$order->hasField('shipments')) {
+      return;
+    }
 
     $shipping_rate_option = '';
     /** @var \Drupal\commerce_shipping\Entity\ShipmentInterface[] $shipments */

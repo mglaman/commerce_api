@@ -67,6 +67,10 @@ final class ShippingMethodsLinkProvider extends LinkProviderBase implements Cont
     $cache_metadata = new CacheableMetadata();
     $cache_metadata->addCacheableDependency($entity);
 
+    if (!$entity->hasField('shipments')) {
+      return AccessRestrictedLink::createInaccessibleLink($cache_metadata);
+    }
+
     return AccessRestrictedLink::createLink(
       AccessResult::allowed(),
       $cache_metadata,

@@ -2,7 +2,6 @@
 
 namespace Drupal\commerce_api;
 
-use Drupal\commerce_api\EventSubscriber\CollectResourceObjectMetaSubscriber;
 use Drupal\commerce_api\EventSubscriber\ShippingProfileSubscriber;
 use Drupal\commerce_api\ResourceType\ResourceTypeRepositoryShim;
 use Drupal\commerce_api\Routing\CrossBundlesRouteSubscriber;
@@ -29,13 +28,6 @@ class CommerceApiServiceProvider extends ServiceProviderBase {
       $container->register('commerce_api.shipping_profile_subscriber', ShippingProfileSubscriber::class)
         ->addArgument(new Reference('commerce_shipping.order_manager'))
         ->addArgument(new Reference('entity_type.manager'))
-        ->addTag('event_subscriber');
-
-      $container->register('commerce_api.collect_resource_object_meta_subscriber', CollectResourceObjectMetaSubscriber::class)
-        ->addArgument(new Reference('entity.repository'))
-        ->addArgument(new Reference('current_route_match'))
-        ->addArgument(new Reference('commerce_shipping.order_manager'))
-        ->addArgument(new Reference('commerce_shipping.shipment_manager'))
         ->addTag('event_subscriber');
     }
     // Workarounds for JSON:API Cross Bundles.

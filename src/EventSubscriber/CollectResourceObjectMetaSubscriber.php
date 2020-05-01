@@ -56,15 +56,29 @@ class CollectResourceObjectMetaSubscriber implements EventSubscriberInterface {
    *   The entity repository.
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match.
+   */
+  public function __construct(EntityRepositoryInterface $entity_repository, RouteMatchInterface $route_match) {
+    $this->entityRepository = $entity_repository;
+    $this->routeMatch = $route_match;
+  }
+
+  /**
+   * Sets the shipping order manager.
+   *
    * @param \Drupal\commerce_shipping\ShippingOrderManagerInterface $shipping_order_manager
    *   The shipping order manager.
+   */
+  public function setShippingOrderManager(ShippingOrderManagerInterface $shipping_order_manager) {
+    $this->shippingOrderManager = $shipping_order_manager;
+  }
+
+  /**
+   * Sets the shipment manager.
+   *
    * @param \Drupal\commerce_shipping\ShipmentManagerInterface $shipment_manager
    *   The shipment manager.
    */
-  public function __construct(EntityRepositoryInterface $entity_repository, RouteMatchInterface $route_match, ShippingOrderManagerInterface $shipping_order_manager, ShipmentManagerInterface $shipment_manager) {
-    $this->entityRepository = $entity_repository;
-    $this->routeMatch = $route_match;
-    $this->shippingOrderManager = $shipping_order_manager;
+  public function setShipmentManager(ShipmentManagerInterface $shipment_manager) {
     $this->shipmentManager = $shipment_manager;
   }
 
@@ -99,7 +113,7 @@ class CollectResourceObjectMetaSubscriber implements EventSubscriberInterface {
     assert($order instanceof OrderInterface);
 
     $violations = $order->validate()->filterByFieldAccess();
-    if ($this->getOrderShippingProfile($order)->isNew()) {
+    if ($order->hasField('shipments') && $this->getOrderShippingProfile($order)->isNew()) {
       $violations->add(
         new ConstraintViolation('This value should not be null.', '', [], 'test', 'shipping_information', NULL)
       );
@@ -170,10 +184,13 @@ class CollectResourceObjectMetaSubscriber implements EventSubscriberInterface {
    * @param \Drupal\commerce_order\Entity\OrderInterface $order
    *   The order.
    *
-   * @return array
+   * @return \Drupal\commerce_shipping\Entity\ShipmentInterface[]
    *   The array of shipments.
    */
   protected function getOrderShipments(OrderInterface $order): array {
+    if (!$shipments = $order->hasField('shipments')) {
+      return [];
+    }
     /** @var \Drupal\commerce_shipping\Entity\ShipmentInterface[] $shipments */
     $shipments = $order->get('shipments')->referencedEntities();
     if (empty($shipments)) {

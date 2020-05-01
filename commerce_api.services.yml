@@ -84,3 +84,12 @@ services:
     class: Drupal\commerce_api\ParamConverter\EntityUuidConverter
     tags:
       - { name: paramconverter, priority: 10 }
+
+  commerce_api.collect_resource_object_meta_subscriber:
+    class: Drupal\commerce_api\EventSubscriber\CollectResourceObjectMetaSubscriber
+    arguments: ['@entity.repository', '@current_route_match']
+    calls:
+      - ['setShippingOrderManager', ['@?commerce_shipping.order_manager']]
+      - ['setShipmentManager', ['@?commerce_shipping.shipment_manager']]
+    tags:
+      - { name: event_subscriber }
